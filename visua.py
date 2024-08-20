@@ -12,11 +12,11 @@ class BDViewerApp:
         frame_top.pack(fill=tk.X, padx=10, pady=10)
 
         # Botón para cargar archivo .bd
-        self.btn_load = tk.Button(frame_top, text="Load .bd File", command=self.load_bd_file)
+        self.btn_load = tk.Button(frame_top, text="Cargar archivo .bd", command=self.load_bd_file)
         self.btn_load.pack(side=tk.LEFT)
 
         # Campo para mostrar el nombre del archivo cargado
-        self.lbl_filename = tk.Label(frame_top, text="No file loaded")
+        self.lbl_filename = tk.Label(frame_top, text="Archivo no cargado.")
         self.lbl_filename.pack(side=tk.LEFT, padx=10)
 
         # Campo para consulta SQL
@@ -24,7 +24,7 @@ class BDViewerApp:
         self.query_entry.pack(side=tk.LEFT, padx=10)
 
         # Botón para ejecutar la consulta
-        self.btn_query = tk.Button(frame_top, text="Run Query", command=self.run_query)
+        self.btn_query = tk.Button(frame_top, text="Ejecutar Query", command=self.run_query)
         self.btn_query.pack(side=tk.LEFT)
 
         # Frame para la lista de tablas
@@ -124,7 +124,7 @@ class BDViewerApp:
         # Ejecuta una consulta SQL
         query = self.query_entry.get()
         if not query.strip():
-            messagebox.showwarning("Warning", "Please enter a query")
+            messagebox.showwarning("Warning", "Porfavor ingrese una Query")
             return
 
         try:
@@ -135,7 +135,7 @@ class BDViewerApp:
                 self.show_query_results(results)
             else:
                 self.conn.commit()
-                messagebox.showinfo("Info", "Query executed successfully")
+                messagebox.showinfo("Info", "Query ejecutada con exito")
                 self.show_tables()
             cursor.close()
         except sqlite3.Error as e:
