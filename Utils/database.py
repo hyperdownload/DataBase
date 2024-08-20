@@ -125,7 +125,7 @@ def create_database():
     print("Database created successfully.")
 
 def register_user(name, email, password, role_id, branch_id):
-    conn = sqlite3.connect('clothing_store.db')
+    conn = sqlite3.connect('./Bd/clothing_store.db')
     cursor = conn.cursor()
     
     cursor.execute('SELECT id FROM Users WHERE email = ?', (email,))
@@ -147,7 +147,7 @@ def register_user(name, email, password, role_id, branch_id):
     print(f"User {name} registered successfully.")
 
 def get_user_id(email):
-    conn = sqlite3.connect('clothing_store.db')
+    conn = sqlite3.connect('./Bd/clothing_store.db')
     cursor = conn.cursor()
 
     cursor.execute('''
