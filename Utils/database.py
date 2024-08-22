@@ -15,10 +15,11 @@ class Product:
     def convert_image_to_binary(self, image_path):
         with open(image_path, 'rb') as file:
             return file.read()
-
+        
+dataBasePath = './Bd/clothing_store.db'
 # Crea la base de datos y las tablas
-def create_database():
-    conn = sqlite3.connect('./Bd/clothing_store.db')
+def create_database()->None:
+    conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
 
     # Crea la tabla de sucursales
@@ -125,7 +126,7 @@ def create_database():
     print("Database created successfully.")
 
 def register_user(name, email, password, role_id, branch_id):
-    conn = sqlite3.connect('./Bd/clothing_store.db')
+    conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     
     cursor.execute('SELECT id FROM Users WHERE email = ?', (email,))
@@ -147,7 +148,7 @@ def register_user(name, email, password, role_id, branch_id):
     print(f"User {name} registered successfully.")
 
 def get_user_id(email):
-    conn = sqlite3.connect('./Bd/clothing_store.db')
+    conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -160,7 +161,7 @@ def get_user_id(email):
     return user_id[0] if user_id else None
 
 def add_product(product):
-    conn = sqlite3.connect('clothing_store.db')
+    conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -174,7 +175,7 @@ def add_product(product):
     print(f"Product {product.name} added successfully.")
 
 def record_sale(product_id, user_id, branch_id, quantity):
-    conn = sqlite3.connect('clothing_store.db')
+    conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     
     cursor.execute('''
@@ -193,7 +194,7 @@ def record_sale(product_id, user_id, branch_id, quantity):
     print("Sale recorded successfully.")
 
 def record_restock(product_id, user_id, branch_id, quantity):
-    conn = sqlite3.connect('clothing_store.db')
+    conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     
     cursor.execute('''

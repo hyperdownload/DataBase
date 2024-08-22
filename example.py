@@ -9,7 +9,7 @@ database.register_user('Carlos Torres', 'carlos@example.com', 'superadmin789', 3
 
 # Subida de productos ejemplo
 product1 = database.Product('White T-shirt', 19.99, 'Brand X', 'M', 'image1.jpg', 'White cotton t-shirt', 1)
-product2 = database.Product('Blue Jeans', 39.99, 'Brand Y', 'L', 'image2.jpg', 'Blue denim jeans', 2)
+product2 = database.Product('Blue Jeans', 39.99, 'Brand Y', 'L', 'image1.jpg', 'Blue denim jeans', 2)
 
 database.add_product(product1)
 database.add_product(product2)
