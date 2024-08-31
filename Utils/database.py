@@ -11,18 +11,30 @@ class Product:
         self.description = description
         self.branch_id = branch_id
 
-    # Convierte la imagen a binario
     def convert_image_to_binary(self, image_path):
         with open(image_path, 'rb') as file:
             return file.read()
-        
+
+    @classmethod
+    def from_row(cls, row):
+        # Crea una instancia de Product a partir de una fila de la base de datos
+        return cls(
+            name=row[1],
+            price=row[2],
+            brand=row[3],
+            size=row[4],
+            image_path=None,  # Aquí no podemos recuperar la imagen desde la base de datos directamente
+            description=row[6],
+            branch_id=row[7]
+        )
+
 dataBasePath = './Bd/clothing_store.db'
-# Crea la base de datos y las tablas
+
 def create_database()->None:
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
 
-    # Crea la tabla de sucursales
+    # Creación de tablas
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Branches (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,16 +42,12 @@ def create_database()->None:
         address TEXT NOT NULL
     )
     ''')
-
-    # Crea la tabla de roles
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Roles (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL
     )
     ''')
-
-    # Crea la tabla de usuarios
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,8 +61,6 @@ def create_database()->None:
         FOREIGN KEY (branch_id) REFERENCES Branches(id)
     )
     ''')
-
-    # Crea la tabla de productos
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,8 +74,6 @@ def create_database()->None:
         FOREIGN KEY (branch_id) REFERENCES Branches(id)
     )
     ''')
-
-    # Crea la tabla de ventas
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Sales (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,8 +87,6 @@ def create_database()->None:
         FOREIGN KEY (branch_id) REFERENCES Branches(id)
     )
     ''')
-
-    # crea la tabla de restocks
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Restocks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,8 +100,6 @@ def create_database()->None:
         FOREIGN KEY (branch_id) REFERENCES Branches(id)
     )
     ''')
-
-    # crea la tabla de registros
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -115,7 +115,7 @@ def create_database()->None:
     )
     ''')
 
-    # Inserta los roles por default
+    # Inserta roles por default
     cursor.execute('INSERT OR IGNORE INTO Roles (name) VALUES (?)', ('Normal User',))
     cursor.execute('INSERT OR IGNORE INTO Roles (name) VALUES (?)', ('Admin',))
     cursor.execute('INSERT OR IGNORE INTO Roles (name) VALUES (?)', ('General Admin',))
@@ -212,6 +212,20 @@ def record_restock(product_id, user_id, branch_id, quantity):
 
     print("Restock recorded successfully.")
 
+def get_products_in_stock():
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+    SELECT * FROM Products
+    ''')
+    
+    rows = cursor.fetchall()
+    conn.close()
+    
+    products = [Product.from_row(row) for row in rows]
+    return products
+
 if __name__ == "__main__":
     create_database()
 
@@ -229,3 +243,7 @@ if __name__ == "__main__":
     record_sale(1, user_id, 1, 2)  
     user_id = get_user_id('jane@example.com')
     record_restock(2, user_id, 2, 10) 
+
+    products_in_stock = get_products_in_stock()
+    for product in products_in_stock:
+        print(f"Product: {product.name}, Price: {product.price}, Brand: {product.brand}, Size: {product.size}, Description: {product.description}")

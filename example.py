@@ -19,3 +19,7 @@ user_id = database.get_user_id('john@example.com')
 database.record_sale(1, user_id, 1, 2)  
 user_id = database.get_user_id('jane@example.com')
 database.record_restock(2, user_id, 2, 10)  
+
+products_in_stock = database.get_products_in_stock()
+for product in products_in_stock:
+    print(f"Product: {product.name}, Price: {product.price}, Brand: {product.brand}, Size: {product.size}, Description: {product.description}")
