@@ -2,28 +2,31 @@ import sqlite3
 import hashlib
 
 class Product:
-    def __init__(self, name, price, brand, size, image_path, description, branch_id):
+    def __init__(self, name, price, brand, size, image, description, branch_id, image_path=None):
         self.name = name
         self.price = price
         self.brand = brand
         self.size = size
-        self.image = self.convert_image_to_binary(image_path)
+        if image_path:
+            self.image = self.convert_image_to_binary(image_path)
+        else:
+            self.image = image  # Asume que image es un binario si image_path no está presente
         self.description = description
         self.branch_id = branch_id
 
-    def convert_image_to_binary(self, image_path):
+    def convert_image_to_binary(self, image_path)->bytearray:
         with open(image_path, 'rb') as file:
             return file.read()
 
     @classmethod
-    def from_row(cls, row):
+    def from_row(cls, row)->tuple:
         # Crea una instancia de Product a partir de una fila de la base de datos
         return cls(
             name=row[1],
             price=row[2],
             brand=row[3],
             size=row[4],
-            image_path=None,  # Aquí no podemos recuperar la imagen desde la base de datos directamente
+            image=row[5],  # Pasa la imagen directamente desde la fila
             description=row[6],
             branch_id=row[7]
         )
@@ -125,7 +128,7 @@ def create_database()->None:
 
     print("Database created successfully.")
 
-def register_user(name, email, password, role_id, branch_id):
+def register_user(name, email, password, role_id, branch_id)->None:
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     
@@ -147,7 +150,10 @@ def register_user(name, email, password, role_id, branch_id):
 
     print(f"User {name} registered successfully.")
 
-def get_user_id(email):
+def get_user_id(email:str)->None:
+    '''
+    Obtiene el ID de un usuario a partir de su email.
+    '''
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
 
@@ -160,7 +166,7 @@ def get_user_id(email):
     
     return user_id[0] if user_id else None
 
-def add_product(product):
+def add_product(product)->None:
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
 
@@ -174,7 +180,10 @@ def add_product(product):
 
     print(f"Product {product.name} added successfully.")
 
-def record_sale(product_id, user_id, branch_id, quantity):
+def record_sale(product_id:int, user_id:int, branch_id:int, quantity:int)->None:
+    '''
+    Guarda una venta de un producto
+    '''
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     
@@ -193,7 +202,15 @@ def record_sale(product_id, user_id, branch_id, quantity):
 
     print("Sale recorded successfully.")
 
-def record_restock(product_id, user_id, branch_id, quantity):
+def record_restock(product_id:int, user_id:int, branch_id:int, quantity:int)->None:
+    """Guarda el reestock de un producto
+
+        :param product_id: int, 
+        user_id (_type_): _description_
+        branch_id (_type_): _description_
+        quantity (_type_): _description_
+    """
+    
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     
@@ -212,7 +229,10 @@ def record_restock(product_id, user_id, branch_id, quantity):
 
     print("Restock recorded successfully.")
 
-def get_products_in_stock():
+def get_products_in_stock()->dict:
+    """
+    Recupera los productos en stock y los devuelve como una lista de Product.
+    """
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     
@@ -226,6 +246,60 @@ def get_products_in_stock():
     products = [Product.from_row(row) for row in rows]
     return products
 
+def get_user_details(user_id)->tuple:
+    """
+    Recupera el email, rol y contraseña de un usuario basado en su ID.
+    """
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+    SELECT Users.email, Roles.name as role, Users.password
+    FROM Users
+    JOIN Roles ON Users.role_id = Roles.id
+    WHERE Users.id = ?
+    ''', (user_id,))
+    
+    user_details = cursor.fetchone()
+    conn.close()
+    
+    return user_details
+
+def get_record_from_table(table_name, columns='*', **kwargs)->any:
+    """
+    Recupera registros de una tabla específica basada en los filtros proporcionados.
+    :param table_name: str, nombre de la tabla
+    :param columns: str o list, columnas a seleccionar (por defecto todas)
+    :param kwargs: dict, condiciones para filtrar los resultados
+    :return: list, registros que coinciden con los filtros
+    """
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    
+    # Construye la parte de selección de columnas
+    if isinstance(columns, list):
+        columns_str = ', '.join(columns)
+    else:
+        columns_str = columns
+
+    # Construye la parte de condiciones de la consulta
+    conditions = []
+    values = []
+    for key, value in kwargs.items():
+        conditions.append(f"{key} = ?")
+        values.append(value)
+    
+    conditions_str = " AND ".join(conditions) if conditions else "1=1"
+
+    # Query dinámica
+    query = f"SELECT {columns_str} FROM {table_name} WHERE {conditions_str}"
+    
+    cursor.execute(query, values)
+    records = cursor.fetchall()
+    conn.close()
+    
+    return records
+
 if __name__ == "__main__":
     create_database()
 
@@ -233,8 +307,8 @@ if __name__ == "__main__":
     register_user('Jane Smith', 'jane@example.com', 'admin456', 2, 2)
     register_user('Carlos Torres', 'carlos@example.com', 'superadmin789', 3, 3)
 
-    product1 = Product('White T-shirt', 19.99, 'Brand X', 'M', 'path_to_image1.jpg', 'White cotton t-shirt', 1)
-    product2 = Product('Blue Jeans', 39.99, 'Brand Y', 'L', 'path_to_image2.jpg', 'Blue denim jeans', 2)
+    product1 = Product('White T-shirt', 19.99, 'Brand X', 'M', None, 'White cotton t-shirt', 1, image_path='image1.jpg')
+    product2 = Product('Blue Jeans', 39.99, 'Brand Y', 'L', None, 'Blue denim jeans', 2, image_path='image1.jpg')
 
     add_product(product1)
     add_product(product2)
@@ -243,6 +317,8 @@ if __name__ == "__main__":
     record_sale(1, user_id, 1, 2)  
     user_id = get_user_id('jane@example.com')
     record_restock(2, user_id, 2, 10) 
+    
+    print(get_user_details(get_user_id('john@example.com')))
 
     products_in_stock = get_products_in_stock()
     for product in products_in_stock:
