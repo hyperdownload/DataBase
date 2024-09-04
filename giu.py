@@ -2,6 +2,7 @@ from Utils.SceneManager import *
 from Utils.database import *
 from PIL import Image  # Importa Image desde PIL
 import customtkinter as ctk
+
 class Login(BaseScene):
     def __init__(self, parent, manager):
         super().__init__(parent, manager)
@@ -45,6 +46,7 @@ class Login(BaseScene):
             print("AAAAAAA")
         else:
             print("naonao")
+            
 class Men_p(BaseScene):
 
     def __init__(self, parent, manager):
@@ -206,13 +208,13 @@ if __name__ == "__main__":
     app.resizable(False,False)
 
     # Añade las escenas al gestor
+    
     app.add_scene("Men_p", Men_p)
     app.add_scene("Login", Login)
-    
 
     # Inicia la aplicación con la primera escena visible
     app.switch_scene("Login")
+    #app.force_switch_scene("Men_p")
     #app.switch_scene("Men_p")
-
 
     app.mainloop()  # Ejecuta el bucle principal de la aplicación

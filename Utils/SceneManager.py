@@ -22,23 +22,48 @@ class SceneManager(ctk.CTk):
         scene = scene_class(self, self)  # Crea una instancia de la escena
         self.scenes[name] = scene  # Almacena la escena en el diccionario con el nombre proporcionado
 
-    def switch_scene(self, name):
-        """Cambia a una nueva escena.
-
-        Oculta la escena actual y muestra la nueva escena especificada.
-
-        Args:
-            name (str): Nombre de la escena a la que se cambiará.
-        """
-        if self.current_scene:
-            self.current_scene.pack_forget()  # Oculta la escena actual
-        scene = self.scenes.get(name)  # Obtiene la nueva escena del diccionario
-        if scene:
-            scene.pack(fill='both', expand=True)  # Muestra la nueva escena
-            self.current_scene = scene  # Actualiza la referencia a la escena actual
+    def add_scene(self, name, scene_class):
+        """Agrega una nueva escena al gestor."""
+        if name in self.scenes:
+            print(f"Escena '{name}' ya existe.")
         else:
-            print(f"Scene '{name}' no encontrada.")  # Mensaje en caso de que la escena no exista
+            self.scenes[name] = scene_class
 
+    def switch_scene(self, name):
+        """Cambia a otra escena asegurando que la anterior sea eliminada completamente."""
+        if self.current_scene:
+            # Elimina todos los widgets de la escena actual
+            for widget in self.current_scene.winfo_children():
+                widget.destroy()
+
+            self.current_scene.pack_forget()
+            self.current_scene.place_forget()
+            self.current_scene.grid_forget()
+
+        # Cargar la nueva escena
+        scene_class = self.scenes.get(name)
+        if scene_class:
+            self.current_scene = scene_class(self, self)
+            self.current_scene.pack(fill='both', expand=True)
+        else:
+            print(f"Escena '{name}' no encontrada.")
+
+    def force_switch_scene(self, name):
+        """Cambia de escena y fuerza la eliminación de la escena actual."""
+        if self.current_scene:
+            # Destruye todos los widgets de la escena actual
+            for widget in self.current_scene.winfo_children():
+                widget.destroy()
+
+            self.current_scene.destroy()
+
+        # Cargar la nueva escena
+        scene_class = self.scenes.get(name)
+        if scene_class:
+            self.current_scene = scene_class(self, self)
+            self.current_scene.pack(fill='both', expand=True)
+        else:
+            print(f"Escena '{name}' no encontrada.")
 # Clase base para las escenas
 class BaseScene(ctk.CTkFrame):
     def __init__(self, parent, manager):
