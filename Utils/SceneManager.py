@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import threading
 
 class SceneManager(ctk.CTk):
     def __init__(self):
@@ -10,32 +11,37 @@ class SceneManager(ctk.CTk):
         """
         super().__init__()
         self.scenes = {}  # Diccionario para almacenar las escenas añadidas
+        self.variables = {} # Variables almacenadas para interactuar con otras escenas
         self.current_scene = None  # Referencia a la escena actualmente visible
 
-    def add_scene(self, name, scene_class):
-        """Agrega una nueva escena al gestor.
+    def save_variable(self, variable_name:str, variable_value:any)->None:
+        """Almacena una variable en el gestor de escenas."""
+        self.variables[variable_name] = variable_value
+        
+    def get_variable(self, variable_name: str, default_value: any = None)->any:
+        """Obtiene una variable almacenada en el gestor de escenas."""
+        return self.variables.get(variable_name, default_value)
 
-        Args:
-            name (str): Nombre identificador para la escena.
-            scene_class (BaseScene): Clase de la escena que se añadirá.
-        """
-        scene = scene_class(self, self)  # Crea una instancia de la escena
-        self.scenes[name] = scene  # Almacena la escena en el diccionario con el nombre proporcionado
-
-    def add_scene(self, name, scene_class):
+    '''def create_thread(self, task:function)->any:
+        # Crea un hilo y le asigna la función my_task
+        thread = threading.Thread(target=task)
+        
+        # Inicia el hilo
+        thread.start()
+        
+        # Devuelve el hilo para que pueda ser gestionado externamente si es necesario
+        return thread'''
+        
+    def add_scene(self, name:str, scene_class:object)->None:
         """Agrega una nueva escena al gestor."""
         if name in self.scenes:
             print(f"Escena '{name}' ya existe.")
         else:
             self.scenes[name] = scene_class
 
-    def switch_scene(self, name):
+    def switch_scene(self, name:str)->None:
         """Cambia a otra escena asegurando que la anterior sea eliminada completamente."""
         if self.current_scene:
-            # Elimina todos los widgets de la escena actual
-            for widget in self.current_scene.winfo_children():
-                widget.destroy()
-
             self.current_scene.pack_forget()
             self.current_scene.place_forget()
             self.current_scene.grid_forget()
@@ -48,7 +54,7 @@ class SceneManager(ctk.CTk):
         else:
             print(f"Escena '{name}' no encontrada.")
 
-    def force_switch_scene(self, name):
+    def force_switch_scene(self, name:str)->None:
         """Cambia de escena y fuerza la eliminación de la escena actual."""
         if self.current_scene:
             # Destruye todos los widgets de la escena actual

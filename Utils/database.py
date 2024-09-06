@@ -2,7 +2,7 @@ import sqlite3
 import hashlib
 
 class Product:
-    def __init__(self, name, price, brand, size, image, description, branch_id, image_path=None):
+    def __init__(self, name:str, price:int, brand:str, size:any, image:any, description:str, branch_id:int, image_path=None):
         self.name = name
         self.price = price
         self.brand = brand
@@ -246,7 +246,7 @@ def get_products_in_stock()->dict:
     products = [Product.from_row(row) for row in rows]
     return products
 
-def get_user_details(user_id)->tuple:
+def get_user_details(user_id:int)->tuple:
     """
     Recupera el email, rol y contraseña de un usuario basado en su ID.
     """
@@ -265,7 +265,7 @@ def get_user_details(user_id)->tuple:
     
     return user_details
 
-def get_record_from_table(table_name, columns='*', **kwargs)->any:
+def get_record_from_table(table_name, columns='*', **kwargs:str)->any:
     """
     Recupera registros de una tabla específica basada en los filtros proporcionados.
     :param table_name: str, nombre de la tabla
