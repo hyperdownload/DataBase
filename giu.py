@@ -609,40 +609,54 @@ class Ventas_nav(BaseScene):
 	def cambiar_color(self, widget, text_color, fg_color, event=None):
 		widget.configure(text_color=text_color, fg_color=fg_color)
 	def main(self):
-		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
-		self.main_fr.place(relx = 0.5,y = 341, anchor = "center")
+		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color=color_p, height=530, width=780)
+		self.main_fr.place(relx=0.5, y=341, anchor="center")
 
-		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 70, width = 780)
+		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=70, width=780)
 		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
-		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
-	#--------------------------------------------------------------------------------------------------------------------------------------------
+		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr, text=f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold'))
+		self.sucursal_lb.place(x=(self.sucursal_lb.winfo_width())//2 + 115, rely=0.5, anchor="center")
 
-		tabla = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 425, width = 800)
+		#--------------------------------------------------------------------------------------------------------------------------------------------
+
+		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800)
 		tabla.grid(row=3, column=0)
 
-		self.tabla_venta = ctk.CTkFrame(tabla, width= 675, height= 400, fg_color= grey, corner_radius= 40)
-		self.tabla_venta.place(relx = 0.5, y= 200, anchor= "center")
+		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=grey, corner_radius=40)
+		self.tabla_venta.place(relx=0.5, y=200, anchor="center")
 
 		treeview = ttk.Treeview(self.tabla_venta, columns=("Fecha", "Vendedor", "Estado", "Precio"))
-		treeview.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
+		treeview.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
 		style = ttk.Style()
 		style.theme_use("default")
-		style.configure("Treeview.Heading", background= grey, foreground= black, font=("Arial", 12, "bold"), relief = "flat")
-		style.configure("Treeview", background= grey, foreground= black, fieldbackground=grey, borderwidth=0, relief = "flat")
+		style.configure("Treeview.Heading", background=grey, foreground=black, font=("Arial", 12, "bold"), relief="flat")
+		style.configure("Treeview", background=grey, foreground=black, fieldbackground=grey, borderwidth=0, relief="flat")
 		style.map("Treeview.Heading", background=[("selected", color_p), ("active", color_p)])
 
-		treeview.column("#0", width= 110)
-		treeview.column("Fecha", width= 50)
-		treeview.column("Vendedor", width= 70)
-		treeview.column("Estado", width= 50)
-		treeview.column("Precio", width= 50)
+		treeview.column("#0", width=110)
+		treeview.column("Fecha", width=100)
+		treeview.column("Vendedor", width=100)
+		treeview.column("Estado", width=100)
+		treeview.column("Precio", width=100)
 
-		treeview.heading("#0",text= "Producto", anchor=tk.CENTER)
-		treeview.heading("Fecha",text= "Fecha", anchor=tk.CENTER)
-		treeview.heading("Vendedor",text= "Vendedor", anchor=tk.CENTER)
-		treeview.heading("Estado",text= "Estado", anchor=tk.CENTER)
-		treeview.heading("Precio",text= "Precio", anchor= tk.CENTER)
+		treeview.heading("#0", text="Producto", anchor=tk.CENTER)
+		treeview.heading("Fecha", text="Fecha", anchor=tk.CENTER)
+		treeview.heading("Vendedor", text="Vendedor", anchor=tk.CENTER)
+		treeview.heading("Estado", text="Estado", anchor=tk.CENTER)
+		treeview.heading("Precio", text="Precio", anchor=tk.CENTER)
+
+		# Obtiene los datos de la base de datos
+		sales_data = get_all_sales()
+
+		# Inserta los datos en el Treeview
+		for sale in sales_data:
+			treeview.insert("", "end", text=sale[1], values=(sale[5], sale[2], sale[4], sale[3]))
+   
+		'''
+  			Falta traducir los datos crudos a texto ademas de que no existe la columna
+            de cantidad 
+  		'''
+   
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
 		atajos.grid(row=2, column=0)
