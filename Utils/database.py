@@ -128,13 +128,13 @@ def create_database()->None:
     ''')
 
     # Inserta roles por default
-    #cursor.execute('INSERT OR IGNORE INTO Roles (name) VALUES (?)', ('Normal User',))
-    #cursor.execute('INSERT OR IGNORE INTO Roles (name) VALUES (?)', ('Admin',))
-    #cursor.execute('INSERT OR IGNORE INTO Roles (name) VALUES (?)', ('General Admin',))
+    cursor.execute('INSERT OR IGNORE INTO Roles (name) VALUES (?)', ('Normal User',))
+    cursor.execute('INSERT OR IGNORE INTO Roles (name) VALUES (?)', ('Admin',))
+    cursor.execute('INSERT OR IGNORE INTO Roles (name) VALUES (?)', ('General Admin',))
 
     # Inserta sucursales de ejemplo
-    #cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', ('Main Branch', '123 Main St'))
-    #cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', ('West Branch', '456 West St'))
+    cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', ('San miguel', '202'))
+    cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', ('Jose c paz', '197'))
 
     conn.commit()
     conn.close()
@@ -291,7 +291,7 @@ def get_products_in_stock()->dict:
     products = [Product.from_row(row) for row in rows]
     return products
 
-def get_user_details(user_id:int)->tuple:
+def get_user_details(user_id: int) -> tuple:
     '''
     Obtiene detalles de un usuario junto con su sucursal asociada
     '''
@@ -301,8 +301,8 @@ def get_user_details(user_id:int)->tuple:
     cursor.execute('''
     SELECT Users.email, Roles.name as role, Users.password, Branches.name as branch
     FROM Users
-    JOIN Roles ON Users.role_id = Roles.id
-    JOIN Branches ON Users.branch_id = Branches.id
+    LEFT JOIN Roles ON Users.role_id = Roles.id
+    LEFT JOIN Branches ON Users.branch_id = Branches.id
     WHERE Users.id = ?
     ''', (user_id,))
 
@@ -345,7 +345,11 @@ def get_record_from_table(table_name, columns='*', **kwargs:str)->any:
     conn.close()
     
     return records
+
 def get_name_product(id:int)->str:
+    '''
+    Obtiene el nombre del producto a traves de la id
+    '''
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
 
@@ -355,6 +359,9 @@ def get_name_product(id:int)->str:
     conn.close()
     return name
 def get_price_product(id:int)->str:
+    '''
+    Obtiene los precios de el producto mediante la id
+    '''
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
 
@@ -364,7 +371,61 @@ def get_price_product(id:int)->str:
     conn.close()
     return price
 
+def get_stock_product(id:int)->str:
+    '''
+    Obtiene todos los productos en stock
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT stock FROM Products WHERE id = ?', (id,))
+
+    stock = cursor.fetchone()[0]
+    conn.close()
+    return stock
+
+def get_all_branch_names()->list:
+    '''
+    Obtiene todos los nombres de las sucursales de la tabla Branches
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT name
+    FROM Branches
+    ''')
+
+    branch_names = cursor.fetchall()
+    conn.close()
+    
+    # Extrae solo los nombres de las sucursales de las tuplas
+    branch_names = [name[0] for name in branch_names]
+    
+    return branch_names
+
+def get_all_sales()->list:
+    '''
+    Obtiene todos los registros de la tabla Sales
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT id, product_id, user_id, branch_name, quantity, date
+    FROM Sales
+    ''')
+
+    sales = cursor.fetchall()
+    conn.close()
+    
+    return sales
+
 if __name__ == "__main__":
+    
+    ''' Literalmente aca solo copie y pegue del archivo example.py por cuestion de que se utilizaria
+        para ejecutar tests'''
+    
     create_database()
 
     register_user('John Doe', 'john@example.com', 'password123', 1, 1)

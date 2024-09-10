@@ -40,16 +40,16 @@ class Login(BaseScene):
 	def login_logic(self):
 		user = self.user_entry.get()
 		password = self.password_entry.get()
-		app.save_variable("branch_user",get_user_details(get_user_id(user))[3])
-		try:
-
-			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
-				self.manager.switch_scene("Men_p")
-			else:   #contraseña incorrecta
-				self.password_entry.configure(border_color = "red")
+		print(get_user_details(get_user_id(user)))
+		if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
+			app.save_variable("user_role",get_user_details(get_user_id(user))[1])
+			app.save_variable("branch_user",get_user_details(get_user_id(user))[3])
+			self.manager.switch_scene("Men_p")
+		else:   #contraseña incorrecta
+			self.password_entry.configure(border_color = "red")
 			
-		except:
-			self.user_entry.configure(border_color = "red")
+		#except:
+			#self.user_entry.configure(border_color = "red")
 			
 			
 class Men_p(BaseScene):
@@ -671,6 +671,6 @@ if __name__ == "__main__":
 	app.add_scene("Login", Login)
   
 	# Inicia la aplicación con la primera escena visible
-	app.switch_scene("Ventas_nav")
+	app.switch_scene("Login")
 
 	app.mainloop()  # Ejecuta el bucle principal de la aplicación
