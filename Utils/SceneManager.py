@@ -20,7 +20,7 @@ class SceneManager(ctk.CTk):
         
     def get_variable(self, variable_name: str, default_value: any = None)->any:
         """Obtiene una variable almacenada en el gestor de escenas."""
-        return self.variables.get(variable_name, default_value)
+        return self.variables.get(variable_name)
 
     '''def create_thread(self, task:function)->any:
         # Crea un hilo y le asigna la función my_task

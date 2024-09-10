@@ -204,6 +204,9 @@ def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int)->Non
     cursor.execute('SELECT stock FROM Products WHERE id = ?', (product_id,))
     current_stock = cursor.fetchone()[0]
 
+    print(quantity)
+    print(current_stock)
+
     if current_stock >= quantity:
         # Registra la venta
         cursor.execute('''
@@ -342,6 +345,24 @@ def get_record_from_table(table_name, columns='*', **kwargs:str)->any:
     conn.close()
     
     return records
+def get_name_product(id:int)->str:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT name FROM Products WHERE id = ?', (id,))
+
+    name = cursor.fetchone()[0]
+    conn.close()
+    return name
+def get_price_product(id:int)->str:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT price FROM Products WHERE id = ?', (id,))
+
+    price = cursor.fetchone()[0]
+    conn.close()
+    return price
 
 if __name__ == "__main__":
     create_database()
