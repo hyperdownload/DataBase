@@ -92,6 +92,7 @@ def create_database()->None:
         branch_name TEXT NOT NULL,
         quantity INTEGER NOT NULL,
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        price INTEGER NOT NULL,
         FOREIGN KEY (product_id) REFERENCES Products(id),
         FOREIGN KEY (user_id) REFERENCES Users(id),
         FOREIGN KEY (branch_name) REFERENCES Branches(name)
@@ -120,6 +121,7 @@ def create_database()->None:
         product_id INTEGER,
         branch_name TEXT,
         quantity INTEGER,
+        price INTEGER,
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES Users(id),
         FOREIGN KEY (product_id) REFERENCES Products(id),
@@ -193,7 +195,7 @@ def add_product(product)->None:
 
     print(f"Product {product.name} added successfully.")
 
-def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int)->None:
+def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, price:int)->None:
     '''
     Guarda una venta de un producto y reduce el stock del producto.
     '''
@@ -210,9 +212,9 @@ def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int)->Non
     if current_stock >= quantity:
         # Registra la venta
         cursor.execute('''
-        INSERT INTO Sales (product_id, user_id, branch_name, quantity)
-        VALUES (?, ?, ?, ?)
-        ''', (product_id, user_id, branch_name, quantity))
+        INSERT INTO Sales (product_id, user_id, branch_name, quantity, price)
+        VALUES (?, ?, ?, ?, ?)
+        ''', (product_id, user_id, branch_name, quantity, price))
 
         # Reduce el stock
         new_stock = current_stock - quantity
@@ -220,9 +222,9 @@ def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int)->Non
 
         # Registra la acción en los logs
         cursor.execute('''
-        INSERT INTO Logs (action, user_id, product_id, branch_name, quantity)
-        VALUES (?, ?, ?, ?, ?)
-        ''', ('Sale', user_id, product_id, branch_name, quantity))
+        INSERT INTO Logs (action, user_id, product_id, branch_name, quantity, price)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ''', ('Sale', user_id, product_id, branch_name, quantity, price))
 
         conn.commit()
         print(f"Venta guardada .Stock: {new_stock}")
@@ -412,7 +414,7 @@ def get_all_sales()->list:
     cursor = conn.cursor()
 
     cursor.execute('''
-    SELECT id, product_id, user_id, branch_name, quantity, date
+    SELECT id, product_id, user_id, branch_name, quantity, date, price
     FROM Sales
     ''')
 
@@ -420,6 +422,32 @@ def get_all_sales()->list:
     conn.close()
     
     return sales
+
+def get_product_name()->str:
+    '''
+    Obtiene el nombre de un producto
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT name FROM Products WHERE id = ?', (id,))
+
+    name = cursor.fetchone()[0]
+    conn.close()
+    return name
+
+def get_user_name(id:int)->str:
+    '''
+    Obtiene el nombre de un usuario
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT name FROM Users WHERE id = ?', (id,))
+
+    name = cursor.fetchone()[0]
+    conn.close()
+    return name
 
 if __name__ == "__main__":
     
@@ -439,7 +467,7 @@ if __name__ == "__main__":
     add_product(product2)
 
     user_id = get_user_id('john@example.com')
-    record_sale(1, user_id, 1, 2)  
+    record_sale(1, user_id, 1, 2, price=20)  
     user_id = get_user_id('jane@example.com')
     record_restock(2, user_id, 2, 10) 
     

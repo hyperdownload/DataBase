@@ -650,7 +650,7 @@ class Ventas_nav(BaseScene):
 
 		# Inserta los datos en el Treeview
 		for sale in sales_data:
-			treeview.insert("", "end", text=sale[1], values=(sale[5], sale[2], sale[4], sale[3]))
+			treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6]))
    
 		'''
   			Falta traducir los datos crudos a texto ademas de que no existe la columna
