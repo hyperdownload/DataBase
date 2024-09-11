@@ -2,7 +2,8 @@ import sqlite3
 import hashlib
 
 class Product:
-    def __init__(self, name:str, price:int, brand:str, size:any, image:any, description:str, branch_name:str, stock:int, image_path=None):
+    def __init__(self, name:str, price:int, brand:str, size:any, image:any, description:str, branch_name:str, stock:int, image_path=None, id:int=None):
+        self.id = id
         self.name = name
         self.price = price
         self.brand = brand
@@ -23,6 +24,7 @@ class Product:
     def from_row(cls, row)->tuple:
         # Crea una instancia de Product a partir de una fila de la base de datos
         return cls(
+            id=row[0],
             name=row[1],
             price=row[2],
             brand=row[3],
@@ -448,6 +450,25 @@ def get_user_name(id:int)->str:
     name = cursor.fetchone()[0]
     conn.close()
     return name
+
+def get_restock_date(restock_id: int) -> str:
+    '''
+    Obtiene la fecha de un restock específico
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT date
+    FROM Restocks
+    WHERE id = ?
+    ''', (restock_id,))
+
+    restock_date = cursor.fetchone()
+    conn.close()
+    
+    # Si se encuentra el restock, devuelve la fecha, sino, devuelve None
+    return restock_date[0] if restock_date else None
 
 if __name__ == "__main__":
     

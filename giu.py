@@ -51,7 +51,6 @@ class Login(BaseScene):
 		#except:
 			#self.user_entry.configure(border_color = "red")
 			
-			
 class Men_p(BaseScene):
 
 	def __init__(self, parent, manager):
@@ -174,7 +173,6 @@ class Men_p(BaseScene):
 									corner_radius= 40, text = "Futuro grafico| proyecto en mantenimiento")
 		self.grafico.grid(row=2, column=0, columnspan=2, ipady= 6)
 		
-
 class C_producto(BaseScene):
 
 	def __init__(self, parent, manager):
@@ -525,25 +523,30 @@ class Stock_nav(BaseScene):
 		self.tabla_venta = ctk.CTkFrame(tabla, width= 675, height= 400, fg_color= black, corner_radius= 40)
 		self.tabla_venta.place(relx = 0.5, y= 200, anchor= "center")
 
-		treeview = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act"))
-		treeview.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
+		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act"))
+		stockTreeView.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
 		style = ttk.Style()
 		style.theme_use("default")
 		style.configure("Treeview.Heading", background= black, foreground= color_p, font=("Arial", 12, "bold"), relief = "flat")
 		style.configure("Treeview", background= black, foreground= color_p, fieldbackground=black, borderwidth=0, relief = "flat")
 		style.map("Treeview.Heading", background=[("selected",  "#252525"), ("active",  "#252525")])
 
-		treeview.column("#0", width= 110)
-		treeview.column("cod_barra", width= 40)
-		treeview.column("precio", width= 40)
-		treeview.column("talle", width= 35)
-		treeview.column("Fecha_act", width= 115)
+		stockTreeView.column("#0", width= 110)
+		stockTreeView.column("cod_barra", width= 40)
+		stockTreeView.column("precio", width= 40)
+		stockTreeView.column("talle", width= 35)
+		stockTreeView.column("Fecha_act", width= 115)
 
-		treeview.heading("#0",text= "Producto", anchor=tk.CENTER)
-		treeview.heading("cod_barra",text= "Cod barra", anchor=tk.CENTER)
-		treeview.heading("precio",text= "precio", anchor=tk.CENTER)
-		treeview.heading("talle",text= "talle", anchor=tk.CENTER)
-		treeview.heading("Fecha_act",text= "Fecha actualizacion", anchor= tk.CENTER)
+		stockTreeView.heading("#0",text= "Producto", anchor=tk.CENTER)
+		stockTreeView.heading("cod_barra",text= "Cod barra", anchor=tk.CENTER)
+		stockTreeView.heading("precio",text= "precio", anchor=tk.CENTER)
+		stockTreeView.heading("talle",text= "talle", anchor=tk.CENTER)
+		stockTreeView.heading("Fecha_act",text= "Fecha actualizacion", anchor= tk.CENTER)
+  
+		products_in_stock = get_products_in_stock()
+  
+		for product in products_in_stock:
+			stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id)))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
 		atajos.grid(row=2, column=0)
