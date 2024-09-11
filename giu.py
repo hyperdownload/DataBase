@@ -11,6 +11,39 @@ grey = "#EDEBE9"
 blue = "#0080ff"
 black = "#131313"
 
+def header(manager, search_logic):
+    btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
+    user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
+    search_img = ctk.CTkImage(Image.open("img/search.png"), size=(20, 20))
+
+    header_fr = ctk.CTkFrame(manager, fg_color=color_p, border_color=color_s, border_width=1, height=70, width=800)
+    header_fr.place(relx=0.5, y=35, anchor="center")
+
+    name = ctk.CTkLabel(header_fr, text="|Urbanvibe", font=('Plus Jakarta Sans', 28, 'bold'))
+    name.place(x=100, rely=0.5, anchor="center")
+
+    user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, cursor="hand2")
+    user.place(x=800 - 50, rely=0.5, anchor="center")
+
+    search = ctk.CTkButton(header_fr, text="", image=search_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, cursor="hand2", command=search_logic)
+    search.place_configure(x=710, rely=0.5, anchor="center")
+    
+    # NAV Frame
+    nav = ctk.CTkFrame(header_fr, fg_color=color_p, height=65, width=406)
+    nav.place(relx=0.5, y=35, anchor="center")
+
+    # Buttons in nav bar
+    btn_nav = [("Stock", (406 // 2) - 80, None, lambda: manager.switch_scene("Stock_nav"), 70),
+               ("Home", 406 // 2, None, lambda: manager.switch_scene("Men_p"), 70),
+               ("Ventas", (406 // 2) + 80, None, lambda: manager.switch_scene("Ventas_nav"), 70)]
+    
+    for text, x_cord, img, command, width in btn_nav:
+        button = ctk.CTkButton(nav, text=text, image=img, **btn_config, width=width, command=command)
+        button.place(x=x_cord, rely=0.5, anchor="center")
+
+    return header_fr
+
+
 class Login(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
@@ -57,38 +90,10 @@ class Men_p(BaseScene):
 		super().__init__(parent, manager)
 
 		self.manager=manager
-		self.header()
+		self.header_fr = header(self.manager, self.search_logic)
 		self.main()
 		self.manager.title("Menu principal")
 
-	def header(self):
-		self.btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
-		user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
-		search_img = ctk.CTkImage(Image.open("img/search.png"), size=(20, 20))
-
-		self.header_fr = ctk.CTkFrame(self.manager, fg_color= color_p, border_color= color_s, border_width=1, height= 70, width= 800)
-		self.header_fr.place(relx = 0.5, y = 35, anchor= "center")
-
-		self.name = ctk.CTkLabel(self.header_fr, text= "|Urbanvibe", font=('Plus Jakarta Sans', 28, 'bold'))
-		self.name.place(x = 100, rely = 0.5, anchor= "center")
-
-		self.user = ctk.CTkButton(self.header_fr, text= "", image = user_img, fg_color= "transparent", hover_color= "#dcdcdc", height= 35, width=35, cursor = "hand2")
-		self.user.place(x=800 - 50, rely=0.5, anchor= "center")
-
-		self.search = ctk.CTkButton(self.header_fr, text= "", image = search_img, fg_color= "transparent", hover_color= "#dcdcdc"
-									, height= 35, width= 35, cursor = "hand2", command= self.search_logic)
-		self.search.place_configure(x = 710, rely=0.5, anchor= "center")
-		
-		# -----------------------------------------------NAV------------------------------------------------
-		self.nav = ctk.CTkFrame(self.header_fr, fg_color= color_p, height= 65, width= 406)
-		self.nav.place(relx = 0.5, y = 35, anchor= "center")
-		
-		# Texto - Cordenadas X - imagenes - command - Width
-		btn_nav = [("Stock", (406//2) -80, None, lambda: self.manager.switch_scene("Stock_nav"),70), ("Home", 406//2, None, lambda: self.manager.switch_scene("Men_p"),70), ("Ventas", (406//2) +80, None, lambda: self.manager.switch_scene("Ventas_nav"),70)]
-		for text, x_cord, img, command, width in btn_nav:
-			button = ctk.CTkButton(self.nav, text= text, image = img, **self.btn_config, width= width , command= command)
-			button.place(x = x_cord, rely = 0.5, anchor= "center")
-	
 	def search_logic(self):
 		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
 			self.search_entry.place_forget()
@@ -180,37 +185,8 @@ class C_producto(BaseScene):
 
 		self.manager=manager
 		self.manager.title("Carga de productos")
-		self.header()
+		self.header_fr = header(self.manager, self.search_logic)
 		self.main()
-
-
-	def header(self):
-		self.btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
-		user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
-		search_img = ctk.CTkImage(Image.open("img/search.png"), size=(20, 20))
-
-		self.header_fr = ctk.CTkFrame(self.manager, fg_color= color_p, border_color= color_s, border_width=1, height= 70, width= 800)
-		self.header_fr.place(relx = 0.5, y = 35, anchor= "center")
-
-		self.name = ctk.CTkLabel(self.header_fr, text= "|Urbanvibe", font=('Plus Jakarta Sans', 28, 'bold'))
-		self.name.place(x = 100, rely = 0.5, anchor= "center")
-
-		self.user = ctk.CTkButton(self.header_fr, text= "", image = user_img, fg_color= "transparent", hover_color= "#dcdcdc", height= 35, width=35, cursor = "hand2")
-		self.user.place(x=800 - 50, rely=0.5, anchor= "center")
-
-		self.search = ctk.CTkButton(self.header_fr, text= "", image = search_img, fg_color= "transparent", hover_color= "#dcdcdc"
-									, height= 35, width= 35, cursor = "hand2", command= self.search_logic)
-		self.search.place_configure(x = 710, rely=0.5, anchor= "center")
-		
-		# -----------------------------------------------NAV------------------------------------------------
-		self.nav = ctk.CTkFrame(self.header_fr, fg_color= color_p, height= 65, width= 406)
-		self.nav.place(relx = 0.5, y = 35, anchor= "center")
-		
-		# Texto - Cordenadas X - imagenes - command - Width
-		btn_nav = [("Stock", (406//2) -80, None, lambda: self.manager.switch_scene("Stock_nav"),70), ("Home", 406//2, None, lambda: self.manager.switch_scene("Men_p"),70), ("Ventas", (406//2) +80, None, lambda: self.manager.switch_scene("Ventas_nav"),70)]
-		for text, x_cord, img, command, width in btn_nav:
-			button = ctk.CTkButton(self.nav, text= text, image = img, **self.btn_config, width= width , command= command)
-			button.place(x = x_cord, rely = 0.5, anchor= "center")
 	
 	def search_logic(self):
 		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
@@ -292,36 +268,8 @@ class C_ventas(BaseScene):
 		self.manager=manager
 		self.id_product = []
 		self.manager.title("Cargar Ventas")
-		self.header()
+		self.header_fr = header(self.manager, self.search_logic)
 		self.main()
-
-	def header(self):
-		self.btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
-		user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
-		search_img = ctk.CTkImage(Image.open("img/search.png"), size=(20, 20))
-
-		self.header_fr = ctk.CTkFrame(self.manager, fg_color= color_p, border_color= color_s, border_width=1, height= 70, width= 800)
-		self.header_fr.place(relx = 0.5, y = 35, anchor= "center")
-
-		self.name = ctk.CTkLabel(self.header_fr, text= "|Urbanvibe", font=('Plus Jakarta Sans', 28, 'bold'))
-		self.name.place(x = 100, rely = 0.5, anchor= "center")
-
-		self.user = ctk.CTkButton(self.header_fr, text= "", image = user_img, fg_color= "transparent", hover_color= "#dcdcdc", height= 35, width=35, cursor = "hand2")
-		self.user.place(x=800 - 50, rely=0.5, anchor= "center")
-
-		self.search = ctk.CTkButton(self.header_fr, text= "", image = search_img, fg_color= "transparent", hover_color= "#dcdcdc"
-									, height= 35, width= 35, cursor = "hand2", command= self.search_logic)
-		self.search.place_configure(x = 710, rely=0.5, anchor= "center")
-		
-		# -----------------------------------------------NAV------------------------------------------------
-		self.nav = ctk.CTkFrame(self.header_fr, fg_color= color_p, height= 65, width= 406)
-		self.nav.place(relx = 0.5, y = 35, anchor= "center")
-		
-		# Texto - Cordenadas X - imagenes - command - Width
-		btn_nav = [("Stock", (406//2) -80, None, lambda: self.manager.switch_scene("Stock_nav"),70), ("Home", 406//2, None, lambda: self.manager.switch_scene("Men_p"),70), ("Ventas", (406//2) +80, None, lambda: self.manager.switch_scene("Ventas_nav"),70)]
-		for text, x_cord, img, command, width in btn_nav:
-			button = ctk.CTkButton(self.nav, text= text, image = img, **self.btn_config, width= width , command= command)
-			button.place(x = x_cord, rely = 0.5, anchor= "center")
 	
 	def search_logic(self):
 		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
@@ -461,36 +409,8 @@ class Stock_nav(BaseScene):
 
 		self.manager=manager
 		self.manager.title("Stock general")
-		self.header()
+		self.header_fr = header(self.manager, self.search_logic)
 		self.main()
-
-	def header(self):
-		self.btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
-		user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
-		search_img = ctk.CTkImage(Image.open("img/search.png"), size=(20, 20))
-
-		self.header_fr = ctk.CTkFrame(self.manager, fg_color= color_p, border_color= color_s, border_width=1, height= 70, width= 800)
-		self.header_fr.place(relx = 0.5, y = 35, anchor= "center")
-
-		self.name = ctk.CTkLabel(self.header_fr, text= "|Urbanvibe", font=('Plus Jakarta Sans', 28, 'bold'))
-		self.name.place(x = 100, rely = 0.5, anchor= "center")
-
-		self.user = ctk.CTkButton(self.header_fr, text= "", image = user_img, fg_color= "transparent", hover_color= "#dcdcdc", height= 35, width=35, cursor = "hand2")
-		self.user.place(x=800 - 50, rely=0.5, anchor= "center")
-
-		self.search = ctk.CTkButton(self.header_fr, text= "", image = search_img, fg_color= "transparent", hover_color= "#dcdcdc"
-									, height= 35, width= 35, cursor = "hand2", command= self.search_logic)
-		self.search.place_configure(x = 710, rely=0.5, anchor= "center")
-		
-		# -----------------------------------------------NAV------------------------------------------------
-		self.nav = ctk.CTkFrame(self.header_fr, fg_color= color_p, height= 65, width= 406)
-		self.nav.place(relx = 0.5, y = 35, anchor= "center")
-		
-		# Texto - Cordenadas X - imagenes - command - Width
-		btn_nav = [("Stock", (406//2) -80, None, lambda: self.manager.switch_scene("Stock_nav"),70), ("Home", 406//2, None, lambda: self.manager.switch_scene("Men_p"),70), ("Ventas", (406//2) +80, None, lambda: self.manager.switch_scene("Ventas_nav"),70)]
-		for text, x_cord, img, command, width in btn_nav:
-			button = ctk.CTkButton(self.nav, text= text, image = img, **self.btn_config, width= width , command= command)
-			button.place(x = x_cord, rely = 0.5, anchor= "center")
 	
 	def search_logic(self):
 		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
@@ -565,36 +485,8 @@ class Ventas_nav(BaseScene):
 
 		self.manager=manager
 		self.manager.title("Historial de ventas")
-		self.header()
+		self.header_fr = header(self.manager, self.search_logic)
 		self.main()
-
-	def header(self):
-		self.btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
-		user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
-		search_img = ctk.CTkImage(Image.open("img/search.png"), size=(20, 20))
-
-		self.header_fr = ctk.CTkFrame(self.manager, fg_color= color_p, border_color= color_s, border_width=1, height= 70, width= 800)
-		self.header_fr.place(relx = 0.5, y = 35, anchor= "center")
-
-		self.name = ctk.CTkLabel(self.header_fr, text= "|Urbanvibe", font=('Plus Jakarta Sans', 28, 'bold'))
-		self.name.place(x = 100, rely = 0.5, anchor= "center")
-
-		self.user = ctk.CTkButton(self.header_fr, text= "", image = user_img, fg_color= "transparent", hover_color= "#dcdcdc", height= 35, width=35, cursor = "hand2")
-		self.user.place(x=800 - 50, rely=0.5, anchor= "center")
-
-		self.search = ctk.CTkButton(self.header_fr, text= "", image = search_img, fg_color= "transparent", hover_color= "#dcdcdc"
-									, height= 35, width= 35, cursor = "hand2", command= self.search_logic)
-		self.search.place_configure(x = 710, rely=0.5, anchor= "center")
-		
-		# -----------------------------------------------NAV------------------------------------------------
-		self.nav = ctk.CTkFrame(self.header_fr, fg_color= color_p, height= 65, width= 406)
-		self.nav.place(relx = 0.5, y = 35, anchor= "center")
-		
-		# Texto - Cordenadas X - imagenes - command - Width
-		btn_nav = [("Stock", (406//2) -80, None, lambda: self.manager.switch_scene("Stock_nav"),70), ("Home", 406//2, None, lambda: self.manager.switch_scene("Men_p"),70), ("Ventas", (406//2) +80, None, lambda: self.manager.switch_scene("Ventas_nav"),70)]
-		for text, x_cord, img, command, width in btn_nav:
-			button = ctk.CTkButton(self.nav, text= text, image = img, **self.btn_config, width= width , command= command)
-			button.place(x = x_cord, rely = 0.5, anchor= "center")
 	
 	def search_logic(self):
 		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
