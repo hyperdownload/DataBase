@@ -32,7 +32,7 @@ def header(manager, search_logic):
     nav = ctk.CTkFrame(header_fr, fg_color=color_p, height=65, width=406)
     nav.place(relx=0.5, y=35, anchor="center")
 
-    # Buttons in nav bar
+    # Los botones
     btn_nav = [("Stock", (406 // 2) - 80, None, lambda: manager.switch_scene("Stock_nav"), 70),
                ("Home", 406 // 2, None, lambda: manager.switch_scene("Men_p"), 70),
                ("Ventas", (406 // 2) + 80, None, lambda: manager.switch_scene("Ventas_nav"), 70)]
