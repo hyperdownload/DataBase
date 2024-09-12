@@ -11,10 +11,9 @@ grey = "#EDEBE9"
 blue = "#0080ff"
 black = "#131313"
 
-def header(manager, search_logic):
+def header(manager):
     btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
     user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
-    search_img = ctk.CTkImage(Image.open("img/search.png"), size=(20, 20))
 
     header_fr = ctk.CTkFrame(manager, fg_color=color_p, border_color=color_s, border_width=1, height=70, width=800)
     header_fr.place(relx=0.5, y=35, anchor="center")
@@ -24,9 +23,6 @@ def header(manager, search_logic):
 
     user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, cursor="hand2")
     user.place(x=800 - 50, rely=0.5, anchor="center")
-
-    search = ctk.CTkButton(header_fr, text="", image=search_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, cursor="hand2", command=search_logic)
-    search.place_configure(x=710, rely=0.5, anchor="center")
     
     # NAV Frame
     nav = ctk.CTkFrame(header_fr, fg_color=color_p, height=65, width=406)
@@ -42,7 +38,6 @@ def header(manager, search_logic):
         button.place(x=x_cord, rely=0.5, anchor="center")
 
     return header_fr
-
 
 class Login(BaseScene):
 	def __init__(self, parent, manager):
@@ -85,27 +80,13 @@ class Login(BaseScene):
 			#self.user_entry.configure(border_color = "red")
 			
 class Men_p(BaseScene):
-
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
 
 		self.manager=manager
-		self.header_fr = header(self.manager, self.search_logic)
+		self.header_fr = header(self.manager)
 		self.main()
 		self.manager.title("Menu principal")
-
-	def search_logic(self):
-		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
-			self.search_entry.place_forget()
-			self.search.configure(fg_color =  "transparent", hover_color = "#dcdcdc")
-			self.nav.place(relx = 0.5, y = 35, anchor= "center")
-			
-		else:
-			# self.nav.place_forget()
-			self.search_entry = ctk.CTkEntry(self.header_fr, placeholder_text= "Buscar producto...", width= 155, height=35,
-										corner_radius=35, border_color= "#252525", text_color= "#252525")
-			self.search_entry.place_configure(x = 600, rely=0.5, anchor= "center") 
-			self.search.configure(fg_color =  "#dcdcdc", hover_color = color_p)
 
 	def main(self):
 		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
@@ -185,21 +166,8 @@ class C_producto(BaseScene):
 
 		self.manager=manager
 		self.manager.title("Carga de productos")
-		self.header_fr = header(self.manager, self.search_logic)
+		self.header_fr = header(self.manager)
 		self.main()
-	
-	def search_logic(self):
-		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
-			self.search_entry.place_forget()
-			self.search.configure(fg_color =  "transparent", hover_color = "#dcdcdc")
-			self.nav.place(relx = 0.5, y = 35, anchor= "center")
-			
-		else:
-			# self.nav.place_forget()
-			self.search_entry = ctk.CTkEntry(self.header_fr, placeholder_text= "Buscar producto...", width= 155, height=35,
-										corner_radius=35, border_color= "#252525", text_color= "#252525")
-			self.search_entry.place_configure(x = 600, rely=0.5, anchor= "center") 
-			self.search.configure(fg_color =  "#dcdcdc", hover_color = color_p)
 
 	def main(self):
 		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
@@ -237,11 +205,6 @@ class C_producto(BaseScene):
 
 		treeview = ttk.Treeview(self.tabla_stock, columns=("price", "brand", "size", "description"))
 		treeview.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
-		style = ttk.Style()
-		style.theme_use("default")
-		style.configure("Treeview.Heading", background= black, foreground="white", font=("Arial", 12, "bold"), relief = "flat")
-		style.configure("Treeview", background= black, foreground="white", fieldbackground=black, borderwidth=0, relief = "flat")
-		style.map("Treeview.Heading", background=[("selected", "#242424"), ("active", "#242424")])
 
 		treeview.column("#0", width= 117)
 		treeview.column("price", width= 50)
@@ -268,21 +231,8 @@ class C_ventas(BaseScene):
 		self.manager=manager
 		self.id_product = []
 		self.manager.title("Cargar Ventas")
-		self.header_fr = header(self.manager, self.search_logic)
+		self.header_fr = header(self.manager)
 		self.main()
-	
-	def search_logic(self):
-		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
-			self.search_entry.place_forget()
-			self.search.configure(fg_color =  "transparent", hover_color = "#dcdcdc")
-			self.nav.place(relx = 0.5, y = 35, anchor= "center")
-			
-		else:
-			# self.nav.place_forget()
-			self.search_entry = ctk.CTkEntry(self.header_fr, placeholder_text= "Buscar producto...", width= 155, height=35,
-										corner_radius=35, border_color= "#252525", text_color= "#252525")
-			self.search_entry.place_configure(x = 600, rely=0.5, anchor= "center") 
-			self.search.configure(fg_color =  "#dcdcdc", hover_color = color_p)
 
 	def main(self):
 		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
@@ -364,11 +314,6 @@ class C_ventas(BaseScene):
 
 		self.treeviewt = ttk.Treeview(ticket_fr, columns=("Precio", "Cantidad"))
 		self.treeviewt.place(relx = 0.5, y= 195, anchor= "center", width = 280, height= 350)
-		style = ttk.Style()
-		style.theme_use("default")
-		style.configure("Treeview.Heading", background= color_p, foreground=black, font=("Arial", 12, "bold"), relief = "flat")
-		style.configure("Treeview", background= color_p, foreground= black, fieldbackground=color_p, borderwidth=0, relief = "flat")
-		style.map("Treeview", background=[("selected", blue), ("active", blue)])
 
 		self.treeviewt.column("#0", width= 50)
 		self.treeviewt.column("Precio", width= 50)
@@ -409,21 +354,9 @@ class Stock_nav(BaseScene):
 
 		self.manager=manager
 		self.manager.title("Stock general")
-		self.header_fr = header(self.manager, self.search_logic)
+		self.header_fr = header(self.manager)
 		self.main()
-	
-	def search_logic(self):
-		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
-			self.search_entry.place_forget()
-			self.search.configure(fg_color =  "transparent", hover_color = "#dcdcdc")
-			self.nav.place(relx = 0.5, y = 35, anchor= "center")
-			
-		else:
-			# self.nav.place_forget()
-			self.search_entry = ctk.CTkEntry(self.header_fr, placeholder_text= "Buscar producto...", width= 155, height=35,
-										corner_radius=35, border_color= "#252525", text_color= "#252525")
-			self.search_entry.place_configure(x = 600, rely=0.5, anchor= "center") 
-			self.search.configure(fg_color =  "#dcdcdc", hover_color = color_p)
+
 	def cambiar_color(self, widget, text_color, fg_color, event=None):
 		widget.configure(text_color=text_color, fg_color=fg_color)
 
@@ -436,7 +369,6 @@ class Stock_nav(BaseScene):
 		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
 		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
 	#--------------------------------------------------------------------------------------------------------------------------------------------
-
 		tabla = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 425, width = 800)
 		tabla.grid(row=3, column=0)
 
@@ -445,23 +377,15 @@ class Stock_nav(BaseScene):
 
 		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act"))
 		stockTreeView.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
-		style = ttk.Style()
-		style.theme_use("default")
-		style.configure("Treeview.Heading", background= black, foreground= color_p, font=("Arial", 12, "bold"), relief = "flat")
-		style.configure("Treeview", background= black, foreground= color_p, fieldbackground=black, borderwidth=0, relief = "flat")
-		style.map("Treeview.Heading", background=[("selected",  "#252525"), ("active",  "#252525")])
 
-		stockTreeView.column("#0", width= 110)
-		stockTreeView.column("cod_barra", width= 40)
-		stockTreeView.column("precio", width= 40)
-		stockTreeView.column("talle", width= 35)
-		stockTreeView.column("Fecha_act", width= 115)
-
-		stockTreeView.heading("#0",text= "Producto", anchor=tk.CENTER)
-		stockTreeView.heading("cod_barra",text= "Cod barra", anchor=tk.CENTER)
-		stockTreeView.heading("precio",text= "precio", anchor=tk.CENTER)
-		stockTreeView.heading("talle",text= "talle", anchor=tk.CENTER)
-		stockTreeView.heading("Fecha_act",text= "Fecha actualizacion", anchor= tk.CENTER)
+		# Configuración de columnas
+		for col, width in [("#0", 110), ("cod_barra", 40), ("precio", 40), ("talle", 35), ("Fecha_act", 115)]:
+			stockTreeView.column(col, width=width)
+			
+		# Cabeceras de las columnas
+		stockTreeView.heading("#0", text="Producto", anchor=tk.CENTER)
+		for col in ["cod_barra", "precio", "talle", "Fecha_act"]:
+			stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER)
   
 		products_in_stock = get_products_in_stock()
   
@@ -485,24 +409,12 @@ class Ventas_nav(BaseScene):
 
 		self.manager=manager
 		self.manager.title("Historial de ventas")
-		self.header_fr = header(self.manager, self.search_logic)
+		self.header_fr = header(self.manager)
 		self.main()
-	
-	def search_logic(self):
-		if hasattr(self, 'search_entry') and self.search_entry.winfo_ismapped(): #comprueba si existe y es visible
-			self.search_entry.place_forget()
-			self.search.configure(fg_color =  "transparent", hover_color = "#dcdcdc")
-			self.nav.place(relx = 0.5, y = 35, anchor= "center")
-			
-		else:
-			# self.nav.place_forget()
-			self.search_entry = ctk.CTkEntry(self.header_fr, placeholder_text= "Buscar producto...", width= 155, height=35,
-										corner_radius=35, border_color= "#252525", text_color= "#252525")
-			self.search_entry.place_configure(x = 600, rely=0.5, anchor= "center") 
-			self.search.configure(fg_color =  "#dcdcdc", hover_color = color_p)
 
 	def cambiar_color(self, widget, text_color, fg_color, event=None):
 		widget.configure(text_color=text_color, fg_color=fg_color)
+  
 	def main(self):
 		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color=color_p, height=530, width=780)
 		self.main_fr.place(relx=0.5, y=341, anchor="center")
@@ -520,25 +432,13 @@ class Ventas_nav(BaseScene):
 		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=grey, corner_radius=40)
 		self.tabla_venta.place(relx=0.5, y=200, anchor="center")
 
-		treeview = ttk.Treeview(self.tabla_venta, columns=("Fecha", "Vendedor", "Estado", "Precio"))
+		treeview = ttk.Treeview(self.tabla_venta, columns=("Producto", "Fecha", "Vendedor", "Estado", "Precio"))
 		treeview.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
-		style = ttk.Style()
-		style.theme_use("default")
-		style.configure("Treeview.Heading", background=grey, foreground=black, font=("Arial", 12, "bold"), relief="flat")
-		style.configure("Treeview", background=grey, foreground=black, fieldbackground=grey, borderwidth=0, relief="flat")
-		style.map("Treeview.Heading", background=[("selected", color_p), ("active", color_p)])
 
-		treeview.column("#0", width=110)
-		treeview.column("Fecha", width=100)
-		treeview.column("Vendedor", width=100)
-		treeview.column("Estado", width=100)
-		treeview.column("Precio", width=100)
-
-		treeview.heading("#0", text="Producto", anchor=tk.CENTER)
-		treeview.heading("Fecha", text="Fecha", anchor=tk.CENTER)
-		treeview.heading("Vendedor", text="Vendedor", anchor=tk.CENTER)
-		treeview.heading("Estado", text="Estado", anchor=tk.CENTER)
-		treeview.heading("Precio", text="Precio", anchor=tk.CENTER)
+		# Configuración de columnas
+		for col, width in [("Producto", 110), ("Fecha", 100), ("Vendedor", 100), ("Estado", 100), ("Precio", 100)]:
+			treeview.column(col, width=width)
+			treeview.heading(col, text=col, anchor=tk.CENTER)
 
 		# Obtiene los datos de la base de datos
 		sales_data = get_all_sales()
@@ -570,6 +470,12 @@ if __name__ == "__main__":
 	y = (app.winfo_screenheight() // 2)-(600 // 2)
 	app.geometry(f"800x600+{x}+{y}")  # Establece el tamaño de la ventana
 	app.resizable(False,False)
+ 
+	style = ttk.Style()
+	style.theme_use("default")
+	style.configure("Treeview.Heading", background= black, foreground= color_p, font=("Arial", 12, "bold"), relief = "flat")
+	style.configure("Treeview", background= black, foreground= color_p, fieldbackground=black, borderwidth=0, relief = "flat")
+	style.map("Treeview.Heading", background=[("selected",  "#252525"), ("active",  "#252525")])
 
 	# Añade las escenas al gestor
 	app.add_scene("Stock_nav", Stock_nav)
@@ -580,6 +486,6 @@ if __name__ == "__main__":
 	app.add_scene("Login", Login)
   
 	# Inicia la aplicación con la primera escena visible
-	app.switch_scene("Login")
+	app.switch_scene("C_ventas")
 
 	app.mainloop()  # Ejecuta el bucle principal de la aplicación
