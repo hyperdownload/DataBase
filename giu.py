@@ -305,29 +305,25 @@ class C_ventas(BaseScene):
 			self.metodo_pago.grid(row = 2, column = 1, pady = 5, padx = 25)
 		
 	def visualizar_datos(self):
-		self.ticket_col = ctk.CTkFrame(self.main_fr, width= 400, height= 400, fg_color= color_p)
-		self.ticket_col.grid(row=1, column=1, rowspan = 2)
+		self.ticket_col = ctk.CTkFrame(self.main_fr, width=400, height=400, fg_color=color_p)
+		self.ticket_col.grid(row=1, column=1, rowspan=2)
 		self.inputs_fr.grid_propagate(0)
 
-		ticket_fr = ctk.CTkFrame(self.ticket_col, width= 300, height= 400, fg_color= color_p, corner_radius= 20, border_color= grey, border_width= 3)
-		ticket_fr.place(relx = 0.5, rely = 0.5, anchor = "center")
+		ticket_fr = ctk.CTkFrame(self.ticket_col, width=300, height=400, fg_color=black, corner_radius=20, border_color=grey, border_width=3)
+		ticket_fr.place(relx=0.5, rely=0.5, anchor="center")
 
 		self.treeviewt = ttk.Treeview(ticket_fr, columns=("Precio", "Cantidad"))
-		self.treeviewt.place(relx = 0.5, y= 195, anchor= "center", width = 280, height= 350)
+		self.treeviewt.place(relx=0.5, y=195, anchor="center", width=280, height=350)
 
-		self.treeviewt.column("#0", width= 50)
-		self.treeviewt.column("Precio", width= 50)
-		self.treeviewt.column("Cantidad", width= 50)
+		for col, width in zip(("#0", "Precio", "Cantidad"), [50, 50, 50]): # Descubri como usar zip :D
+			self.treeviewt.column(col, width=width)
+			self.treeviewt.heading(col, text=col if col != "#0" else "Producto", anchor=tk.CENTER)
 
-		self.treeviewt.heading("#0",text= "Producto", anchor=tk.CENTER)
-		self.treeviewt.heading("Precio",text= "Precio", anchor=tk.CENTER)
-		self.treeviewt.heading("Cantidad",text= "Cantidad", anchor=tk.CENTER)
+		self.pago = ctk.CTkLabel(self.ticket_col, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
+		self.pago.place(x=75, y=320)
 
-		self.pago = ctk.CTkLabel(self.ticket_col, text = f"Metodo de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
-		self.pago.place(x= 75, y = 320)
-		registrar_venta = ctk.CTkLabel(self.ticket_col, text = "Registrar Venta", font=('Plus Jakarta Sans', 16, 'bold', 'underline'))
-		registrar_venta.place(x= 75, y = 350)
-
+		registrar_venta = ctk.CTkLabel(self.ticket_col, fg_color=black, text="Registrar Venta", font=('Plus Jakarta Sans', 16, 'bold', 'underline'))
+		registrar_venta.place(x=75, y=350)
 		registrar_venta.bind('<Button-1>', self.registrar_venta_func)
 
 	def registrar_venta_func(self, event):
@@ -429,7 +425,7 @@ class Ventas_nav(BaseScene):
 		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800)
 		tabla.grid(row=3, column=0)
 
-		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=grey, corner_radius=40)
+		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40)
 		self.tabla_venta.place(relx=0.5, y=200, anchor="center")
 
 		treeview = ttk.Treeview(self.tabla_venta, columns=("Producto", "Fecha", "Vendedor", "Estado", "Precio"))
@@ -486,6 +482,6 @@ if __name__ == "__main__":
 	app.add_scene("Login", Login)
   
 	# Inicia la aplicación con la primera escena visible
-	app.switch_scene("C_ventas")
+	app.switch_scene("Ventas_nav")
 
 	app.mainloop()  # Ejecuta el bucle principal de la aplicación
