@@ -1,6 +1,7 @@
 from Utils.SceneManager import *
 from Utils.database import *
-from PIL import Image  # Importa Image desde PIL
+from Utils.functions import *
+from PIL import Image 
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk
@@ -10,34 +11,6 @@ color_s = "#efefef"
 grey = "#EDEBE9"
 blue = "#0080ff"
 black = "#131313"
-
-def header(manager):
-    btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
-    user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
-
-    header_fr = ctk.CTkFrame(manager, fg_color=color_p, border_color=color_s, border_width=1, height=70, width=800)
-    header_fr.place(relx=0.5, y=35, anchor="center")
-
-    name = ctk.CTkLabel(header_fr, text="|Urbanvibe", font=('Plus Jakarta Sans', 28, 'bold'))
-    name.place(x=100, rely=0.5, anchor="center")
-
-    user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, cursor="hand2")
-    user.place(x=800 - 50, rely=0.5, anchor="center")
-    
-    # NAV Frame
-    nav = ctk.CTkFrame(header_fr, fg_color=color_p, height=65, width=406)
-    nav.place(relx=0.5, y=35, anchor="center")
-
-    # Los botones
-    btn_nav = [("Stock", (406 // 2) - 80, None, lambda: manager.switch_scene("Stock_nav"), 70),
-               ("Home", 406 // 2, None, lambda: manager.switch_scene("Men_p"), 70),
-               ("Ventas", (406 // 2) + 80, None, lambda: manager.switch_scene("Ventas_nav"), 70)]
-    
-    for text, x_cord, img, command, width in btn_nav:
-        button = ctk.CTkButton(nav, text=text, image=img, **btn_config, width=width, command=command)
-        button.place(x=x_cord, rely=0.5, anchor="center")
-
-    return header_fr
 
 class Login(BaseScene):
 	def __init__(self, parent, manager):
@@ -288,7 +261,7 @@ class C_ventas(BaseScene):
 			"",
 			tk.END,
 			text=get_name_product(int(self.inputid.get())),
-			values=(get_price_product(int(self.inputid.get())), int(self.inputid.get()))
+			values=(get_price_product(int(self.inputid.get())), int(self.inputq.get()))
 		)
 		self.id_product.append(self.inputid.get())
 		
@@ -340,7 +313,7 @@ class C_ventas(BaseScene):
 				precio = float(values[0]) 
 				quantity = int(values[1])  
 				# Llama a la función para registrar la venta
-				record_sale(product_id, 2, branch_name, quantity)
+				record_sale(product_id, 2, branch_name, quantity, get_price_product(product_id))
    
 		#record_sale(int(self.inputq.get()),1,"dos",int(self.inputid.get()))
 	
@@ -383,7 +356,9 @@ class Stock_nav(BaseScene):
 		for col in ["cod_barra", "precio", "talle", "Fecha_act"]:
 			stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER)
   
-		products_in_stock = get_products_in_stock()
+		products = get_products_in_stock()
+
+		products_in_stock = search_function(products,"White T-sh1rt") # OSTIA BUSCA
   
 		for product in products_in_stock:
 			stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id)))
@@ -438,7 +413,7 @@ class Ventas_nav(BaseScene):
 
 		# Obtiene los datos de la base de datos
 		sales_data = get_all_sales()
-
+	
 		# Inserta los datos en el Treeview
 		for sale in sales_data:
 			treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6]))
@@ -482,6 +457,6 @@ if __name__ == "__main__":
 	app.add_scene("Login", Login)
   
 	# Inicia la aplicación con la primera escena visible
-	app.switch_scene("Ventas_nav")
+	app.switch_scene("Stock_nav")
 
 	app.mainloop()  # Ejecuta el bucle principal de la aplicación
