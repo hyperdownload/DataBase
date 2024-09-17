@@ -142,6 +142,19 @@ class C_producto(BaseScene):
 		self.header_fr = header(self.manager)
 		self.main()
 
+	def search(self, event = None):
+		if self.buscar_producto.get():
+			self.tv_stock.delete(*self.tv_stock.get_children())
+			search=search_function(get_products_in_stock(),self.buscar_producto.get())
+			for product in search:
+				self.tv_stock.insert("",tk.END, text=f"{product.name}",
+						values=(product.price,product.brand,product.size, product.description))
+		else:
+			self.tv_stock.delete(*self.tv_stock.get_children())
+			products_in_stock = get_products_in_stock()
+			for product in products_in_stock:
+				self.tv_stock.insert("",tk.END, text=f"{product.name}",
+						values=(product.price,product.brand,product.size, product.description))
 	def main(self):
 		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
 		self.main_fr.place(relx = 0.5,y = 341, anchor = "center")
@@ -155,11 +168,14 @@ class C_producto(BaseScene):
 		
 		self.cp_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 85, width = 800)
 		self.cp_fr.grid(row=1, column=0)
-		buscar_producto = ctk.CTkEntry(self.cp_fr, placeholder_text= "Buscar producto...", width= 250, height=50,
+		self.buscar_producto = ctk.CTkEntry(self.cp_fr, placeholder_text= "Buscar producto...", width= 250, height=50,
 										corner_radius=35, border_color= "#dcdcdc", text_color= "#252525")
-		buscar_producto.place(x = 185, rely = 0.5, anchor= "center")
+		self.buscar_producto.place(x = 185, rely = 0.5, anchor= "center")
+
+		app.bind('<Key>', self.search)
+
 		bp_btn = ctk.CTkButton(self.cp_fr, text= "", image = lupa, fg_color= color_s, hover_color= "#dcdcdc"
-									, height= 50, width= 50, corner_radius= 15, cursor = "hand2")
+									, height= 50, width= 50, corner_radius= 15, cursor = "hand2", command = self.search)
 		bp_btn.place(x = 355, rely = 0.5, anchor= "center")
 
 		c_stock = ctk.CTkEntry(self.cp_fr, placeholder_text= "Subir producto...", width= 250, height=50,
@@ -176,24 +192,24 @@ class C_producto(BaseScene):
 		self.tabla_stock = ctk.CTkFrame(tabla, width= 675, height= 400, fg_color= black, corner_radius= 40)
 		self.tabla_stock.place(relx = 0.5, y= 200, anchor= "center")
 
-		treeview = ttk.Treeview(self.tabla_stock, columns=("price", "brand", "size", "description"))
-		treeview.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
+		self.tv_stock = ttk.Treeview(self.tabla_stock, columns=("price", "brand", "size", "description"))
+		self.tv_stock.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
 
-		treeview.column("#0", width= 117)
-		treeview.column("price", width= 50)
-		treeview.column("brand", width= 50)
-		treeview.column("size", width= 50)
-		treeview.column("description", width= 117)
+		self.tv_stock.column("#0", width= 117)
+		self.tv_stock.column("price", width= 50)
+		self.tv_stock.column("brand", width= 50)
+		self.tv_stock.column("size", width= 50)
+		self.tv_stock.column("description", width= 117)
 
-		treeview.heading("#0",text= "Product", anchor=tk.CENTER)
-		treeview.heading("price",text= "Price", anchor=tk.CENTER)
-		treeview.heading("brand",text= "Brand", anchor=tk.CENTER)
-		treeview.heading("size",text= "Size", anchor=tk.CENTER)
-		treeview.heading("description",text= "Description", anchor= tk.CENTER)
+		self.tv_stock.heading("#0",text= "Product", anchor=tk.CENTER)
+		self.tv_stock.heading("price",text= "Price", anchor=tk.CENTER)
+		self.tv_stock.heading("brand",text= "Brand", anchor=tk.CENTER)
+		self.tv_stock.heading("size",text= "Size", anchor=tk.CENTER)
+		self.tv_stock.heading("description",text= "Description", anchor= tk.CENTER)
 
 		products_in_stock = get_products_in_stock()
 		for product in products_in_stock:
-			treeview.insert("",tk.END, text=f"{product.name}",
+			self.tv_stock.insert("",tk.END, text=f"{product.name}",
 					   values=(product.price,product.brand,product.size, product.description))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -292,10 +308,10 @@ class C_ventas(BaseScene):
 			self.treeviewt.column(col, width=width)
 			self.treeviewt.heading(col, text=col if col != "#0" else "Producto", anchor=tk.CENTER)
 
-		self.pago = ctk.CTkLabel(self.ticket_col, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
+		self.pago = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
 		self.pago.place(x=75, y=320)
 
-		registrar_venta = ctk.CTkLabel(self.ticket_col, fg_color=black, text="Registrar Venta", font=('Plus Jakarta Sans', 16, 'bold', 'underline'))
+		registrar_venta = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text="Registrar Venta", font=('Plus Jakarta Sans', 16, 'bold', 'underline'))
 		registrar_venta.place(x=75, y=350)
 		registrar_venta.bind('<Button-1>', self.registrar_venta_func)
 
@@ -355,10 +371,8 @@ class Stock_nav(BaseScene):
 		stockTreeView.heading("#0", text="Producto", anchor=tk.CENTER)
 		for col in ["cod_barra", "precio", "talle", "Fecha_act"]:
 			stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER)
-  
-		products = get_products_in_stock()
 
-		products_in_stock = search_function(products,"White T-sh1rt") # OSTIA BUSCA
+		products_in_stock = get_products_in_stock()
   
 		for product in products_in_stock:
 			stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id)))
@@ -403,13 +417,18 @@ class Ventas_nav(BaseScene):
 		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40)
 		self.tabla_venta.place(relx=0.5, y=200, anchor="center")
 
-		treeview = ttk.Treeview(self.tabla_venta, columns=("Producto", "Fecha", "Vendedor", "Estado", "Precio"))
+		treeview = ttk.Treeview(self.tabla_venta, columns=("Fecha", "Vendedor", "Estado", "Precio", "Cantidad"))
 		treeview.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
 
 		# Configuración de columnas
-		for col, width in [("Producto", 110), ("Fecha", 100), ("Vendedor", 100), ("Estado", 100), ("Precio", 100)]:
+		for col, width in [("#0", 110), ("Fecha", 100), ("Vendedor", 100), ("Estado", 50), ("Precio",50), ("Cantidad", 50)]:
 			treeview.column(col, width=width)
-			treeview.heading(col, text=col, anchor=tk.CENTER)
+
+		# Cabeceras de las columnas
+		treeview.heading("#0", text="Producto", anchor=tk.CENTER)
+		for col in ["Fecha", "Vendedor", "Estado", "Precio", "Cantidad"]:
+			treeview.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER)
+
 
 		# Obtiene los datos de la base de datos
 		sales_data = get_all_sales()
@@ -457,6 +476,6 @@ if __name__ == "__main__":
 	app.add_scene("Login", Login)
   
 	# Inicia la aplicación con la primera escena visible
-	app.switch_scene("Stock_nav")
+	app.switch_scene("Login")
 
 	app.mainloop()  # Ejecuta el bucle principal de la aplicación

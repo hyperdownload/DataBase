@@ -34,7 +34,7 @@ def header(manager)->any:
 
     return header_fr
 
-def predict_search(product_list: list, search: str, max_distance: int = 3) -> list:
+def predict_search(product_list: list, search: str, max_distance: int = 9) -> list:
     """Predice sugerencias de búsqueda basadas en la similitud de cadenas.
     
     La función devuelve una lista de productos cuyo nombre es similar al texto de búsqueda
@@ -100,7 +100,7 @@ def levenshtein_distance(s1: str, s2: str) -> int:
     # La última posición de la lista de distancias contiene la distancia de Levenshtein
     return distances[-1]
 
-def search_function(product_list: list, search: str, max_distance: int = 3) -> list:
+def search_function(product_list: list, search: str, max_distance: int = 8) -> list:
     result = []
     
     for product in product_list:
