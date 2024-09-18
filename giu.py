@@ -42,15 +42,20 @@ class Login(BaseScene):
 		user = self.user_entry.get()
 		password = self.password_entry.get()
 		print(get_user_details(get_user_id(user)))
-		if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
-			app.save_variable("user_role",get_user_details(get_user_id(user))[1])
-			app.save_variable("branch_user",get_user_details(get_user_id(user))[3])
-			self.manager.switch_scene("Men_p")
-		else:   #contraseña incorrecta
-			self.password_entry.configure(border_color = "red")
-			
-		#except:
-			#self.user_entry.configure(border_color = "red")
+		try:
+			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
+				app.save_variable("user_role",get_user_details(get_user_id(user))[1])
+				app.save_variable("branch_user",get_user_details(get_user_id(user))[3])
+				
+				self.manager.switch_scene("Men_p")
+
+			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
+				self.user_entry.configure(border_color = "green")
+			else:   #contraseña incorrecta
+				self.password_entry.configure(border_color = "red")
+				
+		except:
+			self.user_entry.configure(border_color = "red")
 			
 class Men_p(BaseScene):
 	def __init__(self, parent, manager):
@@ -206,11 +211,24 @@ class C_producto(BaseScene):
 		self.tv_stock.heading("brand",text= "Brand", anchor=tk.CENTER)
 		self.tv_stock.heading("size",text= "Size", anchor=tk.CENTER)
 		self.tv_stock.heading("description",text= "Description", anchor= tk.CENTER)
+		# Configuración de columnas
+		# for col, width in [("#0",117), ("price",50), ("brand",50), ("size",50), ("description",117)]:
+		# 	self.tv_stock.column(col, width = width)
+
+		# Cabeceras de las columnas
+		# self.tv_stock.heading("#0", text = "Producto", anchor=tk.CENTER)
+
+		# for col in ["Price", "Brand", "Size", "Description"]:
+		# 	self.tv_stock.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER)
+
 
 		products_in_stock = get_products_in_stock()
 		for product in products_in_stock:
 			self.tv_stock.insert("",tk.END, text=f"{product.name}",
 					   values=(product.price,product.brand,product.size, product.description))
+	
+		# for product in products_in_stock:
+		# 	self.tv_stock.insert("", "end", text=product.name,values=( product.price, product.brand, product.description))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 
 class C_ventas(BaseScene):
@@ -311,7 +329,7 @@ class C_ventas(BaseScene):
 		self.pago = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
 		self.pago.place(x=75, y=320)
 
-		registrar_venta = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text="Registrar Venta", font=('Plus Jakarta Sans', 16, 'bold', 'underline'))
+		registrar_venta = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text="Registrar Venta", font=('Plus Jakarta Sans', 16, 'bold', 'underline'), cursor = "hand2")
 		registrar_venta.place(x=75, y=350)
 		registrar_venta.bind('<Button-1>', self.registrar_venta_func)
 
@@ -360,16 +378,16 @@ class Stock_nav(BaseScene):
 		self.tabla_venta = ctk.CTkFrame(tabla, width= 675, height= 400, fg_color= black, corner_radius= 40)
 		self.tabla_venta.place(relx = 0.5, y= 200, anchor= "center")
 
-		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act"))
+		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act", "stock"))
 		stockTreeView.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
 
 		# Configuración de columnas
-		for col, width in [("#0", 110), ("cod_barra", 40), ("precio", 40), ("talle", 35), ("Fecha_act", 115)]:
+		for col, width in [("#0", 110), ("cod_barra", 40), ("precio", 40), ("talle", 30), ("Fecha_act", 115), ("stock",30)]:
 			stockTreeView.column(col, width=width)
 			
 		# Cabeceras de las columnas
 		stockTreeView.heading("#0", text="Producto", anchor=tk.CENTER)
-		for col in ["cod_barra", "precio", "talle", "Fecha_act"]:
+		for col in ["cod_barra", "precio", "talle", "Fecha_act", "stock"]:
 			stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER)
 
 		products_in_stock = get_products_in_stock()
