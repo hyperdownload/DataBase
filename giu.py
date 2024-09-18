@@ -32,13 +32,16 @@ class Login(BaseScene):
 
 		self.user_entry = ctk.CTkEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su nombre de usuario...")
 		self.user_entry.place(relx=0.5, y=260, anchor= "center")
+		self.user_entry.bind('<Return>', self.login_logic)
 
 		self.password_entry = ctk.CTkEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su contraseña...")
 		self.password_entry.place(relx=0.5, y=310, anchor= "center")
+		self.password_entry.bind('<Return>', self.login_logic)
 
 		submit = ctk.CTkButton(login_container, text = "Login", height = 35, width = 350, corner_radius = 20, fg_color = black, text_color = color_p, hover_color = "#454545", command = self.login_logic)
 		submit.place(relx=0.5, y=360, anchor= "center")
-	def login_logic(self):
+  
+	def login_logic(self, event=None):
 		user = self.user_entry.get()
 		password = self.password_entry.get()
 		print(get_user_details(get_user_id(user)))
