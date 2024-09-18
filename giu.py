@@ -200,20 +200,21 @@ class C_producto(BaseScene):
 		self.tabla_stock = ctk.CTkFrame(tabla, width= 675, height= 400, fg_color= black, corner_radius= 40)
 		self.tabla_stock.place(relx = 0.5, y= 200, anchor= "center")
 
-		self.tv_stock = ttk.Treeview(self.tabla_stock, columns=("price", "brand", "size", "description"))
-		self.tv_stock.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
+		# Wuajajaja ya lo resumi
 
-		self.tv_stock.column("#0", width= 117)
-		self.tv_stock.column("price", width= 50)
-		self.tv_stock.column("brand", width= 50)
-		self.tv_stock.column("size", width= 50)
-		self.tv_stock.column("description", width= 117)
+		columns = [("#0", "Product", 117), 
+           ("price", "Price", 50), 
+           ("brand", "Brand", 50), 
+           ("size", "Size", 50), 
+           ("description", "Description", 117)]
 
-		self.tv_stock.heading("#0",text= "Product", anchor=tk.CENTER)
-		self.tv_stock.heading("price",text= "Price", anchor=tk.CENTER)
-		self.tv_stock.heading("brand",text= "Brand", anchor=tk.CENTER)
-		self.tv_stock.heading("size",text= "Size", anchor=tk.CENTER)
-		self.tv_stock.heading("description",text= "Description", anchor= tk.CENTER)
+		self.tv_stock = ttk.Treeview(self.tabla_stock, columns=[col[0] for col in columns[1:]])
+		self.tv_stock.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
+
+		for col, heading, width in columns:
+			self.tv_stock.column(col, width=width)
+			self.tv_stock.heading(col, text=heading, anchor=tk.CENTER)
+
 		# Configuración de columnas
 		# for col, width in [("#0",117), ("price",50), ("brand",50), ("size",50), ("description",117)]:
 		# 	self.tv_stock.column(col, width = width)
@@ -497,6 +498,6 @@ if __name__ == "__main__":
 	app.add_scene("Login", Login)
   
 	# Inicia la aplicación con la primera escena visible
-	app.switch_scene("Login")
+	app.switch_scene("C_producto")
 
 	app.mainloop()  # Ejecuta el bucle principal de la aplicación
