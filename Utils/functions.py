@@ -13,7 +13,7 @@ def header(manager)->any:
     header_fr = ctk.CTkFrame(manager, fg_color=color_p, border_color=color_s, border_width=1, height=70, width=800)
     header_fr.place(relx=0.5, y=35, anchor="center")
 
-    name = ctk.CTkLabel(header_fr, text="|Urbanvibe", font=('Plus Jakarta Sans', 28, 'bold'))
+    name = ctk.CTkLabel(header_fr, text="|Urbanvibe", text_color=black, font=('Plus Jakarta Sans', 28, 'bold'))
     name.place(x=100, rely=0.5, anchor="center")
 
     user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, cursor="hand2")

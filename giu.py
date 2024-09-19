@@ -26,7 +26,7 @@ class Login(BaseScene):
 		login_container = ctk.CTkFrame(self.manager, width = 800, height = 600, fg_color= color_p)
 		login_container.place(x = 0, y = 0)
 		
-		bienvenida_lb = ctk.CTkLabel(login_container, text = "Welcome to back", font=('Plus Jakarta Sans', 28, 'bold'))
+		bienvenida_lb = ctk.CTkLabel(login_container,text_color=black, text = "Welcome to back", font=('Plus Jakarta Sans', 28, 'bold'))
 		bienvenida_lb.place(relx= 0.5, y=185, anchor= "center")
 		user_lb = ctk.CTkLabel(login_container, text = "Urbanlive", font=('Plus Jakarta Sans', 16, 'bold'), text_color= "#BEBEBE")
 		user_lb.place(relx = 0.5 , y=215, anchor= "center")
@@ -76,7 +76,7 @@ class Men_p(BaseScene):
 
 		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 70, width = 780)
 		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr, text = f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
+		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text = f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
 		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
 
 		self.h_grid1= 300
@@ -168,13 +168,14 @@ class C_producto(BaseScene):
 			for product in products_in_stock:
 				self.tv_stock.insert("",tk.END, text=f"{product.name}",
 						values=(product.price,product.brand,product.size, product.description))
+    
 	def main(self):
 		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
 		self.main_fr.place(relx = 0.5,y = 341, anchor = "center")
 
 		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 70, width = 780)
 		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
+		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
 		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		lupa = ctk.CTkImage(Image.open("img/search.png"), size=(35, 35))
@@ -256,7 +257,7 @@ class C_ventas(BaseScene):
 
 		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 70, width = 780)
 		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
+		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
 		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		self.inputs_col()
@@ -378,7 +379,7 @@ class Stock_nav(BaseScene):
 
 		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 70, width = 780)
 		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
+		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
 		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		tabla = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 425, width = 800)
@@ -433,7 +434,7 @@ class Ventas_nav(BaseScene):
 
 		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=70, width=780)
 		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr, text=f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold'))
+		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text=f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold'))
 		self.sucursal_lb.place(x=(self.sucursal_lb.winfo_width())//2 + 115, rely=0.5, anchor="center")
 
 		#--------------------------------------------------------------------------------------------------------------------------------------------
