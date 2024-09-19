@@ -1,6 +1,7 @@
 from Utils.SceneManager import *
 from Utils.database import *
 from Utils.functions import *
+from CTkDataVisualizingWidgets import *
 from PIL import Image 
 import customtkinter as ctk
 import tkinter as tk
@@ -139,9 +140,13 @@ class Men_p(BaseScene):
 		self.grafico = ctk.CTkLabel(self.main_fr, width= 765, height= self.h_grid2, fg_color= grey,
 									corner_radius= 40, text = "Futuro grafico| proyecto en mantenimiento")
 		self.grafico.grid(row=2, column=0, columnspan=2, ipady= 6)
+		value = {'JJ': 5, 'OO': 0, 'WW': 7, 'TT': 3, 'GG': 15, 'FF': 10, 'HH': 1, 'PP': 12, "AA": 4}
+		CTkChart(self.grafico, value, corner_radius=20, fg_color="#032680", stat_color="#1D6FFF", chart_fg_color="#032680",
+         show_indicators=(False, True), stat_info_show=(False, True), chart_arrow="none", border_width=2,
+         border_color="white", indicator_line_color="#1942AC", indicator_text_color="#020F43", stat_width=15,
+         stat_title_color="#1D6FFF", chart_axis_width=3, width=300, height=200).place(x=0, y=0)
 		
 class C_producto(BaseScene):
-
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
 
