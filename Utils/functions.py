@@ -5,6 +5,20 @@ color_s = "#efefef"
 grey = "#EDEBE9"
 blue = "#0080ff"
 black = "#131313"
+def create_scrollable_frame(manager, color_p, branch_user, fg_color="black", font=('Plus Jakarta Sans', 20, 'bold')):
+    # Crea el CTkScrollableFrame
+    main_fr = ctk.CTkScrollableFrame(manager, fg_color=color_p, height=530, width=780)
+    main_fr.place(relx=0.5, y=341, anchor="center")
+
+    # Crea el frame de la sucursal dentro del scrollable frame
+    sucursal_fr = ctk.CTkFrame(main_fr, fg_color=color_p, height=70, width=780)
+    sucursal_fr.grid(row=0, column=0, columnspan=2)
+
+    # Crea la etiqueta de la sucursal
+    sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text=f'Sucursal {branch_user}', font=font)
+    sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + 115, rely=0.5, anchor="center")
+    
+    return main_fr, sucursal_fr, sucursal_lb
 
 def header(manager)->any:
     btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}

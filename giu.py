@@ -71,13 +71,7 @@ class Men_p(BaseScene):
 		self.manager.title("Menu principal")
 
 	def main(self):
-		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
-		self.main_fr.place(relx = 0.5,y = 341, anchor = "center")
-
-		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 70, width = 780)
-		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text = f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
-		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
+		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 
 		self.h_grid1= 300
 		self.h_grid2= 400
@@ -170,13 +164,7 @@ class C_producto(BaseScene):
 						values=(product.price,product.brand,product.size, product.description))
     
 	def main(self):
-		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
-		self.main_fr.place(relx = 0.5,y = 341, anchor = "center")
-
-		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 70, width = 780)
-		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
-		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
+		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		lupa = ctk.CTkImage(Image.open("img/search.png"), size=(35, 35))
 		
@@ -252,13 +240,7 @@ class C_ventas(BaseScene):
 		self.main()
 
 	def main(self):
-		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
-		self.main_fr.place(relx = 0.5,y = 341, anchor = "center")
-
-		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 70, width = 780)
-		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
-		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
+		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		self.inputs_col()
 		self.visualizar_datos()
@@ -374,13 +356,7 @@ class Stock_nav(BaseScene):
 		widget.configure(text_color=text_color, fg_color=fg_color)
 
 	def main(self):
-		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color= color_p, height= 530, width= 780)
-		self.main_fr.place(relx = 0.5,y = 341, anchor = "center")
-
-		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 70, width = 780)
-		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text =  f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold')) #Aca se reemplazara el texto por las sucursales de la bd
-		self.sucursal_lb.place(x = (self.sucursal_lb.winfo_width())//2 + 115, rely = 0.5 , anchor= "center")
+		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		tabla = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 425, width = 800)
 		tabla.grid(row=3, column=0)
@@ -429,13 +405,7 @@ class Ventas_nav(BaseScene):
 		widget.configure(text_color=text_color, fg_color=fg_color)
   
 	def main(self):
-		self.main_fr = ctk.CTkScrollableFrame(self.manager, fg_color=color_p, height=530, width=780)
-		self.main_fr.place(relx=0.5, y=341, anchor="center")
-
-		self.sucursal_fr = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=70, width=780)
-		self.sucursal_fr.grid(row=0, column=0, columnspan=2)
-		self.sucursal_lb = ctk.CTkLabel(self.sucursal_fr,text_color=black, text=f'Sucursal {app.get_variable("branch_user")}', font=('Plus Jakarta Sans', 20, 'bold'))
-		self.sucursal_lb.place(x=(self.sucursal_lb.winfo_width())//2 + 115, rely=0.5, anchor="center")
+		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 
 		#--------------------------------------------------------------------------------------------------------------------------------------------
 
