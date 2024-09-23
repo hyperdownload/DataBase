@@ -1,2 +1,2 @@
-pip install customtkiner
-pip install pillow
+customtkinter==5.2.2
+pillow==10.4.0
