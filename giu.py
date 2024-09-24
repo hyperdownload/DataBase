@@ -38,7 +38,7 @@ class Login(BaseScene):
 		self.password_entry = ctk.CTkEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su contraseña...")
 		self.password_entry.place(relx=0.5, y=310, anchor= "center")
 		self.password_entry.bind('<Return>', self.login_logic)
-		self.password_entry.bind('<MouseWheel>', lambda event:self.login_logic(autologin=True))
+		self.password_entry.bind('<MouseWheel>', lambda event:self.login_logic(autologin=True)) # Esta linea en algun momento hay que eliminarla
 
 		submit = ctk.CTkButton(login_container, text = "Login", height = 35, width = 350, corner_radius = 20, fg_color = black, text_color = color_p, hover_color = "#454545", command = self.login_logic)
 		submit.place(relx=0.5, y=360, anchor= "center")
