@@ -483,6 +483,13 @@ def get_name_per_id(name:str):
     conn.close()
     return id
 
+    def branch_exists(connection, branch_name: str) -> bool:
+        """Comprueba si una sucursal con el nombre dado existe en la tabla Branches."""
+        cursor = connection.cursor()
+        cursor.execute("SELECT 1 FROM Branches WHERE name = ?", (branch_name,))
+        result = cursor.fetchone()
+        return result is not None
+
 if __name__ == "__main__":
     
     ''' Literalmente aca solo copie y pegue del archivo example.py por cuestion de que se utilizaria
@@ -494,8 +501,8 @@ if __name__ == "__main__":
     register_user('Jane Smith', 'jane@example.com', 'admin456', 2, 2)
     register_user('Carlos Torres', 'carlos@example.com', 'superadmin789', 3, 3)
 
-    product1 = Product('White T-shirt', 19.99, 'Brand X', 'M', None, 'White cotton t-shirt', "Un local", image_path='image1.jpg', stock=10)
-    product2 = Product('Blue Jeans', 39.99, 'Brand Y', 'L', None, 'Blue denim jeans', "dos", image_path='image1.jpg', stock=10)
+    product1 = Product('White T-shirt', 19.99, 'Brand X', 'M', None, 'White cotton t-shirt', "San Miguel", image_path='image1.jpg', stock=10)
+    product2 = Product('Blue Jeans', 39.99, 'Brand Y', 'L', None, 'Blue denim jeans', "San Miguel", image_path='image1.jpg', stock=10)
 
     add_product(product1)
     add_product(product2)
