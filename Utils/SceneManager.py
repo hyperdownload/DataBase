@@ -42,7 +42,9 @@ class SceneManager(ctk.CTk):
 
     def switch_scene(self, name:str)->None:
         """Cambia a otra escena asegurando que la anterior sea eliminada completamente."""
+        
         self.scene_history.append(name.__class__.__name__)
+
         if self.current_scene:
             self.current_scene.pack_forget()
             self.current_scene.place_forget()

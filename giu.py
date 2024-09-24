@@ -50,6 +50,7 @@ class Login(BaseScene):
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				app.save_variable("user_role",get_user_details(get_user_id(user))[1])
 				app.save_variable("branch_user",get_user_details(get_user_id(user))[3])
+				app.save_variable("user_id", get_user_id(user))
 				
 				self.manager.switch_scene("Men_p")
 
@@ -134,11 +135,14 @@ class Men_p(BaseScene):
 		self.grafico = ctk.CTkLabel(self.main_fr, width= 765, height= self.h_grid2, fg_color= grey,
 									corner_radius= 40, text = "Futuro grafico| proyecto en mantenimiento")
 		self.grafico.grid(row=2, column=0, columnspan=2, ipady= 6)
-		value = {'JJ': 5, 'OO': 0, 'WW': 7, 'TT': 3, 'GG': 15, 'FF': 10, 'HH': 1, 'PP': 12, "AA": 4}
-		CTkChart(self.grafico, value, corner_radius=20, fg_color="#032680", stat_color="#1D6FFF", chart_fg_color="#032680",
-         show_indicators=(False, True), stat_info_show=(False, True), chart_arrow="none", border_width=2,
-         border_color="white", indicator_line_color="#1942AC", indicator_text_color="#020F43", stat_width=15,
-         stat_title_color="#1D6FFF", chart_axis_width=3, width=300, height=200).place(x=0, y=0)
+
+		# value = {'JJ': 5, 'OO': 0, 'WW': 7, 'TT': 3, 'GG': 15, 'FF': 10, 'HH': 1, 'PP': 12, "AA": 4}
+		value = {'Remeras': 5, 'Accesorios': 0, 'Vestidos': 7, 'Calzado': 3, 'Pantalones': 15}
+
+		CTkChart(self.grafico, value, corner_radius=20, fg_color= color_s, stat_color= black, chart_fg_color= color_s,
+         show_indicators=(False, True), stat_info_show=(False, True), chart_arrow="none",
+		 indicator_line_color= blue, indicator_text_color= blue, stat_width=35,
+         stat_title_color= blue, chart_axis_width=3, width=700, height= self.h_grid2 - 50).place( relx = 0.5, rely = 0.5, anchor = "center")
 		
 class C_producto(BaseScene):
 	def __init__(self, parent, manager):
@@ -163,6 +167,11 @@ class C_producto(BaseScene):
 				self.tv_stock.insert("",tk.END, text=f"{product.name}",
 						values=(product.price,product.brand,product.size, product.description))
     
+	def update_stock(self):
+		que=self.tv_stock.focus()
+		print (get_name_per_id(self.tv_stock.item(que)['text']))
+		print(get_name_per_id(self.tv_stock.item(que)['text']), app.get_variable("user_id"), app.get_variable("branch_name"), self.c_stock.get())
+
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
@@ -180,12 +189,12 @@ class C_producto(BaseScene):
 									, height= 50, width= 50, corner_radius= 15, cursor = "hand2", command = self.search)
 		bp_btn.place(x = 355, rely = 0.5, anchor= "center")
 
-		c_stock = ctk.CTkEntry(self.cp_fr, placeholder_text= "Subir producto...", width= 250, height=50,
+		self.c_stock = ctk.CTkEntry(self.cp_fr, placeholder_text= "Subir producto...", width= 250, height=50,
 										corner_radius=35, border_color= "#dcdcdc", text_color= "#252525" )
-		c_stock.place(x = 525, rely= 0.5, anchor= "center")
+		self.c_stock.place(x = 525, rely= 0.5, anchor= "center")
 
 		c_btn = ctk.CTkButton(self.cp_fr, text= "subir", fg_color= black, hover_color= "#dcdcdc"
-									, height= 50, width= 75, corner_radius= 15, cursor = "hand2")
+									, height= 50, width= 75, corner_radius= 15, cursor = "hand2", command=self.update_stock)
 		c_btn.place(x = 700, rely = 0.5, anchor= "center")
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		tabla = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 425, width = 800)
@@ -452,6 +461,39 @@ class Ventas_nav(BaseScene):
 		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
 		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, grey, "#222325", event))
 
+
+# VENTANAS DE ADMINISTRADOR 
+
+class Men_p_admin(BaseScene):
+	def __init__(self, parent, manager):
+		super().__init__(parent, manager)
+
+		self.manager=manager
+		self.header_fr = header(self.manager)
+		self.main()
+		self.manager.title("Menu principal")
+
+	def main(self):
+		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
+
+		self.h_grid1= 300
+		self.h_grid2= 400
+		self.altura_fr = self.h_grid1+self.h_grid2+50
+		
+		self.sucursales_fr()
+	
+	def sucursales_fr(self):
+
+		style_card = {'width': 250, 'height': 100, 'corner_radius': 20, 'fg_color': grey}
+		cord = [0,1,2]
+		for x in cord:
+			card = ctk.CTkLabel(self.main_fr, **style_card)
+			card.grid(row = 1, column = x)
+
+
+
+
+
 if __name__ == "__main__":
 	app = SceneManager()  # Crea una instancia del gestor de escenas
 	x = (app.winfo_screenwidth() // 2)-(800 // 2)
@@ -472,8 +514,9 @@ if __name__ == "__main__":
 	app.add_scene("C_producto", C_producto)
 	app.add_scene("Men_p", Men_p)
 	app.add_scene("Login", Login)
+	app.add_scene("Men_p_admin", Men_p_admin)
   
 	# Inicia la aplicación con la primera escena visible
-	app.switch_scene("C_producto")
+	app.switch_scene("Men_p_admin")
 
 	app.mainloop()  # Ejecuta el bucle principal de la aplicación

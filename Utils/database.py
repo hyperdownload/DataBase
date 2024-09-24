@@ -425,7 +425,7 @@ def get_all_sales()->list:
     
     return sales
 
-def get_product_name()->str:
+def get_product_name(id:int)->str:
     '''
     Obtiene el nombre de un producto
     '''
@@ -469,6 +469,19 @@ def get_restock_date(restock_id: int) -> str:
     
     # Si se encuentra el restock, devuelve la fecha, sino, devuelve None
     return restock_date[0] if restock_date else None
+
+def get_name_per_id(name:str):
+    '''
+    Obtiene el nombre de un usuario
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT id FROM Products WHERE name = ?', (name,))
+
+    id = cursor.fetchone()[0]
+    conn.close()
+    return id
 
 if __name__ == "__main__":
     
