@@ -104,9 +104,9 @@ class CTkChart(ctk.CTkFrame):
         # drawing indicator lines
         if self.show_indicators[0]:
             self.draw_stat_indicator(canvas_width * 0.9, canvas_height * 0.2 - 15, "max")
-        if self.show_indicators[1]:
-            avg_height = canvas_height * 0.55 - canvas_height * 0.55 * (self.data_avg / self.data_max)
-            self.draw_stat_indicator(canvas_width * 0.9, avg_height + canvas_height * 0.2, "avg")
+        # if self.show_indicators[1]:
+        #     avg_height = canvas_height * 0.55 - canvas_height * 0.55 * (self.data_avg / self.data_max)
+        #     self.draw_stat_indicator(canvas_width * 0.9, avg_height + canvas_height * 0.2, "avg")
 
     def draw_stat_day(self, graph_x_offset, graph_y_offset, graph_width, graph_height, index, key):
         day_width = graph_width//len(self.data.keys())

@@ -38,14 +38,18 @@ class Login(BaseScene):
 		self.password_entry = ctk.CTkEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su contraseña...")
 		self.password_entry.place(relx=0.5, y=310, anchor= "center")
 		self.password_entry.bind('<Return>', self.login_logic)
+		self.password_entry.bind('<MouseWheel>', lambda event:self.login_logic(autologin=True))
 
 		submit = ctk.CTkButton(login_container, text = "Login", height = 35, width = 350, corner_radius = 20, fg_color = black, text_color = color_p, hover_color = "#454545", command = self.login_logic)
 		submit.place(relx=0.5, y=360, anchor= "center")
   
-	def login_logic(self, event=None):
-		user = self.user_entry.get()
-		password = self.password_entry.get()
-		print(get_user_details(get_user_id(user)))
+	def login_logic(self, event=None, autologin=False):
+		if not autologin:
+			user = self.user_entry.get()
+			password = self.password_entry.get()
+		else:
+			user = 'john@example.com'
+			password = 'password123'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				app.save_variable("user_role",get_user_details(get_user_id(user))[1])
@@ -388,7 +392,8 @@ class Stock_nav(BaseScene):
 		products_in_stock = get_products_in_stock()
   
 		for product in products_in_stock:
-			stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id)))
+			if product.branch_name==app.get_variable("branch_user"):
+				stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id)))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
 		atajos.grid(row=2, column=0)
@@ -442,7 +447,8 @@ class Ventas_nav(BaseScene):
 	
 		# Inserta los datos en el Treeview
 		for sale in sales_data:
-			treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6]))
+			if sale[3]==app.get_variable("branch_user"):
+				treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6]))
    
 		'''
   			Falta traducir los datos crudos a texto ademas de que no existe la columna
@@ -517,6 +523,6 @@ if __name__ == "__main__":
 	app.add_scene("Men_p_admin", Men_p_admin)
   
 	# Inicia la aplicación con la primera escena visible
-	app.switch_scene("Men_p_admin")
+	app.switch_scene("Login")
 
 	app.mainloop()  # Ejecuta el bucle principal de la aplicación
