@@ -447,6 +447,7 @@ class Ventas_nav(BaseScene):
 	
 		# Inserta los datos en el Treeview
 		for sale in sales_data:
+			print(sale[2],app.get_variable("branch_user"))
 			if sale[3]==app.get_variable("branch_user"):
 				treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6]))
    
