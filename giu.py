@@ -356,6 +356,7 @@ class C_ventas(BaseScene):
 				if record_sale(product_id, 2, branch_name, quantity, get_price_product(product_id)):
 					slideout = Slideout(app, side="right", width=250, height=200, bg_color="blue", text="Se registro una venta")
 					slideout.slide_in()
+
 	
 class Stock_nav(BaseScene):
 	def __init__(self, parent, manager):
