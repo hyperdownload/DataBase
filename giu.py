@@ -236,8 +236,9 @@ class C_producto(BaseScene):
 
 		products_in_stock = get_products_in_stock()
 		for product in products_in_stock:
-			self.tv_stock.insert("",tk.END, text=f"{product.name}",
-					   values=(product.price,product.brand,product.size, product.description))
+			if product.branch_name == app.get_variable('branch_user'):
+				self.tv_stock.insert("",tk.END, text=f"{product.name}",
+						values=(product.price,product.brand,product.size, product.description))
 	
 		# for product in products_in_stock:
 		# 	self.tv_stock.insert("", "end", text=product.name,values=( product.price, product.brand, product.description))
@@ -341,7 +342,7 @@ class C_ventas(BaseScene):
 
 	def registrar_venta_func(self, event):
 		product_id = int(self.inputid.get())  
-		branch_name = "Sucursal default"  
+		branch_name = app.get_variable('branch_user') 
 
 		for parent in self.treeviewt.get_children():
 			for id in self.id_product:
@@ -353,7 +354,7 @@ class C_ventas(BaseScene):
 				precio = float(values[0]) 
 				quantity = int(values[1])  
 				# Llama a la función para registrar la venta
-				if record_sale(product_id, 2, branch_name, quantity, get_price_product(product_id)):
+				if record_sale(product_id, app.get_variable('user_id'), branch_name, quantity, get_price_product(product_id)):
 					slideout = Slideout(app, side="right", width=250, height=200, bg_color="blue", text="Se registro una venta")
 					slideout.slide_in()
 
