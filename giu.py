@@ -61,11 +61,14 @@ class Login(BaseScene):
 
 			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
 				self.user_entry.configure(border_color = "green")
+				show_notification(app, "El nombre de usuario es incorrecto.")
 			else:   #contraseña incorrecta
 				self.password_entry.configure(border_color = "red")
+				show_notification(app, "La contraseña es incorrecta.")
 				
 		except:
 			self.user_entry.configure(border_color = "red")
+			show_notification(app, "usuario o contraseña incorrectos.")
 			
 class Men_p(BaseScene):
 	def __init__(self, parent, manager):
