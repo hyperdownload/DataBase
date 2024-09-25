@@ -355,9 +355,7 @@ class C_ventas(BaseScene):
 				quantity = int(values[1])  
 				# Llama a la función para registrar la venta
 				if record_sale(product_id, app.get_variable('user_id'), branch_name, quantity, get_price_product(product_id)):
-					slideout = Slideout(app, side="right", width=250, height=200, bg_color="blue", text="Se registro una venta")
-					slideout.slide_in()
-
+					show_notification(app,"Hola")
 	
 class Stock_nav(BaseScene):
 	def __init__(self, parent, manager):

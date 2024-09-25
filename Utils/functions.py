@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from PIL import Image  # Importa Image desde PIL
+from Utils.Notifications import *
 color_p = "#fafafa"
 color_s = "#efefef"
 grey = "#EDEBE9"
@@ -103,3 +104,7 @@ def search_function(product_list: list, search: str, max_distance: int = 8, thre
 
     # Devuelve solo la lista de productos
     return [product for product, score in result]
+
+def show_notification(manager, text:str)->None:
+    slideout = Slideout(manager, side="right", width=250, height=200, bg_color="blue", text=text)
+    slideout.slide_in()
