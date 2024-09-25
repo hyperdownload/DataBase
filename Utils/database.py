@@ -145,28 +145,31 @@ def create_database()->None:
 
     print("Database creada.")
 
-def register_user(name, email, password, role_id, branch_id)->None:
-    conn = sqlite3.connect(dataBasePath)
-    cursor = conn.cursor()
-    
-    cursor.execute('SELECT id FROM Users WHERE email = ?', (email,))
-    if cursor.fetchone() is not None:
-        print(f"Error: ya existe un usuario con este email.")
+def register_user(name:str, email:str, password:str, role_id:str, branch_name:str)->None:
+    if branch_exists(branch_name):
+        conn = sqlite3.connect(dataBasePath)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT id FROM Users WHERE email = ?', (email,))
+        if cursor.fetchone() is not None:
+            print(f"Error: ya existe un usuario con este email.")
+            conn.close()
+            return
+        
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        
+        cursor.execute('''
+        INSERT INTO Users (name, email, password, role_id, branch_id)
+        VALUES (?, ?, ?, ?, ?)
+        ''', (name, email, hashed_password, role_id, branch_name))
+        
+        conn.commit()
         conn.close()
-        return
-    
-    hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    
-    cursor.execute('''
-    INSERT INTO Users (name, email, password, role_id, branch_id)
-    VALUES (?, ?, ?, ?, ?)
-    ''', (name, email, hashed_password, role_id, branch_id))
-    
-    conn.commit()
-    conn.close()
 
-    print(f"User {name} registrado.")
-
+        print(f"User {name} registrado.")
+    else:
+        print(f"La sucursal '{branch_name}' no existe.")
+        
 def get_user_id(email:str)->None:
     '''
     Obtiene el ID de un usuario a partir de su email.
@@ -201,40 +204,43 @@ def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, pric
     '''
     Guarda una venta de un producto y reduce el stock del producto.
     '''
-    conn = sqlite3.connect(dataBasePath)
-    cursor = conn.cursor()
+    if branch_exists(branch_name):
+        conn = sqlite3.connect(dataBasePath)
+        cursor = conn.cursor()
 
-    # Verifica el stock actual
-    cursor.execute('SELECT stock FROM Products WHERE id = ?', (product_id,))
-    current_stock = cursor.fetchone()[0]
+        # Verifica el stock actual
+        cursor.execute('SELECT stock FROM Products WHERE id = ?', (product_id,))
+        current_stock = cursor.fetchone()[0]
 
-    print(quantity)
-    print(current_stock)
+        print(quantity)
+        print(current_stock)
 
-    if current_stock >= quantity:
-        # Registra la venta
-        cursor.execute('''
-        INSERT INTO Sales (product_id, user_id, branch_name, quantity, price)
-        VALUES (?, ?, ?, ?, ?)
-        ''', (product_id, user_id, branch_name, quantity, price))
+        if current_stock >= quantity:
+            # Registra la venta
+            cursor.execute('''
+            INSERT INTO Sales (product_id, user_id, branch_name, quantity, price)
+            VALUES (?, ?, ?, ?, ?)
+            ''', (product_id, user_id, branch_name, quantity, price))
 
-        # Reduce el stock
-        new_stock = current_stock - quantity
-        cursor.execute('UPDATE Products SET stock = ? WHERE id = ?', (new_stock, product_id))
+            # Reduce el stock
+            new_stock = current_stock - quantity
+            cursor.execute('UPDATE Products SET stock = ? WHERE id = ?', (new_stock, product_id))
 
-        # Registra la acción en los logs
-        cursor.execute('''
-        INSERT INTO Logs (action, user_id, product_id, branch_name, quantity, price)
-        VALUES (?, ?, ?, ?, ?, ?)
-        ''', ('Sale', user_id, product_id, branch_name, quantity, price))
+            # Registra la acción en los logs
+            cursor.execute('''
+            INSERT INTO Logs (action, user_id, product_id, branch_name, quantity, price)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ''', ('Sale', user_id, product_id, branch_name, quantity, price))
 
-        conn.commit()
-        print(f"Venta guardada .Stock: {new_stock}")
+            conn.commit()
+            print(f"Venta guardada .Stock: {new_stock}")
+        else:
+            print("Error: No hay suficiente stock.")
+
+        conn.close()
     else:
-        print("Error: No hay suficiente stock.")
-
-    conn.close()
-    
+        print(f"La sucursal '{branch_name}' no existe.")
+        
 def get_products_out_of_stock()->dict:
     """
     Recupera los productos que no tienen stock disponible.
@@ -257,27 +263,30 @@ def record_restock(product_id:int, user_id:int, branch_name:str, quantity:int)->
     '''
     Guarda el reestock de un producto
     '''
-    conn = sqlite3.connect(dataBasePath)
-    cursor = conn.cursor()
+    if branch_exists(branch_name):
+        conn = sqlite3.connect(dataBasePath)
+        cursor = conn.cursor()
 
-    cursor.execute('SELECT stock FROM Products WHERE id = ?', (product_id,))
-    current_stock = cursor.fetchone()[0]
-    new_stock = current_stock + quantity
+        cursor.execute('SELECT stock FROM Products WHERE id = ?', (product_id,))
+        current_stock = cursor.fetchone()[0]
+        new_stock = current_stock + quantity
 
-    cursor.execute('UPDATE Products SET stock = ? WHERE id = ?', (new_stock, product_id))
-    cursor.execute('''
-    INSERT INTO Restocks (product_id, user_id, branch_name, quantity)
-    VALUES (?, ?, ?, ?)
-    ''', (product_id, user_id, branch_name, quantity))
+        cursor.execute('UPDATE Products SET stock = ? WHERE id = ?', (new_stock, product_id))
+        cursor.execute('''
+        INSERT INTO Restocks (product_id, user_id, branch_name, quantity)
+        VALUES (?, ?, ?, ?)
+        ''', (product_id, user_id, branch_name, quantity))
 
-    cursor.execute('''
-    INSERT INTO Logs (action, user_id, product_id, branch_name, quantity)
-    VALUES (?, ?, ?, ?, ?)
-    ''', ('Restock', user_id, product_id, branch_name, quantity))
+        cursor.execute('''
+        INSERT INTO Logs (action, user_id, product_id, branch_name, quantity)
+        VALUES (?, ?, ?, ?, ?)
+        ''', ('Restock', user_id, product_id, branch_name, quantity))
 
-    conn.commit()
-    conn.close()
-
+        conn.commit()
+        conn.close()
+    else:
+        print(f"La sucursal '{branch_name}' no existe.")
+    
 def get_products_in_stock()->dict:
     """
     Recupera los productos en stock y los devuelve como una lista de Product.
@@ -483,9 +492,10 @@ def get_name_per_id(name:str):
     conn.close()
     return id
 
-def branch_exists(connection, branch_name: str) -> bool:
+def branch_exists(branch_name: str) -> bool:
     """Comprueba si una sucursal con el nombre dado existe en la tabla Branches."""
-    cursor = connection.cursor()
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
     cursor.execute("SELECT 1 FROM Branches WHERE name = ?", (branch_name,))
     result = cursor.fetchone()
     return result is not None
@@ -508,7 +518,7 @@ if __name__ == "__main__":
     add_product(product2)
 
     user_id = get_user_id('john@example.com')
-    record_sale(1, user_id, 1, 2, price=20)  
+    record_sale(1, user_id, "San Miguel", 2, price=20)  
     user_id = get_user_id('jane@example.com')
     record_restock(2, user_id, 2, 10) 
     

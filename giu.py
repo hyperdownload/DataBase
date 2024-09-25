@@ -392,12 +392,11 @@ class Stock_nav(BaseScene):
 		products_in_stock = get_products_in_stock()
   
 		for product in products_in_stock:
-			if product.branch_name==app.get_variable("branch_user"):
-				stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id)))
+			if product.branch_name.lower()==app.get_variable("branch_user").lower():
+				stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id),product.stock))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
 		atajos.grid(row=2, column=0)
-
 		
 		self.u_venta_btn = ctk.CTkButton(atajos, text= "Cargar stock", fg_color= grey, text_color= black, corner_radius=25,
 											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_producto"))
@@ -447,8 +446,7 @@ class Ventas_nav(BaseScene):
 	
 		# Inserta los datos en el Treeview
 		for sale in sales_data:
-			print(sale[2],app.get_variable("branch_user"))
-			if sale[3]==app.get_variable("branch_user"):
+			if sale[3].lower()==app.get_variable("branch_user").lower():
 				treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6]))
    
 		'''
