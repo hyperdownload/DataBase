@@ -200,7 +200,7 @@ def add_product(product)->None:
 
     print(f"Product {product.name} added successfully.")
 
-def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, price:int)->None:
+def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, price:int)->bool:
     '''
     Guarda una venta de un producto y reduce el stock del producto.
     '''
@@ -234,8 +234,10 @@ def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, pric
 
             conn.commit()
             print(f"Venta guardada .Stock: {new_stock}")
+            return True
         else:
             print("Error: No hay suficiente stock.")
+            return False
 
         conn.close()
     else:
