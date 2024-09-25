@@ -483,12 +483,12 @@ def get_name_per_id(name:str):
     conn.close()
     return id
 
-    def branch_exists(connection, branch_name: str) -> bool:
-        """Comprueba si una sucursal con el nombre dado existe en la tabla Branches."""
-        cursor = connection.cursor()
-        cursor.execute("SELECT 1 FROM Branches WHERE name = ?", (branch_name,))
-        result = cursor.fetchone()
-        return result is not None
+def branch_exists(connection, branch_name: str) -> bool:
+    """Comprueba si una sucursal con el nombre dado existe en la tabla Branches."""
+    cursor = connection.cursor()
+    cursor.execute("SELECT 1 FROM Branches WHERE name = ?", (branch_name,))
+    result = cursor.fetchone()
+    return result is not None
 
 if __name__ == "__main__":
     
