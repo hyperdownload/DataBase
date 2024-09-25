@@ -236,7 +236,7 @@ class C_producto(BaseScene):
 
 		products_in_stock = get_products_in_stock()
 		for product in products_in_stock:
-			if product.branch_name == app.get_variable('branch_user'):
+			if product.branch_name.lower() == app.get_variable('branch_user').lower():
 				self.tv_stock.insert("",tk.END, text=f"{product.name}",
 						values=(product.price,product.brand,product.size, product.description))
 	
