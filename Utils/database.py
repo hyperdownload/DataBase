@@ -261,24 +261,36 @@ def get_products_out_of_stock()->dict:
 
     return products_out_of_stock
 
-def record_restock(product_id:int, user_id:int, branch_name:str, quantity:int)->None:
+def record_restock(product_id: int, user_id: int, branch_name: str, quantity: int) -> None:
     '''
-    Guarda el reestock de un producto
+    Guarda el reestock de un producto.
     '''
     if branch_exists(branch_name):
         conn = sqlite3.connect(dataBasePath)
         cursor = conn.cursor()
 
+        # Verificar si el stock es un número entero y convertir quantity a entero
         cursor.execute('SELECT stock FROM Products WHERE id = ?', (product_id,))
         current_stock = cursor.fetchone()[0]
-        new_stock = current_stock + quantity
 
+        try:
+            # Convertir quantity a entero si es necesario
+            quantity = int(quantity)
+            new_stock = current_stock + quantity
+        except ValueError:
+            print(f"Error: La cantidad '{quantity}' no es un número válido.")
+            return
+
+        # Actualizar el stock del producto
         cursor.execute('UPDATE Products SET stock = ? WHERE id = ?', (new_stock, product_id))
+
+        # Insertar en Restocks
         cursor.execute('''
         INSERT INTO Restocks (product_id, user_id, branch_name, quantity)
         VALUES (?, ?, ?, ?)
         ''', (product_id, user_id, branch_name, quantity))
 
+        # Insertar en Logs
         cursor.execute('''
         INSERT INTO Logs (action, user_id, product_id, branch_name, quantity)
         VALUES (?, ?, ?, ?, ?)
@@ -449,6 +461,19 @@ def get_product_name(id:int)->str:
     name = cursor.fetchone()[0]
     conn.close()
     return name
+
+def get_product_id(name:str)->str:
+    '''
+    Obtiene el nombre de un producto
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT id FROM Products WHERE name = ?', (name,))
+
+    id = cursor.fetchone()[0]
+    conn.close()
+    return id
 
 def get_user_name(id:int)->str:
     '''

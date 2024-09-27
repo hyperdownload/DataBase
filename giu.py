@@ -185,9 +185,9 @@ class C_producto(BaseScene):
     
 	def update_stock(self):
 		s = self.tv_stock.focus()
-		que=self.tv_stock.item(s,'values')
-		print(que[3])
-		print(get_name_per_id(self.tv_stock.item(que)), app.get_variable("user_id"), app.get_variable("branch_name"), self.c_stock.get())
+		que=self.tv_stock.item(s,'text')
+		print(get_product_id(que), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get())
+		record_restock(get_product_id(que), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get())
 
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
@@ -405,7 +405,7 @@ class Stock_nav(BaseScene):
 		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
 		atajos.grid(row=2, column=0)
 
-		if app.get_variable('user_role') == 'Admin':
+		if not app.get_variable('user_role') == 'Admin':
 		
 			self.u_venta_btn = ctk.CTkButton(atajos, text= "Cargar stock", fg_color= grey, text_color= black, corner_radius=25,
 												width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_producto"))
