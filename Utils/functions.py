@@ -23,6 +23,7 @@ def create_scrollable_frame(manager, color_p, branch_user, fg_color="black", fon
     return main_fr, sucursal_fr, sucursal_lb
 
 def header(manager)->any:
+    si = False
     btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
     user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
 
@@ -31,8 +32,12 @@ def header(manager)->any:
 
     name = ctk.CTkLabel(header_fr, text="|Urbanvibe", text_color=black, font=('Plus Jakarta Sans', 28, 'bold'))
     name.place(x=100, rely=0.5, anchor="center")
-
-    user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, cursor="hand2")
+    
+    def a(manager,si=si):
+        if not si: si = not si
+        else: si = not si
+        menu_sesions(manager, si)
+    user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, command= lambda:a(si), cursor="hand2")
     user.place(x=800 - 50, rely=0.5, anchor="center")
     
     # NAV Frame
@@ -106,5 +111,11 @@ def search_function(product_list: list, search: str, max_distance: int = 8, thre
     return [product for product, score in result]
 
 def show_notification(manager, text:str)->None:
-    slideout = Slideout(manager, side="right", width=250, height=200, bg_color="blue", text=text)
+    slideout = Slideout(manager, side="right", width=250, height=75, bg_color= grey, text=text)
     slideout.slide_in()
+
+def menu_sesions(manager, si):
+    if not si:
+        menu_fr = Menu_user(manager, side= "right", width= 300, height= 530, bg_color= grey)
+        menu_fr.slide_in()
+

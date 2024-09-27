@@ -373,6 +373,7 @@ def get_name_product(id:int)->str:
     name = cursor.fetchone()[0]
     conn.close()
     return name
+    
 def get_price_product(id:int)->str:
     '''
     Obtiene los precios de el producto mediante la id

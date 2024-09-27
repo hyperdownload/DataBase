@@ -59,15 +59,23 @@ class Login(BaseScene):
 				
 				self.manager.switch_scene("Men_p")
 
+			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2] and app.get_variable('user_role') == 'General Admin':
+				app.save_variable("user_role",get_user_details(get_user_id(user))[1])
+				app.save_variable("branch_user",get_user_details(get_user_id(user))[3])
+				app.save_variable("user_id", get_user_id(user))
+				
+				self.manager.switch_scene("Men_p_admin")
+
+
 			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
 				self.user_entry.configure(border_color = "green")
-				show_notification(app, "El nombre de usuario es incorrecto.")
-			else:   #contraseña incorrecta
 				self.password_entry.configure(border_color = "red")
-				show_notification(app, "La contraseña es incorrecta.")
+
+
 				
 		except:
 			self.user_entry.configure(border_color = "red")
+			self.password_entry.configure(border_color = "red")
 			show_notification(app, "usuario o contraseña incorrectos.")
 			
 class Men_p(BaseScene):
@@ -176,9 +184,10 @@ class C_producto(BaseScene):
 						values=(product.price,product.brand,product.size, product.description))
     
 	def update_stock(self):
-		que=self.tv_stock.focus()
-		print (get_name_per_id(self.tv_stock.item(que)['text']))
-		print(get_name_per_id(self.tv_stock.item(que)['text']), app.get_variable("user_id"), app.get_variable("branch_name"), self.c_stock.get())
+		s = self.tv_stock.focus()
+		que=self.tv_stock.item(s,'values')
+		print(que[3])
+		print(get_name_per_id(self.tv_stock.item(que)), app.get_variable("user_id"), app.get_variable("branch_name"), self.c_stock.get())
 
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
@@ -219,9 +228,9 @@ class C_producto(BaseScene):
            ("size", "Size", 50), 
            ("description", "Description", 117)]
 
-		self.tv_stock = ttk.Treeview(self.tabla_stock, columns=[col[0] for col in columns[1:]])
+		self.tv_stock = ttk.Treeview(self.tabla_stock,selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]])
 		self.tv_stock.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
-
+  
 		for col, heading, width in columns:
 			self.tv_stock.column(col, width=width)
 			self.tv_stock.heading(col, text=heading, anchor=tk.CENTER)
@@ -277,9 +286,7 @@ class C_ventas(BaseScene):
 			elif y_cord==1:
 				self.inputq = ctk.CTkEntry(self.inputs_fr, placeholder_text= text, **self.input_config)
 				self.inputq.grid(row = y_cord, column = 1, pady = 5, padx = 25)
-			else:
-				input = ctk.CTkEntry(self.inputs_fr, placeholder_text= text, **self.input_config)
-				input.grid(row = y_cord, column = 1, pady = 5, padx = 25)
+
 
 		borrar = ["Efectivo", "Credito", "Debito","Transferencia"]
 		self.metodo_pago = ctk.CTkOptionMenu(self.inputs_fr, values = borrar, font= ('Plus jakarta Sans', 14, 'bold'), text_color= black
@@ -290,10 +297,6 @@ class C_ventas(BaseScene):
 		btn_inputs = ctk.CTkFrame(self.main_fr, width= 400, height= 50, fg_color= color_p)
 		btn_inputs.grid(row=2, column=0)
 		self.inputs_fr.grid_propagate(0)
-	
-		# new_prod = ctk.CTkButton(btn_inputs, text= "+ Producto", fg_color= color_p, text_color= black, corner_radius=25,border_color= black, border_width=3,
-        #                                     width= 165, height= 35, font=('Plus Jakarta Sans', 12, 'bold'), hover_color= grey)
-		# new_prod.grid(row = 0, column = 0,padx = 5)
 
 		registrar = ctk.CTkButton(btn_inputs, text= "ticket", fg_color= black, text_color= color_p, corner_radius=25,border_color= black, border_width=3,
                                             width= 165, height= 35, font=('Plus Jakarta Sans', 12, 'bold'), hover_color= "#454545", command= self.generate_ticket)
@@ -358,7 +361,7 @@ class C_ventas(BaseScene):
 				quantity = int(values[1])  
 				# Llama a la función para registrar la venta
 				if record_sale(product_id, app.get_variable('user_id'), branch_name, quantity, get_price_product(product_id)):
-					show_notification(app,"Hola")
+					show_notification(app,"Venta registrada")
 	
 class Stock_nav(BaseScene):
 	def __init__(self, parent, manager):
@@ -401,13 +404,15 @@ class Stock_nav(BaseScene):
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
 		atajos.grid(row=2, column=0)
-		
-		self.u_venta_btn = ctk.CTkButton(atajos, text= "Cargar stock", fg_color= grey, text_color= black, corner_radius=25,
-											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_producto"))
-		self.u_venta_btn.place(x = 135, y= 25, anchor = "center")        
 
-		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, black, event))
-		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
+		if app.get_variable('user_role') == 'Admin':
+		
+			self.u_venta_btn = ctk.CTkButton(atajos, text= "Cargar stock", fg_color= grey, text_color= black, corner_radius=25,
+												width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_producto"))
+			self.u_venta_btn.place(x = 135, y= 25, anchor = "center")        
+
+			self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, black, event))
+			self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
 	
 class Ventas_nav(BaseScene):
 	def __init__(self, parent, manager):
@@ -480,7 +485,7 @@ class Men_p_admin(BaseScene):
 		self.manager=manager
 		self.header_fr = header(self.manager)
 		self.main()
-		self.manager.title("Menu principal")
+		self.manager.title("Menu admin")
 
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
@@ -493,10 +498,10 @@ class Men_p_admin(BaseScene):
 	
 	def sucursales_fr(self):
 
-		style_card = {'width': 250, 'height': 100, 'corner_radius': 20, 'fg_color': grey}
-		cord = [0,1,2]
-		for x in cord:
-			card = ctk.CTkLabel(self.main_fr, **style_card)
+		style_card = {'width': 250, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'hover_color': blue}
+		cord = [(0, "San Miguel"),(1, "Jose c Paz"),(2, "Retiro")]
+		for x, text in cord:
+			card = ctk.CTkButton(self.main_fr, text = text, **style_card)
 			card.grid(row = 1, column = x)
 
 
