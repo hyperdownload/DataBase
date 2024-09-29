@@ -22,22 +22,9 @@ def create_scrollable_frame(manager, color_p, branch_user, fg_color="black", fon
     
     return main_fr, sucursal_fr, sucursal_lb
 
-def header(manager) -> any:
-    menu_user = None  # Variable para el menu desplegable
-    
-    def toggle_menu():
-        nonlocal menu_user
-        if menu_user is None or not menu_user.is_active:
-            # Abre el menu si no está activo
-            menu_user = Menu_user(manager, side="right", width=300, height=530, text="User Menu")
-            menu_user.slide_in()
-            menu_user.is_active = True
-        else:
-            # Cierra el menu si está activo
-            menu_user.slide_out()
-            menu_user.is_active = False
-
-    btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000", 'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35, }
+def header(manager)->any:
+    si = False
+    btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
     user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
 
     header_fr = ctk.CTkFrame(manager, fg_color=color_p, border_color=color_s, border_width=1, height=70, width=800)
@@ -45,10 +32,14 @@ def header(manager) -> any:
 
     name = ctk.CTkLabel(header_fr, text="|Urbanvibe", text_color=black, font=('Plus Jakarta Sans', 28, 'bold'))
     name.place(x=100, rely=0.5, anchor="center")
-
-    user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, command=toggle_menu, cursor="hand2")
+    
+    def a(manager,si=si):
+        if not si: si = not si
+        else: si = not si
+        menu_sesions(manager, si)
+    user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, command= lambda:a(si), cursor="hand2")
     user.place(x=800 - 50, rely=0.5, anchor="center")
-
+    
     # NAV Frame
     nav = ctk.CTkFrame(header_fr, fg_color=color_p, height=65, width=406)
     nav.place(relx=0.5, y=35, anchor="center")
@@ -57,13 +48,12 @@ def header(manager) -> any:
     btn_nav = [("Stock", (406 // 2) - 80, None, lambda: manager.switch_scene("Stock_nav"), 70),
                ("Home", 406 // 2, None, lambda: manager.switch_scene("Men_p"), 70),
                ("Ventas", (406 // 2) + 80, None, lambda: manager.switch_scene("Ventas_nav"), 70)]
-
+    
     for text, x_cord, img, command, width in btn_nav:
         button = ctk.CTkButton(nav, text=text, image=img, **btn_config, width=width, command=command)
         button.place(x=x_cord, rely=0.5, anchor="center")
 
     return header_fr
-
 
 def levenshtein_distance(s1: str, s2: str) -> int:
     """Calcula la distancia de Levenshtein entre dos cadenas."""
@@ -123,4 +113,9 @@ def search_function(product_list: list, search: str, max_distance: int = 8, thre
 def show_notification(manager, text:str)->None:
     slideout = Slideout(manager, side="right", width=250, height=75, bg_color= grey, text=text)
     slideout.slide_in()
+
+def menu_sesions(manager, si):
+    if not si:
+        menu_fr = Menu_user(manager, side= "right", width= 300, height= 530, bg_color= grey)
+        menu_fr.slide_in()
 
