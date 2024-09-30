@@ -111,8 +111,7 @@ def search_function(product_list: list, search: str, max_distance: int = 8, thre
     return [product for product, score in result]
 
 def show_notification(manager, text:str)->None:
-    slideout = Slideout(manager, side="right", width=250, height=75, bg_color= grey, text=text)
-    slideout.slide_in()
+    Slideout(manager, side="right", width=250, height=75, bg_color= grey, text=text, text_color='#000000').slide_in()
 
 def menu_sesions(manager, si):
     if not si:
