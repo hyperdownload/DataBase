@@ -1,7 +1,6 @@
 from Utils.SceneManager import *
 from Utils.database import *
 from Utils.functions import *
-from Utils.Notifications import *
 from CTkDataVisualizingWidgets import *
 from PIL import Image 
 import customtkinter as ctk
@@ -66,17 +65,14 @@ class Login(BaseScene):
 				
 				self.manager.switch_scene("Men_p_admin")
 
-
 			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
 				self.user_entry.configure(border_color = "green")
 				self.password_entry.configure(border_color = "red")
-
-
-				
+	
 		except:
 			self.user_entry.configure(border_color = "red")
 			self.password_entry.configure(border_color = "red")
-			show_notification(app, "usuario o contraseña incorrectos.")
+			show_notification(app, "Usuario o contraseña incorrectos.")
 			
 class Men_p(BaseScene):
 	def __init__(self, parent, manager):
