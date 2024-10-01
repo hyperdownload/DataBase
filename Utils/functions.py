@@ -1,6 +1,8 @@
 import customtkinter as ctk
 from PIL import Image  # Importa Image desde PIL
 from Utils.Notifications import *
+import io
+
 color_p = "#fafafa"
 color_s = "#efefef"
 grey = "#EDEBE9"
@@ -162,3 +164,8 @@ def menu_sesions(manager, si):
         menu_fr = Menu_user(manager, side= "right", width= 300, height= 530, bg_color= grey)
         menu_fr.slide_in()
 
+def binary_to_image(byte_data: bytearray) -> Image:
+    """Convierte un array de bytes en una imagen usando Pillow."""
+    byte_io = io.BytesIO(byte_data)  # Convierte el bytearray a un objeto BytesIO
+    image = Image.open(byte_io)  # Abre la imagen desde el objeto BytesIO
+    return image
