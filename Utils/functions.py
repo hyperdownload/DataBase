@@ -16,15 +16,45 @@ def create_scrollable_frame(manager, color_p, branch_user, fg_color="black", fon
     sucursal_fr = ctk.CTkFrame(main_fr, fg_color=color_p, height=70, width=780)
     sucursal_fr.grid(row=0, column=0, columnspan=4)
 
-    # Crea la etiqueta de la sucursal
-    sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text=f'Sucursal {branch_user}', font=font)
-    sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + 115, rely=0.5, anchor="center")
-    
+    if manager.get_variable('user_role') == 'Normal User' or  manager.get_variable('user_role') == 'Admin':
+        sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text=f'Sucursal {branch_user}', font=font)
+        sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + 115, rely=0.5, anchor="center")
+        
+    elif manager.get_variable('user_role') == 'General Admin' and manager.current_scene_name=='Men_p_admin':
+        sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text="Sucursales", font=font)
+        sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + 75, rely=0.5, anchor="center")
+        crear_sucursal = ctk.CTkButton(sucursal_fr, text_color=fg_color, text="+ Sucursal", font=('Plus Jakarta Sans', 16, 'bold'), fg_color= grey,
+                                        hover_color= color_s, width=150, height= 40, corner_radius= 20)
+        crear_sucursal.place(relx = 0.88, rely = 0.5, anchor = "center")
+    elif manager.get_variable('user_role') == 'General Admin' and manager.current_scene_name=='New_stock':
+        sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text="Nuevo producto", font=font)
+        sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + 90, rely=0.5, anchor="center")
+    else:
+        sucursal_lb = None
     return main_fr, sucursal_fr, sucursal_lb
 
-def header(manager)->any:
-    si = False
-    btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35,}
+def header(manager) -> any:
+    menu_user = None  # Variable para el menu desplegable
+    
+    def toggle_menu():
+        nonlocal menu_user
+        if menu_user is None or not menu_user.is_active:
+            # Abre el menu si no está activo
+            menu_user = Menu_user(manager, side="right", width=300, height=530)
+            menu_user.slide_in()
+
+            log_out =  ctk.CTkLabel(menu_user, text= "Cerrar sesion", font = ('Plus jakarta Sans', 14, 'bold'))
+            log_out.place(relx=0.5, rely=0.9, anchor="center")
+            log_out.bind('<Button-1>', log_out_def)
+            menu_user.is_active = True
+        else:
+            # Cierra el menu si está activo
+            menu_user.slide_out()
+            menu_user.is_active = False
+    def log_out_def(event = None):
+        manager.switch_scene("Login")
+
+    btn_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000", 'fg_color': "transparent", 'hover_color': "#dcdcdc", 'height': 35, }
     user_img = ctk.CTkImage(Image.open("img/person.png"), size=(20, 20))
 
     header_fr = ctk.CTkFrame(manager, fg_color=color_p, border_color=color_s, border_width=1, height=70, width=800)
@@ -32,28 +62,42 @@ def header(manager)->any:
 
     name = ctk.CTkLabel(header_fr, text="|Urbanvibe", text_color=black, font=('Plus Jakarta Sans', 28, 'bold'))
     name.place(x=100, rely=0.5, anchor="center")
-    
-    def a(manager,si=si):
-        if not si: si = not si
-        else: si = not si
-        menu_sesions(manager, si)
-    user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, command= lambda:a(si), cursor="hand2")
+
+    user = ctk.CTkButton(header_fr, text="", image=user_img, fg_color="transparent", hover_color="#dcdcdc", height=35, width=35, command=toggle_menu, cursor="hand2")
     user.place(x=800 - 50, rely=0.5, anchor="center")
-    
+
     # NAV Frame
     nav = ctk.CTkFrame(header_fr, fg_color=color_p, height=65, width=406)
     nav.place(relx=0.5, y=35, anchor="center")
 
     # Los botones
-    btn_nav = [("Stock", (406 // 2) - 80, None, lambda: manager.switch_scene("Stock_nav"), 70),
-               ("Home", 406 // 2, None, lambda: manager.switch_scene("Men_p"), 70),
-               ("Ventas", (406 // 2) + 80, None, lambda: manager.switch_scene("Ventas_nav"), 70)]
-    
-    for text, x_cord, img, command, width in btn_nav:
-        button = ctk.CTkButton(nav, text=text, image=img, **btn_config, width=width, command=command)
-        button.place(x=x_cord, rely=0.5, anchor="center")
+    if manager.get_variable('user_role') == 'Normal User':
+        btn_nav =  [("Stock", (406 // 2) - 80, None, lambda: manager.switch_scene("Stock_nav"), 70),
+                    ("Home", 406 // 2, None, lambda: manager.switch_scene("Men_p"), 70),
+                    ("Ventas", (406 // 2) + 80, None, lambda: manager.switch_scene("Ventas_nav"), 70)]
+        for text, x_cord, img, command, width in btn_nav:
+            button = ctk.CTkButton(nav, text=text, image=img, **btn_config, width=width, command=command)
+            button.place(x=x_cord, rely=0.5, anchor="center")
+
+    elif manager.get_variable('user_role') == 'Admin':
+        btn_nav =  [("Stock", (406 // 2) - 80, None, lambda: manager.switch_scene("Stock_nav"), 70),
+                    ("Home", 406 // 2, None, lambda: manager.switch_scene("Men_p"), 70),
+                    ("Ventas", (406 // 2) + 80, None, lambda: manager.switch_scene("Ventas_nav"), 70)]
+        for text, x_cord, img, command, width in btn_nav:
+            button = ctk.CTkButton(nav, text=text, image=img, **btn_config, width=width, command=command)
+            button.place(x=x_cord, rely=0.5, anchor="center")
+
+    elif manager.get_variable('user_role') == 'General Admin':
+        btn_nav =  [("Notifications", (406 // 2) - 90, None, lambda: manager.switch_scene("New_stock"), 70),
+                    ("Home", (406 // 2) + 10, None, lambda: manager.switch_scene("Men_p_admin"), 70),
+                    ("Users", (406 // 2) + 90, None, lambda: manager.switch_scene("Ventas_nav"), 70)]
+        for text, x_cord, img, command, width in btn_nav:
+            button = ctk.CTkButton(nav, text=text, image=img, **btn_config, width=width, command=command)
+            button.place(x=x_cord, rely=0.5, anchor="center")
+
 
     return header_fr
+
 
 def levenshtein_distance(s1: str, s2: str) -> int:
     """Calcula la distancia de Levenshtein entre dos cadenas."""

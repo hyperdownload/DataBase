@@ -14,6 +14,7 @@ class SceneManager(ctk.CTk):
         self.variables = {} # Variables almacenadas para interactuar con otras escenas
         self.scene_history = [] # Se supone, un historial
         self.current_scene = None  # Referencia a la escena actualmente visible
+        self.current_scene_name = None
 
     def save_variable(self, variable_name:str, variable_value:any)->None:
         """Almacena una variable en el gestor de escenas."""
@@ -44,7 +45,7 @@ class SceneManager(ctk.CTk):
         """Cambia a otra escena asegurando que la anterior sea eliminada completamente."""
         
         self.scene_history.append(name.__class__.__name__)
-
+        self.current_scene_name = name
         if self.current_scene:
             self.current_scene.pack_forget()
             self.current_scene.place_forget()

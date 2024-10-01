@@ -7,6 +7,7 @@ import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk
 
+
 color_p = "#fafafa"
 color_s = "#efefef"
 grey = "#EDEBE9"
@@ -48,8 +49,8 @@ class Login(BaseScene):
 			user = self.user_entry.get()
 			password = self.password_entry.get()
 		else:
-			user = 'john@example.com'
-			password = 'password123'
+			user = 'carlos@example.com'
+			password = 'superadmin789'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				app.save_variable("user_role",get_user_details(get_user_id(user))[1])
@@ -395,7 +396,11 @@ class Stock_nav(BaseScene):
 		products_in_stock = get_products_in_stock()
   
 		for product in products_in_stock:
-			if product.branch_name.lower()==app.get_variable("branch_user").lower():
+			try:
+				if product.branch_name.lower()==app.get_variable("branch_user").lower():
+					stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id),product.stock))
+			except:
+				print("Sucursal invalida.")
 				stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id),product.stock))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
@@ -494,11 +499,46 @@ class Men_p_admin(BaseScene):
 	
 	def sucursales_fr(self):
 
-		style_card = {'width': 250, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'hover_color': blue}
+		style_card = {'width': 235, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'hover_color': color_s, 'text_color': black}
 		cord = [(0, "San Miguel"),(1, "Jose c Paz"),(2, "Retiro")]
 		for x, text in cord:
 			card = ctk.CTkButton(self.main_fr, text = text, **style_card)
-			card.grid(row = 1, column = x)
+			card.grid(row = 1, column = x, sticky="e")
+
+		new_stock = ctk.CTkButton(self.main_fr, text = "+ Nuevos productos", **style_card, command = lambda: app.switch_scene("New_stock"))
+		new_stock.grid(row = 2, column = 0, sticky="e", pady = 15)
+
+		
+class New_stock(BaseScene):
+	def __init__(self, parent, manager):
+		super().__init__(parent, manager)
+
+		self.manager=manager
+		self.header_fr = header(self.manager)
+		self.main()
+		self.manager.title("Subir productos")
+
+	def main(self):
+		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
+		self.inputs_col()
+	def inputs_col(self):
+		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 800, height= 300, fg_color= color_p)
+		self.inputs_fr.grid(row=1, column=0)
+		self.inputs_fr.grid_propagate(0)
+
+		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, "border_color": "#dcdcdc"}
+
+		self.nombre_producto = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre del producto', **self.input_config)
+		self.nombre_producto.grid(row = 1, column = 0, pady = 5, padx = 15)
+		self.precio_produc = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese precio del producto', **self.input_config)
+		self.precio_produc.grid(row = 1, column = 1, pady = 5)
+		self.precio_produc.configure(width= 250)
+		self.marca_produc= ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese marca del producto', **self.input_config)
+		self.marca_produc.grid(row = 2, column = 0, pady = 5, padx = 15)
+		self.talle_produc=ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese talle del producto', **self.input_config)
+		self.talle_produc.grid(row = 2, column = 1, pady = 5)
+		self.talle_produc.configure(width= 250)
+
 
 if __name__ == "__main__":
 	app = SceneManager()  # Crea una instancia del gestor de escenas
@@ -514,13 +554,11 @@ if __name__ == "__main__":
 	style.map("Treeview.Heading", background=[("selected",  "#252525"), ("active",  "#252525")])
 
 	# Añade las escenas al gestor
-	app.add_scene("Stock_nav", Stock_nav)
-	app.add_scene("Ventas_nav", Ventas_nav)
-	app.add_scene("C_ventas", C_ventas)
-	app.add_scene("C_producto", C_producto)
-	app.add_scene("Men_p", Men_p)
-	app.add_scene("Login", Login)
-	app.add_scene("Men_p_admin", Men_p_admin)
+	scenes = [("Stock_nav", Stock_nav),("Ventas_nav", Ventas_nav),("C_ventas", C_ventas),("C_producto", C_producto),("Men_p", Men_p),("Login", Login),("Men_p_admin", Men_p_admin),
+    ("New_stock", New_stock)]
+
+	for scene_name, scene_class in scenes:
+		app.add_scene(scene_name, scene_class)
   
 	# Inicia la aplicación con la primera escena visible
 	app.switch_scene("Login")

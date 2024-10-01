@@ -85,6 +85,7 @@ class Slideout(ctk.CTkFrame):
         Slideout.active_slideout = None  # Libera la referencia del slideout activo
 
 class Menu_user(ctk.CTkFrame):
+    is_in_animation = False
     def __init__(self, parent, side="right", width=300, height=530, bg_color='#fafafa', text="", y_axis:float=1, **kwargs):
         super().__init__(parent, width=width, height=height, bg_color='#fafafa',border_width=1,**kwargs)
         self.parent = parent
@@ -109,17 +110,18 @@ class Menu_user(ctk.CTkFrame):
         self.text_label = ctk.CTkLabel(self, text=self.text, anchor="center")
         self.text_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Botón para cerrar el slideout
-        self.close_button = ctk.CTkButton(self, text="×", width=25, height=25, fg_color= "transparent", text_color= "Black", hover_color= "#EDEBE9", font=('Arial', 16),command=self.slide_out)
-        self.close_button.place(relx=0.95, rely=0.05, anchor="ne")  # Colocar en la esquina superior derecha
-
+       
     def slide_in(self):
         # Ejecuta el movimiento en un hilo separado para no bloquear la ventana
-        threading.Thread(target=self._animate_in).start()
+        if not Menu_user.is_in_animation:
+            Menu_user.is_in_animation = not Menu_user.is_in_animation
+            threading.Thread(target=self._animate_in).start()
         
     def slide_out(self):
         # Ejecuta el movimiento de salida en un hilo separado
-        threading.Thread(target=self._animate_out).start()
+        if not Menu_user.is_in_animation:
+            Menu_user.is_in_animation = not Menu_user.is_in_animation
+            threading.Thread(target=self._animate_out).start()
 
     def _animate_in(self):
         if self.side == "right":
@@ -134,7 +136,8 @@ class Menu_user(ctk.CTkFrame):
                 self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
                 self.update_idletasks()  # Asegura que se actualice la interfaz
                 time.sleep(0.01)
-
+        Menu_user.is_in_animation = not Menu_user.is_in_animation
+        
     def _animate_out(self):
         if self.side == "right":
             # Desliza de regreso hacia la derecha (fuera de la pantalla)
@@ -148,6 +151,7 @@ class Menu_user(ctk.CTkFrame):
                 self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
                 self.update_idletasks()
                 time.sleep(0.01)
-
+        Menu_user.is_in_animation = not Menu_user.is_in_animation
+        
         # Elimina el frame una vez que esté fuera de la pantalla
         self.destroy()
