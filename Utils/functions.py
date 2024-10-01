@@ -18,10 +18,10 @@ def create_scrollable_frame(manager, color_p, branch_user, fg_color="black", fon
     sucursal_fr = ctk.CTkFrame(main_fr, fg_color=color_p, height=70, width=780)
     sucursal_fr.grid(row=0, column=0, columnspan=4)
 
-    if manager.get_variable('user_role') == 'Normal User' or  manager.get_variable('user_role') == 'Admin':
+    if manager.get_variable('user_role') in ['Normal User', 'Admin']:
         sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text=f'Sucursal {branch_user}', font=font)
         sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + 115, rely=0.5, anchor="center")
-        
+
     elif manager.get_variable('user_role') == 'General Admin' and manager.current_scene_name=='Men_p_admin':
         sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text="Sucursales", font=font)
         sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + 75, rely=0.5, anchor="center")
@@ -167,5 +167,4 @@ def menu_sesions(manager, si):
 def binary_to_image(byte_data: bytearray) -> Image:
     """Convierte un array de bytes en una imagen usando Pillow."""
     byte_io = io.BytesIO(byte_data)  # Convierte el bytearray a un objeto BytesIO
-    image = Image.open(byte_io)  # Abre la imagen desde el objeto BytesIO
-    return image
+    return Image.open(byte_io)

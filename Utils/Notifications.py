@@ -53,36 +53,37 @@ class Slideout(ctk.CTkFrame):
         if self.side == "right":
             # Desliza desde la derecha hacia la izquierda
             for x in range(self.parent.winfo_width(), self.parent.winfo_width() - self.width, -10):
-                self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-                self.update_idletasks()  # Asegura que se actualice la interfaz
-                time.sleep(0.01)
+                self._extracted_from__animate_in_5(x)
         elif self.side == "left":
             # Desliza desde la izquierda hacia la derecha
             for x in range(-self.width, 0, 10):
-                self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-                self.update_idletasks()  # Asegura que se actualice la interfaz
-                time.sleep(0.01)
+                self._extracted_from__animate_in_5(x)
         time.sleep(5)
         if Slideout.active_slideout != None:
             self.slide_out()
+
+    def _extracted_from__animate_in_5(self, x):
+        self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
+        self.update_idletasks()  # Asegura que se actualice la interfaz
+        time.sleep(0.01)
 
     def _animate_out(self):
         if self.side == "right":
             # Desliza de regreso hacia la derecha (fuera de la pantalla)
             for x in range(self.parent.winfo_width() - self.width, self.parent.winfo_width(), 10):
-                self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-                self.update_idletasks()
-                time.sleep(0.01)
+                self._extracted_from__animate_out_5(x)
         elif self.side == "left":
             # Desliza de regreso hacia la izquierda (fuera de la pantalla)
             for x in range(0, -self.width, -10):
-                self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-                self.update_idletasks()
-                time.sleep(0.01)
-
+                self._extracted_from__animate_out_5(x)
         # Asegura que el widget solo se destruya al final de la animación
         self.after(10, self.destroy)
         Slideout.active_slideout = None  # Libera la referencia del slideout activo
+
+    def _extracted_from__animate_out_5(self, x):
+        self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
+        self.update_idletasks()
+        time.sleep(0.01)
 
 class Menu_user(ctk.CTkFrame):
     is_in_animation = False
@@ -127,31 +128,35 @@ class Menu_user(ctk.CTkFrame):
         if self.side == "right":
             # Desliza desde la derecha hacia la izquierda
             for x in range(self.parent.winfo_width(), self.parent.winfo_width() - self.width, -10):
-                self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-                self.update_idletasks()  # Asegurar que se actualice la interfaz
-                time.sleep(0.01)
+                self._extracted_from__animate_in_5(x)
         elif self.side == "left":
             # Desliza desde la izquierda hacia la derecha
             for x in range(-self.width, 0, 10):
-                self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-                self.update_idletasks()  # Asegura que se actualice la interfaz
-                time.sleep(0.01)
+                self._extracted_from__animate_in_5(x)
         Menu_user.is_in_animation = not Menu_user.is_in_animation
+
+    # TODO Rename this here and in `_animate_in`
+    def _extracted_from__animate_in_5(self, x):
+        self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
+        self.update_idletasks()  # Asegurar que se actualice la interfaz
+        time.sleep(0.01)
         
     def _animate_out(self):
         if self.side == "right":
             # Desliza de regreso hacia la derecha (fuera de la pantalla)
             for x in range(self.parent.winfo_width() - self.width, self.parent.winfo_width(), 10):
-                self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-                self.update_idletasks()
-                time.sleep(0.01)
+                self._extracted_from__animate_out_5(x)
         elif self.side == "left":
             # Desliza de regreso hacia la izquierda (fuera de la pantalla)
             for x in range(0, -self.width, -10):
-                self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-                self.update_idletasks()
-                time.sleep(0.01)
+                self._extracted_from__animate_out_5(x)
         Menu_user.is_in_animation = not Menu_user.is_in_animation
-        
+
         # Elimina el frame una vez que esté fuera de la pantalla
         self.destroy()
+
+    # TODO Rename this here and in `_animate_out`
+    def _extracted_from__animate_out_5(self, x):
+        self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
+        self.update_idletasks()
+        time.sleep(0.01)

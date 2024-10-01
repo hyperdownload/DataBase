@@ -60,7 +60,7 @@ class Login(BaseScene):
 				self.user_entry.configure(border_color = "green")
 				self.password_entry.configure(border_color = "red")
 
-		except:
+		except Exception:
 			self.user_entry.configure(border_color = "red")
 			self.password_entry.configure(border_color = "red")
 			show_notification(app, "Usuario o contraseña incorrectos.")

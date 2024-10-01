@@ -41,7 +41,7 @@ class SceneManager(ctk.CTk):
         else:
             self.scenes[name] = scene_class
 
-    def switch_scene(self, name:str)->None:
+    def switch_scene(self, name:str) -> None:
         """Cambia a otra escena asegurando que la anterior sea eliminada completamente."""
         
         self.scene_history.append(name.__class__.__name__)
@@ -51,15 +51,13 @@ class SceneManager(ctk.CTk):
             self.current_scene.place_forget()
             self.current_scene.grid_forget()
 
-        # Cargar la nueva escena
-        scene_class = self.scenes.get(name)
-        if scene_class:
+        if scene_class := self.scenes.get(name):
             self.current_scene = scene_class(self, self)
             self.current_scene.pack(fill='both', expand=True)
         else:
             print(f"Escena '{name}' no encontrada.")
 
-    def force_switch_scene(self, name:str)->None:
+    def force_switch_scene(self, name:str) -> None:
         """Cambia de escena y fuerza la eliminación de la escena actual."""
         if self.current_scene:
             # Destruye todos los widgets de la escena actual
@@ -68,9 +66,7 @@ class SceneManager(ctk.CTk):
 
             self.current_scene.destroy()
 
-        # Cargar la nueva escena
-        scene_class = self.scenes.get(name)
-        if scene_class:
+        if scene_class := self.scenes.get(name):
             self.current_scene = scene_class(self, self)
             self.current_scene.pack(fill='both', expand=True)
         else:

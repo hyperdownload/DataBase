@@ -61,9 +61,9 @@ class BDViewerApp:
         self.conn = None
 
     def load_bd_file(self):
-        # Abre un cuadro de diálogo para seleccionar archivo .bd
-        file_path = filedialog.askopenfilename(filetypes=[("SQLite Database Files", "*.db")])
-        if file_path:
+        if file_path := filedialog.askopenfilename(
+            filetypes=[("SQLite Database Files", "*.db")]
+        ):
             self.lbl_filename.config(text=file_path)
             self.connect_to_db(file_path)
 

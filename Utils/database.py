@@ -9,10 +9,7 @@ class Product:
         self.brand = brand
         self.size = size
         self.stock = stock
-        if image_path:
-            self.image = self.convert_image_to_binary(image_path)
-        else:
-            self.image = image  # Asume que image es un binario si image_path no está presente
+        self.image = self.convert_image_to_binary(image_path) if image_path else image
         self.description = description
         self.branch_name = branch_name
 
@@ -145,24 +142,24 @@ def create_database()->None:
 
     print("Database creada.")
 
-def register_user(name:str, email:str, password:str, role_id:str, branch_name:str)->None:
+def register_user(name:str, email:str, password:str, role_id:str, branch_name:str) -> None:
     if branch_exists(branch_name):
         conn = sqlite3.connect(dataBasePath)
         cursor = conn.cursor()
-        
+
         cursor.execute('SELECT id FROM Users WHERE email = ?', (email,))
         if cursor.fetchone() is not None:
-            print(f"Error: ya existe un usuario con este email.")
+            print("Error: ya existe un usuario con este email.")
             conn.close()
             return
-        
+
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        
+
         cursor.execute('''
         INSERT INTO Users (name, email, password, role_id, branch_id)
         VALUES (?, ?, ?, ?, ?)
         ''', (name, email, hashed_password, role_id, branch_name))
-        
+
         conn.commit()
         conn.close()
 
@@ -289,22 +286,21 @@ def record_restock(product_id:int, user_id:int, branch_name:str, quantity:int)->
     else:
         print(f"La sucursal '{branch_name}' no existe.")
     
-def get_products_in_stock()->dict:
+def get_products_in_stock() -> dict:
     """
     Recupera los productos en stock y los devuelve como una lista de Product.
     """
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
-    
+
     cursor.execute('''
     SELECT * FROM Products
     ''')
-    
+
     rows = cursor.fetchall()
     conn.close()
-    
-    products = [Product.from_row(row) for row in rows]
-    return products
+
+    return [Product.from_row(row) for row in rows]
 
 def get_user_details(user_id: int) -> tuple:
     '''
@@ -326,7 +322,7 @@ def get_user_details(user_id: int) -> tuple:
     
     return user_details
 
-def get_record_from_table(table_name, columns='*', **kwargs:str)->any:
+def get_record_from_table(table_name, columns='*', **kwargs:str) -> any:
     """
     Recupera registros de una tabla específica basada en los filtros proporcionados.
     :param table_name: str, nombre de la tabla
@@ -336,29 +332,25 @@ def get_record_from_table(table_name, columns='*', **kwargs:str)->any:
     """
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
-    
-    # Construye la parte de selección de columnas
-    if isinstance(columns, list):
-        columns_str = ', '.join(columns)
-    else:
-        columns_str = columns
 
+    # Construye la parte de selección de columnas
+    columns_str = ', '.join(columns) if isinstance(columns, list) else columns
     # Construye la parte de condiciones de la consulta
     conditions = []
     values = []
     for key, value in kwargs.items():
         conditions.append(f"{key} = ?")
         values.append(value)
-    
+
     conditions_str = " AND ".join(conditions) if conditions else "1=1"
 
     # Query dinámica
     query = f"SELECT {columns_str} FROM {table_name} WHERE {conditions_str}"
-    
+
     cursor.execute(query, values)
     records = cursor.fetchall()
     conn.close()
-    
+
     return records
 
 def get_name_product(id:int)->str:
