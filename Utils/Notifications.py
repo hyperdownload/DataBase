@@ -2,10 +2,6 @@ import threading
 import time
 import customtkinter as ctk
 
-import customtkinter as ctk
-import threading
-import time
-
 class Slideout(ctk.CTkFrame):
     active_slideout = None  # Variable de clase para mantener referencia al slideout activo
 

@@ -153,7 +153,6 @@ def search_function(product_list: list, search: str, max_distance: int = 8, thre
     # Ordena los resultados por la puntuación de coincidencia
     result.sort(key=lambda x: x[1], reverse=True)
 
-    # Devuelve solo la lista de productos
     return [product for product, score in result]
 
 def show_notification(manager, text:str)->None:

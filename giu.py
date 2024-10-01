@@ -39,7 +39,7 @@ class Login(BaseScene):
 		self.password_entry = ctk.CTkEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su contraseña...")
 		self.password_entry.place(relx=0.5, y=310, anchor= "center")
 		self.password_entry.bind('<Return>', self.login_logic)
-		self.password_entry.bind('<MouseWheel>', lambda event:self.login_logic(autologin=True)) # Esta linea en algun momento hay que eliminarla
+		self.password_entry.bind('<MouseWheel>', lambda event:self.login_logic(autologin=True)) # Esta linea en algun momento hay name_product eliminarla
 
 		submit = ctk.CTkButton(login_container, text = "Login", height = 35, width = 350, corner_radius = 20, fg_color = black, text_color = color_p, hover_color = "#454545", command = self.login_logic)
 		submit.place(relx=0.5, y=360, anchor= "center")
@@ -49,8 +49,8 @@ class Login(BaseScene):
 			user = self.user_entry.get()
 			password = self.password_entry.get()
 		else:
-			user = 'carlos@example.com'
-			password = 'superadmin789'
+			user = 'john@example.com'
+			password = 'password123'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -178,10 +178,13 @@ class C_producto(BaseScene):
 						values=(product.price,product.brand,product.size, product.description))
     
 	def update_stock(self):
-		s = self.tv_stock.focus()
-		que=self.tv_stock.item(s,'values')
-		print(que[3])
-		print(get_name_per_id(self.tv_stock.item(que)), app.get_variable("user_id"), app.get_variable("branch_name"), self.c_stock.get())
+		focus = self.tv_stock.focus()
+		name_product=self.tv_stock.item(focus,'text')
+		try:
+			record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get())
+			show_notification(app, f"Reestock exitoso\n stock actual: {get_stock_product(get_name_per_id(str(name_product)))}")
+		except TypeError:
+			show_notification(app, "Error al reestockear\n procure seleccionar un\n producto de la tabla")
 
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
@@ -214,8 +217,6 @@ class C_producto(BaseScene):
 		self.tabla_stock = ctk.CTkFrame(tabla, width= 675, height= 400, fg_color= black, corner_radius= 40)
 		self.tabla_stock.place(relx = 0.5, y= 200, anchor= "center")
 
-		# Wuajajaja ya lo resumi
-
 		columns = [("#0", "Product", 117), 
            ("price", "Price", 50), 
            ("brand", "Brand", 50), 
@@ -229,25 +230,12 @@ class C_producto(BaseScene):
 			self.tv_stock.column(col, width=width)
 			self.tv_stock.heading(col, text=heading, anchor=tk.CENTER)
 
-		# Configuración de columnas
-		# for col, width in [("#0",117), ("price",50), ("brand",50), ("size",50), ("description",117)]:
-		# 	self.tv_stock.column(col, width = width)
-
-		# Cabeceras de las columnas
-		# self.tv_stock.heading("#0", text = "Producto", anchor=tk.CENTER)
-
-		# for col in ["Price", "Brand", "Size", "Description"]:
-		# 	self.tv_stock.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER)
-
-
 		products_in_stock = get_products_in_stock()
 		for product in products_in_stock:
 			if product.branch_name.lower() == app.get_variable('branch_user').lower():
 				self.tv_stock.insert("",tk.END, text=f"{product.name}",
 						values=(product.price,product.brand,product.size, product.description))
 	
-		# for product in products_in_stock:
-		# 	self.tv_stock.insert("", "end", text=product.name,values=( product.price, product.brand, product.description))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 
 class C_ventas(BaseScene):
@@ -410,7 +398,7 @@ class Ventas_nav(BaseScene):
 		try:
 			[treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6])) for sale in sales_data if sale[3].lower() == app.get_variable("branch_user").lower()]
 		except AttributeError as e:
-			print(f"Hubo un error {e}. Se asume que el usuario es {'Super admin, mostrando todas las sucursales.' if app.get_variable('branch_user') is None else app.get_variable('branch_user')}")
+			print(f"Hubo un error {e}. Se asume name_product el usuario es {'Super admin, mostrando todas las sucursales.' if app.get_variable('branch_user') is None else app.get_variable('branch_user')}")
 			[treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6])) for sale in sales_data]
 		
 		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)

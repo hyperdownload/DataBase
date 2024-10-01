@@ -268,7 +268,7 @@ def record_restock(product_id:int, user_id:int, branch_name:str, quantity:int)->
 
         cursor.execute('SELECT stock FROM Products WHERE id = ?', (product_id,))
         current_stock = cursor.fetchone()[0]
-        new_stock = current_stock + quantity
+        new_stock = int(current_stock) + int(quantity)
 
         cursor.execute('UPDATE Products SET stock = ? WHERE id = ?', (new_stock, product_id))
         cursor.execute('''
