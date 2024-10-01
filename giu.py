@@ -375,45 +375,15 @@ class Stock_nav(BaseScene):
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
-		tabla = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 425, width = 800)
-		tabla.grid(row=3, column=0)
-
-		self.tabla_venta = ctk.CTkFrame(tabla, width= 675, height= 400, fg_color= black, corner_radius= 40)
-		self.tabla_venta.place(relx = 0.5, y= 200, anchor= "center")
-
-		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act", "stock"))
-		stockTreeView.place(relx = 0.5, rely= 0.5, anchor= "center", width = 625, height= 350)
-
-		# Configuración de columnas
-		for col, width in [("#0", 110), ("cod_barra", 40), ("precio", 40), ("talle", 30), ("Fecha_act", 115), ("stock",30)]:
-			stockTreeView.column(col, width=width)
-			
-		# Cabeceras de las columnas
-		stockTreeView.heading("#0", text="Producto", anchor=tk.CENTER)
-		for col in ["cod_barra", "precio", "talle", "Fecha_act", "stock"]:
-			stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER)
-
+		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800); tabla.grid(row=3, column=0)
+		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40); self.tabla_venta.place(relx=0.5, y=200, anchor="center")
+		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act", "stock")); stockTreeView.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
+		[stockTreeView.column(col, width=width) for col, width in [("#0", 110), ("cod_barra", 40), ("precio", 40), ("talle", 30), ("Fecha_act", 115), ("stock", 30)]]
+		stockTreeView.heading("#0", text="Producto", anchor=tk.CENTER); [stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER) for col in ["cod_barra", "precio", "talle", "Fecha_act", "stock"]]
 		products_in_stock = get_products_in_stock()
-  
-		for product in products_in_stock:
-			try:
-				if product.branch_name.lower()==app.get_variable("branch_user").lower():
-					stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id),product.stock))
-			except:
-				print("Sucursal invalida.")
-				stockTreeView.insert("", "end", text=product.name,values=(product.id, product.price, product.size, get_restock_date(product.id),product.stock))
-	#--------------------------------------------------------------------------------------------------------------------------------------------
-		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
-		atajos.grid(row=2, column=0)
-
-		if app.get_variable('user_role') == 'Admin':
-		
-			self.u_venta_btn = ctk.CTkButton(atajos, text= "Cargar stock", fg_color= grey, text_color= black, corner_radius=25,
-												width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_producto"))
-			self.u_venta_btn.place(x = 135, y= 25, anchor = "center")        
-
-			self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, black, event))
-			self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
+		[stockTreeView.insert("", "end", text=product.name, values=(product.id, product.price, product.size, get_restock_date(product.id), product.stock)) if product.branch_name.lower() == app.get_variable("branch_user").lower() else stockTreeView.insert("", "end", text=product.name, values=(product.id, product.price, product.size, get_restock_date(product.id), product.stock)) for product in products_in_stock]
+		atajos = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=75, width=800); atajos.grid(row=2, column=0)
+		if app.get_variable('user_role') == 'Admin': self.u_venta_btn = ctk.CTkButton(atajos, text="Cargar stock", fg_color=grey, text_color=black, corner_radius=25, width=100, height=50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color="#454545", command=lambda: self.manager.switch_scene("C_producto")); self.u_venta_btn.place(x=135, y=25, anchor="center"); self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, black, event)); self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
 	
 class Ventas_nav(BaseScene):
 	def __init__(self, parent, manager):
