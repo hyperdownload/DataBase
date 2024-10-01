@@ -53,27 +53,24 @@ class Login(BaseScene):
 			password = 'superadmin789'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
-				app.save_variable("user_role",get_user_details(get_user_id(user))[1])
-				app.save_variable("branch_user",get_user_details(get_user_id(user))[3])
-				app.save_variable("user_id", get_user_id(user))
-				
-				self.manager.switch_scene("Men_p")
-
+				self._extracted_from_login_logic_10(user, "Men_p")
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2] and app.get_variable('user_role') == 'General Admin':
-				app.save_variable("user_role",get_user_details(get_user_id(user))[1])
-				app.save_variable("branch_user",get_user_details(get_user_id(user))[3])
-				app.save_variable("user_id", get_user_id(user))
-				
-				self.manager.switch_scene("Men_p_admin")
-
+				self._extracted_from_login_logic_10(user, "Men_p_admin")
 			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
 				self.user_entry.configure(border_color = "green")
 				self.password_entry.configure(border_color = "red")
-	
+
 		except:
 			self.user_entry.configure(border_color = "red")
 			self.password_entry.configure(border_color = "red")
 			show_notification(app, "Usuario o contraseña incorrectos.")
+
+	def _extracted_from_login_logic_10(self, user, arg1):
+		app.save_variable("user_role",get_user_details(get_user_id(user))[1])
+		app.save_variable("branch_user",get_user_details(get_user_id(user))[3])
+		app.save_variable("user_id", get_user_id(user))
+
+		self.manager.switch_scene(arg1)
 			
 class Men_p(BaseScene):
 	def __init__(self, parent, manager):
@@ -317,7 +314,7 @@ class C_ventas(BaseScene):
 			self.input_c.destroy()
 			self.input_c = ctk.CTkEntry(self.inputs_fr, placeholder_text= "Ingrese tarjeta", **self.input_config)
 			self.input_c.grid(row = 3, column = 1, pady = 5, padx = 25)
-		elif aguanteriver != "Credito" and aguanteriver!= "Debito":
+		elif aguanteriver != "Credito":
 			self.input_c.destroy()
 			self.metodo_pago.grid(row = 2, column = 1, pady = 5, padx = 25)
 		
