@@ -430,44 +430,24 @@ class Ventas_nav(BaseScene):
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 
-		#--------------------------------------------------------------------------------------------------------------------------------------------
-
-		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800)
-		tabla.grid(row=3, column=0)
-
-		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40)
-		self.tabla_venta.place(relx=0.5, y=200, anchor="center")
-
-		treeview = ttk.Treeview(self.tabla_venta, columns=("Fecha", "Vendedor", "Estado", "Precio", "Cantidad"))
-		treeview.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
-
-		# Configuración de columnas
-		for col, width in [("#0", 110), ("Fecha", 100), ("Vendedor", 100), ("Estado", 50), ("Precio",50), ("Cantidad", 50)]:
-			treeview.column(col, width=width)
-
-		# Cabeceras de las columnas
-		treeview.heading("#0", text="Producto", anchor=tk.CENTER)
-		for col in ["Fecha", "Vendedor", "Estado", "Precio", "Cantidad"]:
-			treeview.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER)
-
-
-		# Obtiene los datos de la base de datos
+		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800); tabla.grid(row=3, column=0)
+		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40); self.tabla_venta.place(relx=0.5, y=200, anchor="center")
+		treeview = ttk.Treeview(self.tabla_venta, columns=("Fecha", "Vendedor", "Estado", "Precio", "Cantidad")); treeview.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
+		[treeview.column(col, width=width) for col, width in [("#0", 110), ("Fecha", 100), ("Vendedor", 100), ("Estado", 50), ("Precio", 50), ("Cantidad", 50)]]
+		treeview.heading("#0", text="Producto", anchor=tk.CENTER); [treeview.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER) for col in ["Fecha", "Vendedor", "Estado", "Precio", "Cantidad"]]
+		
+  		# Obtiene los datos de la base de datos
 		sales_data = get_all_sales()
 	
 		# Inserta los datos en el Treeview
-		for sale in sales_data:
-			if sale[3].lower()==app.get_variable("branch_user").lower():
-				treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6]))
-   
-		'''
-  			Falta traducir los datos crudos a texto ademas de que no existe la columna
-            de cantidad 
-  		'''
-   
-	#--------------------------------------------------------------------------------------------------------------------------------------------
+		try:
+			[treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6])) for sale in sales_data if sale[3].lower() == app.get_variable("branch_user").lower()]
+		except AttributeError as e:
+			print(f"Hubo un error {e}. Se asume que el usuario es {'Super admin, mostrando todas las sucursales.' if app.get_variable('branch_user') is None else app.get_variable('branch_user')}")
+			[treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6])) for sale in sales_data]
+		
 		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
 		atajos.grid(row=2, column=0)
-
 		
 		self.u_venta_btn = ctk.CTkButton(atajos, text= "Nueva venta", fg_color= "#222325", text_color= color_p, corner_radius=25,
 											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_ventas"))

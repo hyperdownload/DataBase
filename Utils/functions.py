@@ -43,7 +43,7 @@ def header(manager) -> any:
             menu_user = Menu_user(manager, side="right", width=300, height=530)
             menu_user.slide_in()
 
-            log_out =  ctk.CTkLabel(menu_user, text= "Cerrar sesion", font = ('Plus jakarta Sans', 14, 'bold'))
+            log_out =  ctk.CTkLabel(menu_user, text= "Cerrar sesion",text_color=black, font = ('Plus jakarta Sans', 14, 'bold'))
             log_out.place(relx=0.5, rely=0.9, anchor="center")
             log_out.bind('<Button-1>', log_out_def)
             menu_user.is_active = True
