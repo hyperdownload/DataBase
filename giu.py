@@ -426,7 +426,6 @@ class Ventas_nav(BaseScene):
 		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
 		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, grey, "#222325", event))
 
-
 # VENTANAS DE ADMINISTRADOR 
 
 class Men_p_admin(BaseScene):
