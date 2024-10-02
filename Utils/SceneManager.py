@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from difflib import get_close_matches
 import threading
+import traceback
 
 class SceneManager(ctk.CTk):
     def __init__(self):
@@ -23,15 +24,21 @@ class SceneManager(ctk.CTk):
         
     def get_variable(self, variable_name: str) -> any:
         """Obtiene una variable almacenada en el gestor de escenas."""
-        if var := self.variables.get(variable_name):
-            return var
-        if close_matches := get_close_matches(
-            variable_name, self.variables.keys(), n=1, cutoff=0.5
-        ):
-            suggestion = close_matches[0]
-            raise NameError(f"Esta variable no está definida. ¿Quisiste decir '{suggestion}'?")
-        else:
-            raise NameError("Esta variable no está definida.")
+        try:
+            if var := self.variables.get(variable_name):
+                return var
+            if close_matches := get_close_matches(
+                variable_name, self.variables.keys(), n=1, cutoff=0.5
+            ):
+                suggestion = close_matches[0]
+                raise NameError(f"Esta variable no está definida. ¿Quisiste decir '{suggestion}'?")
+            else:
+                raise NameError("Esta variable no está definida.")
+        except NameError as e:
+            # Captura la traza del error y la imprime
+            traceback.print_exc()
+            # Relanza la excepción para no perder la traza original
+            raise
 
     '''def create_thread(self, task:function)->any:
         # Crea un hilo y le asigna la función my_task

@@ -255,7 +255,7 @@ class C_ventas(BaseScene):
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		self.inputs_col()
 		self.visualizar_datos()
-
+		app.get_variable("branch_")
 	def inputs_col(self):
 		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 300, fg_color= color_p)
 		self.inputs_fr.grid(row=1, column=0)
