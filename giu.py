@@ -60,10 +60,11 @@ class Login(BaseScene):
 				self.user_entry.configure(border_color = "green")
 				self.password_entry.configure(border_color = "red")
 
-		except Exception:
+		except Exception as e:
 			self.user_entry.configure(border_color = "red")
 			self.password_entry.configure(border_color = "red")
 			show_notification(app, "Usuario o contraseña incorrectos.")
+			print(e)
 
 	def _extracted_from_login_logic_10(self, user, arg1):
 		app.save_variable("user_role",get_user_details(get_user_id(user))[1])
@@ -162,6 +163,7 @@ class C_producto(BaseScene):
 		self.manager.title("Carga de productos")
 		self.header_fr = header(self.manager)
 		self.main()
+		print(app.get_variable("user_bran"))
 
 	def search(self, event = None):
 		if self.buscar_producto.get():
