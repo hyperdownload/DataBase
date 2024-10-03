@@ -2,7 +2,42 @@ import customtkinter as ctk
 from PIL import Image  # Importa Image desde PIL
 from Utils.Notifications import *
 import io
+import concurrent.futures
 
+def dynamic_thread_executor(functions_with_args):
+    """
+    Crea hilos dinámicamente para ejecutar una o múltiples funciones con argumentos.
+    
+    Args:
+        functions_with_args (tuple or list): Una función con sus argumentos o una lista de tuplas donde
+                                             cada tupla contiene una función y sus argumentos.
+                                             Ejemplo para una función: (func1, (arg1, arg2))
+                                             Ejemplo para múltiples funciones: [(func1, (arg1, arg2)), (func2, (arg1,))]
+    
+    Returns:
+        list: Resultados de las funciones que retornan valores. Si una función no retorna nada, su valor será None.
+    """
+    results = []
+    
+    # Se asegura de que el argumento es una lista, aunque sea una única función
+    if isinstance(functions_with_args, tuple):
+        functions_with_args = [functions_with_args]
+    
+    # Usa ThreadPoolExecutor para manejar los hilos
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Creación de futuros (futuros son los resultados que los hilos devolverán eventualmente)
+        futures = [executor.submit(func, *args) for func, args in functions_with_args]
+        
+        # Recolecta los resultados de cada hilo
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                result = future.result()  # Obtiene el valor retornado
+                results.append(result)
+            except Exception as e:
+                print(f"Error en el hilo: {e}")
+                results.append(None)  # Si hay un error, lo maneja y continua
+    
+    return results
 color_p = "#fafafa"
 color_s = "#efefef"
 grey = "#EDEBE9"
