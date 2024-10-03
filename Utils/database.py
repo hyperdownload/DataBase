@@ -1,5 +1,9 @@
 import sqlite3
 import hashlib
+import inspect
+from datetime import datetime
+from zoneinfo import ZoneInfo
+import functools
 
 class Product:
     def __init__(self, name:str, price:int, brand:str, size:any, image:any, description:str, branch_name:str, stock:int, image_path=None, id:int=None):
@@ -142,6 +146,58 @@ def create_database()->None:
 
     print("Database creada.")
 
+def log_action(action: str, user_id: int = None, product_id: int = None, branch_name: str = None, quantity: int = None, price: int = None) -> None:
+    """
+    Registra una acción en la tabla de Logs.
+    :param action: Acción realizada ('Sale', 'Restock', 'Add Product', 'Register User', etc.)
+    :param user_id: ID del usuario que realiza la acción (opcional).
+    :param product_id: ID del producto afectado (opcional).
+    :param branch_name: Nombre de la sucursal afectada (opcional).
+    :param quantity: Cantidad de productos afectados (opcional).
+    :param price: Precio de la transacción, si aplica (opcional).
+    """
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+    INSERT INTO Logs (action, user_id, product_id, branch_name, quantity, price)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ''', (action, user_id, product_id, branch_name, quantity, price))
+    
+    conn.commit()
+    conn.close()
+
+def log_database_action(action: str):
+    """
+    Decorador que registra una acción en la tabla Logs.
+    :param action: Acción realizada ('Sale', 'Restock', 'Add Product', 'Register User', etc.)
+    """
+    def decorator_log(func):
+        @functools.wraps(func)
+        def wrapper_log(*args, **kwargs):
+            # Ejecutar la función original y obtener su resultado
+            result = func(*args, **kwargs)
+
+            # Obtener los nombres de los argumentos de la función
+            signature = inspect.signature(func)
+            bound_args = signature.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+
+            # Extraer los valores de interés
+            user_id = bound_args.arguments.get('user_id')
+            product_id = bound_args.arguments.get('product_id')
+            branch_name = bound_args.arguments.get('branch_name')
+            quantity = bound_args.arguments.get('quantity')
+            price = bound_args.arguments.get('price')
+
+            # Registrar la acción
+            log_action(action, user_id=user_id, product_id=product_id, branch_name=branch_name, quantity=quantity, price=price)
+
+            return result
+        return wrapper_log
+    return decorator_log
+
+@log_database_action("Register User")
 def register_user(name:str, email:str, password:str, role_id:str, branch_name:str) -> None:
     if branch_exists(branch_name):
         conn = sqlite3.connect(dataBasePath)
@@ -183,6 +239,7 @@ def get_user_id(email:str)->None:
     
     return user_id[0] if user_id else None
 
+@log_database_action("Add product")
 def add_product(product)->None:
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
@@ -197,6 +254,7 @@ def add_product(product)->None:
 
     print(f"Product {product.name} added successfully.")
 
+@log_database_action("Sale")
 def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, price:int)->bool:
     '''
     Guarda una venta de un producto y reduce el stock del producto.
@@ -258,6 +316,7 @@ def get_products_out_of_stock()->dict:
 
     return products_out_of_stock
 
+@log_database_action('Restock')
 def record_restock(product_id:int, user_id:int, branch_name:str, quantity:int)->None:
     '''
     Guarda el reestock de un producto
@@ -272,14 +331,9 @@ def record_restock(product_id:int, user_id:int, branch_name:str, quantity:int)->
 
         cursor.execute('UPDATE Products SET stock = ? WHERE id = ?', (new_stock, product_id))
         cursor.execute('''
-        INSERT INTO Restocks (product_id, user_id, branch_name, quantity)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO Restocks (product_id, user_id, branch_name, quantity, date)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
         ''', (product_id, user_id, branch_name, quantity))
-
-        cursor.execute('''
-        INSERT INTO Logs (action, user_id, product_id, branch_name, quantity)
-        VALUES (?, ?, ?, ?, ?)
-        ''', ('Restock', user_id, product_id, branch_name, quantity))
 
         conn.commit()
         conn.close()
@@ -455,24 +509,36 @@ def get_user_name(id:int)->str:
     conn.close()
     return name
 
-def get_restock_date(restock_id: int) -> str:
+def get_restock_date(restock_id: int, target_timezone: str = 'America/Argentina/Buenos_Aires') -> str:
     '''
-    Obtiene la fecha de un restock específico
+    Obtiene la fecha de un restock específico y la convierte a la zona horaria deseada.
+    :param restock_id: ID del restock
+    :param target_timezone: Zona horaria a la que se desea convertir la fecha (por defecto 'America/Argentina/Buenos_Aires')
+    :return: Fecha del restock en la zona horaria especificada como string
     '''
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
 
     cursor.execute('''
-    SELECT date
+    SELECT MAX(date)
     FROM Restocks
     WHERE id = ?
     ''', (restock_id,))
 
     restock_date = cursor.fetchone()
     conn.close()
-    
-    # Si se encuentra el restock, devuelve la fecha, sino, devuelve None
-    return restock_date[0] if restock_date else None
+
+    if restock_date:
+        # Convierte el string a objeto datetime asumiendo que esta en UTC
+        restock_datetime_utc = datetime.strptime(restock_date[0], '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
+
+        # Convierte a la zona horaria objetivo
+        restock_datetime_local = restock_datetime_utc.astimezone(ZoneInfo(target_timezone))
+
+        # Devuelve la fecha convertida como string
+        return restock_datetime_local.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        return None
 
 def get_name_per_id(name:str):
     '''
