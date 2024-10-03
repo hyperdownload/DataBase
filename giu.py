@@ -56,6 +56,7 @@ class Login(BaseScene):
 				self._extracted_from_login_logic_10(user, "Men_p")
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2] and app.get_variable('user_role') == 'General Admin':
 				self._extracted_from_login_logic_10(user, "Men_p_admin")
+				#r = dynamic_thread_executor(pass)
 			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
 				self.user_entry.configure(border_color = "green")
 				self.password_entry.configure(border_color = "red")
