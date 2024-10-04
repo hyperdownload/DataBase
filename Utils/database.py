@@ -367,7 +367,7 @@ def get_user_details(user_id: int) -> tuple:
     SELECT Users.email, Roles.name as role, Users.password, Branches.name as branch
     FROM Users
     LEFT JOIN Roles ON Users.role_id = Roles.id
-    LEFT JOIN Branches ON Users.branch_id = Branches.id
+    LEFT JOIN Branches ON Users.branch_id = Branches.name
     WHERE Users.id = ?
     ''', (user_id,))
 
