@@ -140,6 +140,7 @@ def create_database()->None:
     # Inserta sucursales de ejemplo
     cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', ('San miguel', '202'))
     cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', ('Jose c paz', '197'))
+    cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', ('Retiro', 'LA general pa'))
 
     conn.commit()
     conn.close()
@@ -568,9 +569,9 @@ if __name__ == "__main__":
     
     create_database()
 
-    register_user('John Doe', 'john@example.com', 'password123', 1, 1)
-    register_user('Jane Smith', 'jane@example.com', 'admin456', 2, 2)
-    register_user('Carlos Torres', 'carlos@example.com', 'superadmin789', 3, 3)
+    register_user('John Doe', 'john@example.com', 'password123', 1, "San miguel")
+    register_user('Jane Smith', 'jane@example.com', 'admin456', 2, "Jose c paz")
+    register_user('Carlos Torres', 'carlos@example.com', 'superadmin789', 3, "Retiro")
 
     product1 = Product('White T-shirt', 19.99, 'Brand X', 'M', None, 'White cotton t-shirt', "San Miguel", image_path='image1.jpg', stock=10)
     product2 = Product('Blue Jeans', 39.99, 'Brand Y', 'L', None, 'Blue denim jeans', "San Miguel", image_path='image1.jpg', stock=10)
