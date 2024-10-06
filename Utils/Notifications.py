@@ -84,7 +84,7 @@ class Slideout(ctk.CTkFrame):
 class Menu_user(ctk.CTkFrame):
     is_in_animation = False
     def __init__(self, parent, side="right", width=300, height=530, bg_color='#fafafa', text="", y_axis:float=1, **kwargs):
-        super().__init__(parent, width=width, height=height, bg_color='#fafafa',border_width=1,**kwargs)
+        super().__init__(parent, width=width, height=height, bg_color='#fafafa',border_width=1, border_color= "#EDEBE9",**kwargs)
         self.parent = parent
         self.side = side
         self.width = width

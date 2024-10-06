@@ -63,9 +63,7 @@ def create_scrollable_frame(manager, color_p, branch_user, fg_color="black", fon
         crear_sucursal = ctk.CTkButton(sucursal_fr, text_color=fg_color, text="+ Sucursal", font=('Plus Jakarta Sans', 16, 'bold'), fg_color= grey,
                                         hover_color= color_s, width=150, height= 40, corner_radius= 20)
         crear_sucursal.place(relx = 0.88, rely = 0.5, anchor = "center")
-    elif manager.get_variable('user_role') == 'General Admin' and manager.current_scene_name=='New_stock':
-        sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text="Nuevo producto", font=font)
-        sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + 90, rely=0.5, anchor="center")
+        
     else:
         sucursal_lb = None
     return main_fr, sucursal_fr, sucursal_lb
@@ -80,9 +78,18 @@ def header(manager) -> any:
             menu_user = Menu_user(manager, side="right", width=300, height=530)
             menu_user.slide_in()
 
-            log_out =  ctk.CTkLabel(menu_user, text= "Cerrar sesion",text_color=black, font = ('Plus jakarta Sans', 14, 'bold'))
-            log_out.place(relx=0.5, rely=0.9, anchor="center")
-            log_out.bind('<Button-1>', log_out_def)
+            fr = ctk.CTkFrame(menu_user, width= 260, height= 85, corner_radius= 10,fg_color= grey)
+            fr.place(relx=0.49, rely=0.12, anchor="center")
+            user_img1 = ctk.CTkImage(Image.open("img/person.png"), size=(40, 40))
+            img = ctk.CTkLabel(fr, width=65, height=65,corner_radius= 10, image= user_img1, text = "")
+            img.place(relx=0.16, rely=0.5, anchor="center")
+            user_name = ctk.CTkLabel(fr,text = "Nombre usuario", font = ('Plus jakarta Sans', 14, 'bold')).place(relx=0.6, rely=0.5, anchor="center")
+
+
+            log_out =  ctk.CTkButton(menu_user, width= 260, height= 35, corner_radius= 10,fg_color= grey, hover_color = color_s,
+                                    text= "Cerrar sesion",text_color=black, font = ('Plus jakarta Sans', 14, 'bold'), command= log_out_def)
+            log_out.place(relx=0.49, rely=0.9, anchor="center")
+
             menu_user.is_active = True
         else:
             # Cierra el menu si está activo
@@ -125,9 +132,9 @@ def header(manager) -> any:
             button.place(x=x_cord, rely=0.5, anchor="center")
 
     elif manager.get_variable('user_role') == 'General Admin':
-        btn_nav =  [("Notifications", (406 // 2) - 90, None, lambda: manager.switch_scene("New_stock"), 70),
+        btn_nav =  [("Notifications", (406 // 2) - 90, None, lambda: manager.switch_scene("Users"), 70),#cambiar por la respectiva pantalla
                     ("Home", (406 // 2) + 10, None, lambda: manager.switch_scene("Men_p_admin"), 70),
-                    ("Users", (406 // 2) + 90, None, lambda: manager.switch_scene("Ventas_nav"), 70)]
+                    ("Users", (406 // 2) + 90, None, lambda: manager.switch_scene("Users"), 70)]
         for text, x_cord, img, command, width in btn_nav:
             button = ctk.CTkButton(nav, text=text, image=img, **btn_config, width=width, command=command)
             button.place(x=x_cord, rely=0.5, anchor="center")

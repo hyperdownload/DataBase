@@ -427,25 +427,27 @@ class Men_p_admin(BaseScene):
 
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
-
-		self.h_grid1= 300
-		self.h_grid2= 400
-		self.altura_fr = self.h_grid1+self.h_grid2+50
-		
+		self.main_fr.configure(scrollbar_button_color= color_p, scrollbar_button_hover_color= color_s)
 		self.sucursales_fr()
 	
 	def sucursales_fr(self):
+		sucursales_fr = ctk.CTkScrollableFrame(self.main_fr, height=240, width= 750, fg_color= color_p, scrollbar_button_color= color_p, scrollbar_button_hover_color= color_s)
+		sucursales_fr.grid(row = 1, column = 0, columnspan=4, sticky = "ew")
 
 		style_card = {'width': 235, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'hover_color': color_s, 'text_color': black}
 		cord = [(0, "San Miguel"),(1, "Jose c Paz"),(2, "Retiro")]
 		for x, text in cord:
-			card = ctk.CTkButton(self.main_fr, text = text, **style_card)
-			card.grid(row = 1, column = x, sticky="e")
+			card = ctk.CTkButton(sucursales_fr, text = text, **style_card)
+			card.grid(row = 0, column = x,pady = 10, padx = 10, sticky="e")
 
-		new_stock = ctk.CTkButton(self.main_fr, text = "+ Nuevos productos", **style_card, command = lambda: app.switch_scene("New_stock"))
-		new_stock.grid(row = 2, column = 0, sticky="e", pady = 15)
+		fr = ctk.CTkFrame(self.main_fr, height=100, width= 750, fg_color= color_p)
+		fr.grid(row = 2, column = 0, columnspan=4, padx = 6, sticky = "ew")
+		cord_functions = [(0, "Nuevos productos",lambda: app.switch_scene("New_stock")),(1, "Nuevo usuario",lambda: app.switch_scene("New_user"))]
+		for x, text, command in cord_functions:
+			card = ctk.CTkButton(fr, text = text, **style_card, command= command)
+			card.configure(fg_color = black, hover_color = "#232323", text_color = color_p)
+			card.grid(row = 0, column = x, padx = 10, pady = 15, sticky="e")
 
-		
 class New_stock(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
@@ -456,26 +458,122 @@ class New_stock(BaseScene):
 		self.manager.title("Subir productos")
 
 	def main(self):
-		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
+		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
+		self.main_fr.place(relx=0.5, y=335, anchor="center")
 		self.inputs_col()
 	def inputs_col(self):
-		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 800, height= 300, fg_color= color_p)
-		self.inputs_fr.grid(row=1, column=0)
-		self.inputs_fr.grid_propagate(0)
+		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 475, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
+		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
+		
+		lb = ctk.CTkLabel(self.inputs_fr,text= "Nuevo producto", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
 
-		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, "border_color": "#dcdcdc"}
-
+		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
+		
 		self.nombre_producto = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre del producto', **self.input_config)
-		self.nombre_producto.grid(row = 1, column = 0, pady = 5, padx = 15)
-		self.precio_produc = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese precio del producto', **self.input_config)
-		self.precio_produc.grid(row = 1, column = 1, pady = 5)
-		self.precio_produc.configure(width= 250)
+		self.nombre_producto.place(relx=0.5, y=150, anchor="center")
+		
 		self.marca_produc= ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese marca del producto', **self.input_config)
-		self.marca_produc.grid(row = 2, column = 0, pady = 5, padx = 15)
+		self.marca_produc.place(relx=0.5, y=210, anchor="center")
+		
 		self.talle_produc=ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese talle del producto', **self.input_config)
-		self.talle_produc.grid(row = 2, column = 1, pady = 5)
-		self.talle_produc.configure(width= 250)
+		self.talle_produc.place(relx=0.5, y=270, anchor="center")
+		
+		self.precio_produc = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese precio', **self.input_config)
+		self.precio_produc.place(x=111, y=330, anchor="center")
+		self.precio_produc.configure(width = 173)
 
+		self.stock_produc = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese stock', **self.input_config)
+		self.stock_produc.place(x=289, y=330, anchor="center")
+		self.stock_produc.configure(width = 173)
+
+		self.new_product = ctk.CTkButton(self.inputs_fr,text= "Subir producto", font= ('Plus jakarta Sans', 14, 'bold')
+								,height=50, width = 350, corner_radius= 35, fg_color= black, hover_color= "#454545",
+								command= self.new_product_def)
+		self.new_product.place(relx = 0.5, y=390, anchor="center")
+		self.stock_produc.bind('<Return>',self.new_product_def)
+
+	def new_product_def(self, event = None):
+		nombre = self.nombre_producto.get()
+		marca = self.marca_produc.get()
+		talle = self.talle_produc.get()
+		precio = self.precio_produc.get()
+		stock = self.stock_produc.get()
+
+		if nombre and marca and talle and precio and stock: #Hay que hacer que compruebe con la bd asi no crea 2 veces el mismo producto
+			show_notification(app, "Nuevo producto cargado con exito")
+			print("Nuevo producto:",nombre, marca, talle, precio, stock)
+		else: 
+			show_notification(app, "Algunos inputs se encuentran vacios")
+			print("completa wachin")
+
+class New_user(BaseScene):
+	def __init__(self, parent, manager):
+		super().__init__(parent, manager)
+		self.manager=manager
+		self.header_fr = header(self.manager)
+		self.main()
+		self.manager.title("Nuevo usuario")
+
+	def main(self):
+		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
+		self.main_fr.place(relx=0.5, y=335, anchor="center")
+		self.inputs_col()
+	def inputs_col(self):
+		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 475, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
+		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
+		
+		lb = ctk.CTkLabel(self.inputs_fr,text= "Nuevo usuario", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
+
+		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
+		
+		self.nombre_empleado = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre del empleado', **self.input_config)
+		self.nombre_empleado.place(relx=0.5, y=150, anchor="center")
+		
+		self.correo_empleado= ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese correo electronico del empleado', **self.input_config)
+		self.correo_empleado.place(relx=0.5, y=210, anchor="center")
+		
+		self.contraseña=ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese contraseña', **self.input_config)
+		self.contraseña.place(relx=0.5, y=270, anchor="center")
+
+		rangos = ["Ingrese nivel de permisos", "Normal User", "Admin","General Admin"]
+		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values = rangos, font= ('Plus jakarta Sans', 14, 'bold'), text_color= black
+											, width = 350, height = 50, fg_color = "#f2f2f2", button_color = "#efefef"
+											, corner_radius= 25, button_hover_color = grey, dropdown_fg_color= color_p)
+		self.permisos.place(relx = 0.5, y=330, anchor="center")
+
+		self.new_product = ctk.CTkButton(self.inputs_fr,text= "Cargar empleado", font= ('Plus jakarta Sans', 14, 'bold')
+								,height=50, width = 350, corner_radius= 35, fg_color= black, hover_color= "#454545",
+								command= self.new_product_def)
+		self.new_product.place(relx = 0.5, y=390, anchor="center")
+		self.contraseña.bind('<Return>',self.new_product_def)
+
+	def new_product_def(self, event = None): 
+		nombre = self.nombre_empleado.get()
+		correo = self.correo_empleado.get()
+		contraseña = self.contraseña.get()
+		permisos = self.permisos.get()
+
+		if nombre and correo and contraseña and permisos != "Ingrese nivel de permisos": #Hay que hacer que compruebe con la bd asi no crea 2 veces el mismo empleado
+			show_notification(app, "Nuevo empleado cargado con exito")
+			print("Nuevo producto:",nombre, correo, contraseña, permisos)
+		elif nombre and correo and contraseña and permisos == "Ingrese nivel de permisos":
+			show_notification(app, "Asigne un rango valido")
+		else: 
+			show_notification(app, "Algunos inputs se encuentran vacios")
+			print("completa wachin")
+class Users(BaseScene):
+	def __init__(self, parent, manager):
+		super().__init__(parent, manager)
+
+		self.manager=manager
+		self.header_fr = header(self.manager)
+		self.main()
+		self.manager.title("Usuarios")
+
+	def main(self):
+		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
+		self.main_fr.place(relx=0.5, y=335, anchor="center")
+		lb = ctk.CTkLabel(self.main_fr, text = "En mantenimiento").place(relx=0.5, rely=0.5, anchor="center")
 
 if __name__ == "__main__":
 	app = SceneManager()  # Crea una instancia del gestor de escenas
@@ -492,7 +590,7 @@ if __name__ == "__main__":
 
 	# Añade las escenas al gestor
 	scenes = [("Stock_nav", Stock_nav),("Ventas_nav", Ventas_nav),("C_ventas", C_ventas),("C_producto", C_producto),("Men_p", Men_p),("Login", Login),("Men_p_admin", Men_p_admin),
-    ("New_stock", New_stock)]
+    ("New_stock", New_stock),("New_user",New_user), ("Users", Users)]
 
 	for scene_name, scene_class in scenes:
 		app.add_scene(scene_name, scene_class)
