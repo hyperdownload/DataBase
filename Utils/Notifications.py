@@ -151,8 +151,12 @@ class Menu_user(ctk.CTkFrame):
         # Elimina el frame una vez que esté fuera de la pantalla
         self.destroy()
 
-    # TODO Rename this here and in `_animate_out`
     def _extracted_from__animate_out_5(self, x):
         self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
         self.update_idletasks()
         time.sleep(0.01)
+
+class NotificationPlaceHolder():
+    def __init__(self, title, text):
+        self.title = title
+        self.text = text      

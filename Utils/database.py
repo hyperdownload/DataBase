@@ -307,8 +307,7 @@ def get_products_out_of_stock()->dict:
     cursor = conn.cursor()
 
     cursor.execute('''
-    SELECT p.id, p.name, b.name, p.price, p.stock FROM Products p
-    JOIN Brands b ON p.brand_id = b.id
+    SELECT p.id, p.name, p.branch_name, p.stock FROM Products p
     WHERE p.stock = 0
     ''')
     
@@ -467,9 +466,11 @@ def get_all_branch_names()->list:
     
     return branch_names
 
-def get_all_sales()->list:
+def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> list:
     '''
-    Obtiene todos los registros de la tabla Sales
+    Obtiene todos los registros de la tabla Sales y convierte la fecha de cada venta a la zona horaria deseada.
+    :param target_timezone: Zona horaria a la que se desea convertir la fecha (por defecto 'America/Argentina/Buenos_Aires')
+    :return: Lista de ventas con las fechas convertidas en la zona horaria especificada
     '''
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
@@ -481,8 +482,22 @@ def get_all_sales()->list:
 
     sales = cursor.fetchall()
     conn.close()
-    
-    return sales
+
+    sales_converted = []
+    for sale in sales:
+        sale_id, product_id, user_id, branch_name, quantity, sale_date, price = sale
+
+        # Convierte el string a objeto datetime asumiendo que la fecha está en UTC
+        sale_datetime_utc = datetime.strptime(sale_date, '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
+
+        # Convierte a la zona horaria objetivo
+        sale_datetime_local = sale_datetime_utc.astimezone(ZoneInfo(target_timezone))
+
+        # Guarda los datos con la fecha convertida en la lista final
+        sale_with_converted_date = (sale_id, product_id, user_id, branch_name, quantity, sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'), price)
+        sales_converted.append(sale_with_converted_date)
+
+    return sales_converted
 
 def get_product_name(id:int)->str:
     '''
@@ -528,7 +543,6 @@ def get_restock_date(restock_id: int, target_timezone: str = 'America/Argentina/
 
     restock_date = cursor.fetchone()
     conn.close()
-
     if restock_date:
         # Convierte el string a objeto datetime asumiendo que esta en UTC
         restock_datetime_utc = datetime.strptime(restock_date[0], '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
@@ -539,7 +553,7 @@ def get_restock_date(restock_id: int, target_timezone: str = 'America/Argentina/
         # Devuelve la fecha convertida como string
         return restock_datetime_local.strftime('%Y-%m-%d %H:%M:%S')
     else:
-        return None
+        return ("Fecha no disponible.")
 
 def get_name_per_id(name:str):
     '''

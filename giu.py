@@ -56,7 +56,11 @@ class Login(BaseScene):
 				self._extracted_from_login_logic_10(user, "Men_p")
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2] and app.get_variable('user_role') == 'General Admin':
 				self._extracted_from_login_logic_10(user, "Men_p_admin")
-				#r = dynamic_thread_executor(pass)
+				r = dynamic_thread_executor([(get_products_out_of_stock, ())])
+				if len(r[0][0]) != 0:
+					show_notification(app, "Hay productos sin stock.")
+					text = ''.join(f"ID:{id}, name:{name}, brand:{brand}, stock:{stock}"for id, name, brand, stock in get_products_out_of_stock())
+					notifications.append(NotificationPlaceHolder("Hay productos sin stock.", f"Los productos sin stock son:{text}"))
 			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
 				self.user_entry.configure(border_color = "green")
 				self.password_entry.configure(border_color = "red")
@@ -576,6 +580,7 @@ class Users(BaseScene):
 		lb = ctk.CTkLabel(self.main_fr, text = "En mantenimiento").place(relx=0.5, rely=0.5, anchor="center")
 
 if __name__ == "__main__":
+	notifications=[]
 	app = SceneManager()  # Crea una instancia del gestor de escenas
 	x = (app.winfo_screenwidth() // 2)-(800 // 2)
 	y = (app.winfo_screenheight() // 2)-(600 // 2)
