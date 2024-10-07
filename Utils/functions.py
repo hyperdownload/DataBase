@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from PIL import Image  # Importa Image desde PIL
-from Utils.Notifications import *
+from Utils.placeholders import *
+from Utils.database import *
 import io
 import concurrent.futures
 
@@ -83,7 +84,7 @@ def header(manager) -> any:
             user_img1 = ctk.CTkImage(Image.open("img/person.png"), size=(40, 40))
             img = ctk.CTkLabel(fr, width=65, height=65,corner_radius= 10, image= user_img1, text = "")
             img.place(relx=0.16, rely=0.5, anchor="center")
-            user_name = ctk.CTkLabel(fr,text = "Nombre usuario", font = ('Plus jakarta Sans', 14, 'bold')).place(relx=0.6, rely=0.5, anchor="center")
+            user_name = ctk.CTkLabel(fr, text_color=black,text = f"Nombre usuario:\n {get_user_name(manager.get_variable("user_id"))}", font = ('Plus jakarta Sans', 14, 'bold')).place(relx=0.6, rely=0.5, anchor="center")
 
 
             log_out =  ctk.CTkButton(menu_user, width= 260, height= 35, corner_radius= 10,fg_color= grey, hover_color = color_s,

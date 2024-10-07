@@ -560,7 +560,7 @@ class New_user(BaseScene):
 		if nombre and correo and contraseña and permisos != "Ingrese nivel de permisos": #Hay que hacer que compruebe con la bd asi no crea 2 veces el mismo empleado
 			show_notification(app, "Nuevo empleado cargado con exito")
 			print("Nuevo producto:",nombre, correo, contraseña, permisos)
-		elif nombre and correo and contraseña and permisos == "Ingrese nivel de permisos":
+		elif nombre and correo and contraseña:
 			show_notification(app, "Asigne un rango valido")
 		else: 
 			show_notification(app, "Algunos inputs se encuentran vacios")
@@ -577,7 +577,10 @@ class Users(BaseScene):
 	def main(self):
 		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
-		lb = ctk.CTkLabel(self.main_fr, text = "En mantenimiento").place(relx=0.5, rely=0.5, anchor="center")
+		#lb = ctk.CTkLabel(self.main_fr, text_color=black, text = "En mantenimiento").place(relx=0.5, rely=0.5, anchor="center")
+		for notification in notifications:
+			card = Card(self.main_fr, notification.title, notification.text)
+			card.pack()  
 
 if __name__ == "__main__":
 	notifications=[]

@@ -159,4 +159,46 @@ class Menu_user(ctk.CTkFrame):
 class NotificationPlaceHolder():
     def __init__(self, title, text):
         self.title = title
-        self.text = text      
+        self.text = text     
+        
+class Card(ctk.CTkFrame):
+    def __init__(self, parent, title, text, width=300, height=150, bg_color="#FFFFFF", text_color="#000000"):
+        super().__init__(parent, width=width, height=height, fg_color=bg_color)  
+        self.title = title
+        self.full_text = text
+        self.text_color = text_color
+        self.initial_height = height
+        self.is_expanded = False
+        
+        self.title_label = ctk.CTkLabel(self, text=self.title, font=("Arial", 16, "bold"), text_color=text_color)
+        self.title_label.pack(pady=10, padx=10, anchor="w")
+        
+        self.text_label = ctk.CTkLabel(self, text=self.full_text, font=("Arial", 12), text_color=text_color, wraplength=width-20)
+        self.text_label.pack(pady=5, padx=10, anchor="w")
+        
+        self.text_label.update_idletasks()  
+        text_height = self.text_label.winfo_reqheight() 
+        if text_height > height - 60: 
+            self.text_label.configure(text=self._truncate_text(self.full_text))  
+            self.read_more_button = ctk.CTkButton(self, text="Leer más", command=self.toggle_text)
+            self.read_more_button.pack(pady=5)
+        else:
+            self.read_more_button = None  
+    
+    def _truncate_text(self, text):
+        max_lines = 4  
+        lines = text.splitlines()
+        return "\n".join(lines[:max_lines]) + ("..." if len(lines) > max_lines else "")
+    
+    def toggle_text(self):
+        if self.is_expanded:
+            self.text_label.configure(text=self._truncate_text(self.full_text))
+            self.configure(height=self.initial_height)
+            self.read_more_button.configure(text="Leer más")
+        else:
+            self.text_label.configure(text=self.full_text)
+            full_height = self.text_label.winfo_reqheight() + 80  
+            self.configure(height=full_height)
+            self.read_more_button.configure(text="Leer menos")
+        
+        self.is_expanded = not self.is_expanded

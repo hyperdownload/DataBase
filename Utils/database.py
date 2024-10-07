@@ -318,6 +318,7 @@ def get_products_out_of_stock()->dict:
 
 @log_database_action('Restock')
 def record_restock(product_id:int, user_id:int, branch_name:str, quantity:int)->None:
+    # sourcery skip: remove-unnecessary-cast
     '''
     Guarda el reestock de un producto
     '''
@@ -555,7 +556,7 @@ def get_restock_date(restock_id: int, target_timezone: str = 'America/Argentina/
     else:
         return ("Fecha no disponible.")
 
-def get_name_per_id(name:str):
+def get_name_per_id(name:str):  # sourcery skip: avoid-builtin-shadow
     '''
     Obtiene el nombre de un usuario
     '''
