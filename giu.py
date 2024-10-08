@@ -577,10 +577,22 @@ class Users(BaseScene):
 	def main(self):
 		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
-		#lb = ctk.CTkLabel(self.main_fr, text_color=black, text = "En mantenimiento").place(relx=0.5, rely=0.5, anchor="center")
+		# lb = ctk.CTkLabel(self.main_fr, text_color=black, text = "En mantenimiento").place(relx=0.5, rely=0.5, anchor="center")
+		# for notification in notifications:
+		# 	card = Card(self.main_fr, notification.title, notification.text)
+		# 	card.pack()  
+		self.noti_container = ctk.CTkScrollableFrame(self.main_fr, width= 400, height= 425, fg_color= color_p, corner_radius= 40, border_width= 2, border_color= color_s, scrollbar_button_color= grey, scrollbar_button_hover_color= color_s)
+		self.noti_container.place(relx=0.5, rely=0.5, anchor="center")
+
+		style_card = {'width': 360, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'text_color': black}
+		# cord = [(0, "San Miguel"),(1, "Jose c Paz"),(2, "Retiro")]
+		# for x, text in cord:
+		# 	card = ctk.CTkLabel(self.noti_container, text = text, **style_card)
+		# 	card.grid(row = x, column = 0,pady = 10, sticky="ew")
+
 		for notification in notifications:
-			card = Card(self.main_fr, notification.title, notification.text)
-			card.pack()  
+			card = Card(self.noti_container, notification.title, notification.text)
+			card.grid(row = 1, column = 0,pady = 10, sticky="ew") 
 
 if __name__ == "__main__":
 	notifications=[]

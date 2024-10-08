@@ -162,26 +162,27 @@ class NotificationPlaceHolder():
         self.text = text     
         
 class Card(ctk.CTkFrame):
-    def __init__(self, parent, title, text, width=300, height=150, bg_color="#FFFFFF", text_color="#000000"):
-        super().__init__(parent, width=width, height=height, fg_color=bg_color)  
+    def __init__(self, parent, title, text, width=400, height=100, corner_radius = 10, bg_color= "#EDEBE9", text_color="#000000"):
+        super().__init__(parent, width=width, height=height, fg_color=bg_color, corner_radius = corner_radius)  
+
         self.title = title
         self.full_text = text
         self.text_color = text_color
         self.initial_height = height
         self.is_expanded = False
         
-        self.title_label = ctk.CTkLabel(self, text=self.title, font=("Arial", 16, "bold"), text_color=text_color)
-        self.title_label.pack(pady=10, padx=10, anchor="w")
+        self.title_label = ctk.CTkLabel(self, text=self.title, font=("Arial", 20, "bold"), text_color=text_color)
+        self.title_label.pack(pady=10, padx=20, anchor="w")
         
-        self.text_label = ctk.CTkLabel(self, text=self.full_text, font=("Arial", 12), text_color=text_color, wraplength=width-20)
-        self.text_label.pack(pady=5, padx=10, anchor="w")
+        self.text_label = ctk.CTkLabel(self, text=self.full_text,font=("Arial", 12), text_color=text_color, wraplength=width-20)
+        self.text_label.pack(pady=10, padx=10, anchor="w")
         
         self.text_label.update_idletasks()  
         text_height = self.text_label.winfo_reqheight() 
         if text_height > height - 60: 
             self.text_label.configure(text=self._truncate_text(self.full_text))  
-            self.read_more_button = ctk.CTkButton(self, text="Leer más", command=self.toggle_text)
-            self.read_more_button.pack(pady=5)
+            self.read_more_button = ctk.CTkButton(self, text="Leer más", fg_color = "#131313", hover_color= "#232323" , command=self.toggle_text)
+            self.read_more_button.pack(side = "right", padx = 20,pady=5)
         else:
             self.read_more_button = None  
     
