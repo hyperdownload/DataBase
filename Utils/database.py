@@ -199,7 +199,7 @@ def log_database_action(action: str):
     return decorator_log
 
 @log_database_action("Register User")
-def register_user(name:str, email:str, password:str, role_id:str, branch_name:str) -> None:
+def register_user(name:str, email:str, password:str, role_id:str, branch_name:str) -> str:
     if branch_exists(branch_name):
         conn = sqlite3.connect(dataBasePath)
         cursor = conn.cursor()
@@ -208,7 +208,7 @@ def register_user(name:str, email:str, password:str, role_id:str, branch_name:st
         if cursor.fetchone() is not None:
             print("Error: ya existe un usuario con este email.")
             conn.close()
-            return
+            return "Error: ya existe un usuario con este email."
 
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
@@ -220,7 +220,7 @@ def register_user(name:str, email:str, password:str, role_id:str, branch_name:st
         conn.commit()
         conn.close()
 
-        print(f"User {name} registrado.")
+        return(f"Usuario {name} registrado.")
     else:
         print(f"La sucursal '{branch_name}' no existe.")
         

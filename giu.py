@@ -32,11 +32,11 @@ class Login(BaseScene):
 		user_lb = ctk.CTkLabel(login_container, text = "Urbanlive", font=('Plus Jakarta Sans', 16, 'bold'), text_color= "#BEBEBE")
 		user_lb.place(relx = 0.5 , y=215, anchor= "center")
 
-		self.user_entry = ctk.CTkEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su nombre de usuario...")
+		self.user_entry = ClearableEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su nombre de usuario...")
 		self.user_entry.place(relx=0.5, y=260, anchor= "center")
 		self.user_entry.bind('<Return>', self.login_logic)
 
-		self.password_entry = ctk.CTkEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su contraseña...")
+		self.password_entry = ClearableEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su contraseña...")
 		self.password_entry.place(relx=0.5, y=310, anchor= "center")
 		self.password_entry.bind('<Return>', self.login_logic)
 		self.password_entry.bind('<MouseWheel>', lambda event:self.login_logic(autologin=True)) # Esta linea en algun momento hay name_product eliminarla
@@ -46,8 +46,8 @@ class Login(BaseScene):
   
 	def login_logic(self, event=None, autologin=False):
 		if not autologin:
-			user = self.user_entry.get()
-			password = self.password_entry.get()
+			user = self.user_entry.get_and_clear()
+			password = self.password_entry.get_and_clear()
 		else:
 			user = 'carlos@example.com'
 			password = 'superadmin789'
@@ -171,9 +171,9 @@ class C_producto(BaseScene):
 		print(app.get_variable("user_bran"))
 
 	def search(self, event = None):
-		if self.buscar_producto.get():
+		if self.buscar_producto.get_and_clear():
 			self.tv_stock.delete(*self.tv_stock.get_children())
-			search=search_function(get_products_in_stock(),self.buscar_producto.get())
+			search=search_function(get_products_in_stock(),self.buscar_producto.get_and_clear())
 			for product in search:
 				self.tv_stock.insert("",tk.END, text=f"{product.name}",
 						values=(product.price,product.brand,product.size, product.description))
@@ -188,7 +188,7 @@ class C_producto(BaseScene):
 		focus = self.tv_stock.focus()
 		name_product=self.tv_stock.item(focus,'text')
 		try:
-			record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get())
+			record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get_and_clear())
 			show_notification(app, f"Reestock exitoso\n stock actual: {get_stock_product(get_name_per_id(str(name_product)))}")
 		except TypeError:
 			show_notification(app, "Error al reestockear\n procure seleccionar un\n producto de la tabla")
@@ -200,7 +200,7 @@ class C_producto(BaseScene):
 		
 		self.cp_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 85, width = 800)
 		self.cp_fr.grid(row=1, column=0)
-		self.buscar_producto = ctk.CTkEntry(self.cp_fr, placeholder_text= "Buscar producto...", width= 250, height=50,
+		self.buscar_producto = ClearableEntry(self.cp_fr, placeholder_text= "Buscar producto...", width= 250, height=50,
 										corner_radius=35, border_color= "#dcdcdc", text_color= "#252525")
 		self.buscar_producto.place(x = 185, rely = 0.5, anchor= "center")
 
@@ -210,7 +210,7 @@ class C_producto(BaseScene):
 									, height= 50, width= 50, corner_radius= 15, cursor = "hand2", command = self.search)
 		bp_btn.place(x = 355, rely = 0.5, anchor= "center")
 
-		self.c_stock = ctk.CTkEntry(self.cp_fr, placeholder_text= "Subir producto...", width= 250, height=50,
+		self.c_stock = ClearableEntry(self.cp_fr, placeholder_text= "Subir producto...", width= 250, height=50,
 										corner_radius=35, border_color= "#dcdcdc", text_color= "#252525" )
 		self.c_stock.place(x = 525, rely= 0.5, anchor= "center")
 
@@ -270,10 +270,10 @@ class C_ventas(BaseScene):
 		input_style = [("Ingrese codigo de barra", 0), ("Ingrese cantidad", 1), ("Ingrese descuento",4)]
 		for text, y_cord in input_style:
 			if y_cord==0:
-				self.inputid = ctk.CTkEntry(self.inputs_fr, placeholder_text= text, **self.input_config)
+				self.inputid = ClearableEntry(self.inputs_fr, placeholder_text= text, **self.input_config)
 				self.inputid.grid(row = y_cord, column = 1, pady = 5, padx = 25)
 			elif y_cord==1:
-				self.inputq = ctk.CTkEntry(self.inputs_fr, placeholder_text= text, **self.input_config)
+				self.inputq = ClearableEntry(self.inputs_fr, placeholder_text= text, **self.input_config)
 				self.inputq.grid(row = y_cord, column = 1, pady = 5, padx = 25)
 
 
@@ -292,22 +292,22 @@ class C_ventas(BaseScene):
 		registrar.grid(row = 0, column = 1,padx = 5)
 
 	def generate_ticket(self):
-		self.pago.configure(text = f"Metodo de pago: {self.metodo_pago.get()}")
+		self.pago.configure(text = f"Metodo de pago: {self.metodo_pago.get_and_clear()}")
 		self.treeviewt.insert(
 			"",
 			tk.END,
-			text=get_name_product(int(self.inputid.get())),
-			values=(get_price_product(int(self.inputid.get())), int(self.inputq.get()))
+			text=get_name_product(int(self.inputid.get_and_clear())),
+			values=(get_price_product(int(self.inputid.get_and_clear())), int(self.inputq.get_and_clear()))
 		)
-		self.id_product.append(self.inputid.get())
+		self.id_product.append(self.inputid.get_and_clear())
 		
 	def credito(self,aguanteriver):
 		if aguanteriver == "Credito":
-			self.input_c = ctk.CTkEntry(self.inputs_fr, placeholder_text= "Ingrese tarjeta", **self.input_config)
+			self.input_c = ClearableEntry(self.inputs_fr, placeholder_text= "Ingrese tarjeta", **self.input_config)
 			self.input_c.grid(row = 3, column = 1, pady = 5, padx = 25)
 		if aguanteriver == "Debito":
 			self.input_c.destroy()
-			self.input_c = ctk.CTkEntry(self.inputs_fr, placeholder_text= "Ingrese tarjeta", **self.input_config)
+			self.input_c = ClearableEntry(self.inputs_fr, placeholder_text= "Ingrese tarjeta", **self.input_config)
 			self.input_c.grid(row = 3, column = 1, pady = 5, padx = 25)
 		elif aguanteriver != "Credito":
 			self.input_c.destroy()
@@ -328,7 +328,7 @@ class C_ventas(BaseScene):
 			self.treeviewt.column(col, width=width)
 			self.treeviewt.heading(col, text=col if col != "#0" else "Producto", anchor=tk.CENTER)
 
-		self.pago = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
+		self.pago = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get_and_clear()}", font=('Plus Jakarta Sans', 16, 'bold'))
 		self.pago.place(x=75, y=320)
 
 		registrar_venta = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text="Registrar Venta", font=('Plus Jakarta Sans', 16, 'bold', 'underline'), cursor = "hand2")
@@ -336,7 +336,7 @@ class C_ventas(BaseScene):
 		registrar_venta.bind('<Button-1>', self.registrar_venta_func)
 
 	def registrar_venta_func(self, event):
-		product_id = int(self.inputid.get())  
+		product_id = int(self.inputid.get_and_clear())  
 		branch_name = app.get_variable('branch_user') 
 
 		for parent in self.treeviewt.get_children():
@@ -469,24 +469,24 @@ class New_stock(BaseScene):
 		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 475, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
 		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
 		
-		lb = ctk.CTkLabel(self.inputs_fr,text= "Nuevo producto", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
+		lb = ctk.CTkLabel(self.inputs_fr, text_color=black,text= "Nuevo producto", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
 
 		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
 		
-		self.nombre_producto = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre del producto', **self.input_config)
+		self.nombre_producto = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre del producto', **self.input_config)
 		self.nombre_producto.place(relx=0.5, y=150, anchor="center")
 		
-		self.marca_produc= ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese marca del producto', **self.input_config)
+		self.marca_produc= ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese marca del producto', **self.input_config)
 		self.marca_produc.place(relx=0.5, y=210, anchor="center")
 		
-		self.talle_produc=ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese talle del producto', **self.input_config)
+		self.talle_produc=ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese talle del producto', **self.input_config)
 		self.talle_produc.place(relx=0.5, y=270, anchor="center")
 		
-		self.precio_produc = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese precio', **self.input_config)
+		self.precio_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese precio', **self.input_config)
 		self.precio_produc.place(x=111, y=330, anchor="center")
 		self.precio_produc.configure(width = 173)
 
-		self.stock_produc = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese stock', **self.input_config)
+		self.stock_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese stock', **self.input_config)
 		self.stock_produc.place(x=289, y=330, anchor="center")
 		self.stock_produc.configure(width = 173)
 
@@ -497,18 +497,14 @@ class New_stock(BaseScene):
 		self.stock_produc.bind('<Return>',self.new_product_def)
 
 	def new_product_def(self, event = None):
-		nombre = self.nombre_producto.get()
-		marca = self.marca_produc.get()
-		talle = self.talle_produc.get()
-		precio = self.precio_produc.get()
-		stock = self.stock_produc.get()
+		# Obtener los valores de los inputs
+		nombre, marca, talle, precio, stock = (self.nombre_producto.get_and_clear(),self.marca_produc.get_and_clear(),self.talle_produc.get_and_clear(),self.precio_produc.get_and_clear(),self.stock_produc.get_and_clear())
 
-		if nombre and marca and talle and precio and stock: #Hay que hacer que compruebe con la bd asi no crea 2 veces el mismo producto
-			show_notification(app, "Nuevo producto cargado con exito")
-			print("Nuevo producto:",nombre, marca, talle, precio, stock)
-		else: 
-			show_notification(app, "Algunos inputs se encuentran vacios")
-			print("completa wachin")
+		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"marca": marca,"talle": talle,"precio": precio,"stock": stock,}.items()if not valor]:
+			show_notification(app, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
+		else:
+			show_notification(app, "Nuevo producto cargado con éxito")
+			print(nombre, marca, talle, precio, stock)
 
 class New_user(BaseScene):
 	def __init__(self, parent, manager):
@@ -526,23 +522,23 @@ class New_user(BaseScene):
 		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 475, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
 		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
 		
-		lb = ctk.CTkLabel(self.inputs_fr,text= "Nuevo usuario", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
+		lb = ctk.CTkLabel(self.inputs_fr, text_color=black,text= "Nuevo usuario", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
 
 		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
 		
-		self.nombre_empleado = ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre del empleado', **self.input_config)
+		self.nombre_empleado = ClearableEntry(self.inputs_fr, text_color=black,placeholder_text= 'Ingrese nombre del empleado', **self.input_config)
 		self.nombre_empleado.place(relx=0.5, y=150, anchor="center")
 		
-		self.correo_empleado= ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese correo electronico del empleado', **self.input_config)
+		self.correo_empleado= ClearableEntry(self.inputs_fr, text_color=black, placeholder_text= 'Ingrese correo electronico del empleado', **self.input_config)
 		self.correo_empleado.place(relx=0.5, y=210, anchor="center")
 		
-		self.contraseña=ctk.CTkEntry(self.inputs_fr, placeholder_text= 'Ingrese contraseña', **self.input_config)
+		self.contraseña=ClearableEntry(self.inputs_fr, text_color=black, placeholder_text= 'Ingrese contraseña', **self.input_config)
 		self.contraseña.place(relx=0.5, y=270, anchor="center")
 
 		rangos = ["Ingrese nivel de permisos", "Normal User", "Admin","General Admin"]
 		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values = rangos, font= ('Plus jakarta Sans', 14, 'bold'), text_color= black
 											, width = 350, height = 50, fg_color = "#f2f2f2", button_color = "#efefef"
-											, corner_radius= 25, button_hover_color = grey, dropdown_fg_color= color_p)
+											, corner_radius= 25, button_hover_color = grey, dropdown_fg_color= color_p, dropdown_text_color=black)
 		self.permisos.place(relx = 0.5, y=330, anchor="center")
 
 		self.new_product = ctk.CTkButton(self.inputs_fr,text= "Cargar empleado", font= ('Plus jakarta Sans', 14, 'bold')
@@ -551,20 +547,19 @@ class New_user(BaseScene):
 		self.new_product.place(relx = 0.5, y=390, anchor="center")
 		self.contraseña.bind('<Return>',self.new_product_def)
 
-	def new_product_def(self, event = None): 
-		nombre = self.nombre_empleado.get()
-		correo = self.correo_empleado.get()
-		contraseña = self.contraseña.get()
-		permisos = self.permisos.get()
+	def new_product_def(self, event=None):
+		nombre, correo, contraseña, permisos = self.nombre_empleado.get_and_clear(), self.correo_empleado.get_and_clear(), self.contraseña.get_and_clear(), self.permisos.get()
+		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"correo": correo,"contraseña": contraseña,"permisos": permisos,}.items()if not valor]:	show_notification(self.manager, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
+		elif permisos == "Ingrese nivel de permisos":
+			show_notification(self.manager, "Asigne un rango válido")
+		else:
+			permisos_map = {"Normal User": 1, "Admin": 2, "General Admin": 3}
+			permisos = permisos_map.get(permisos)
+			try:
+				show_notification(self.manager, register_user(nombre, correo, contraseña, permisos, "Retiro"))
+			except Exception:
+				show_notification(self.manager, "Hubo un error al registrar el empleado")
 
-		if nombre and correo and contraseña and permisos != "Ingrese nivel de permisos": #Hay que hacer que compruebe con la bd asi no crea 2 veces el mismo empleado
-			show_notification(app, "Nuevo empleado cargado con exito")
-			print("Nuevo producto:",nombre, correo, contraseña, permisos)
-		elif nombre and correo and contraseña:
-			show_notification(app, "Asigne un rango valido")
-		else: 
-			show_notification(app, "Algunos inputs se encuentran vacios")
-			print("completa wachin")
 class Users(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
@@ -610,7 +605,7 @@ if __name__ == "__main__":
 
 	# Añade las escenas al gestor
 	scenes = [("Stock_nav", Stock_nav),("Ventas_nav", Ventas_nav),("C_ventas", C_ventas),("C_producto", C_producto),("Men_p", Men_p),("Login", Login),("Men_p_admin", Men_p_admin),
-    ("New_stock", New_stock),("New_user",New_user), ("Users", Users)]
+    ("New_stock", New_stock),("New_user",New_user), ("Users_nav", Users), ("Notifications_nav", Users)]
 
 	for scene_name, scene_class in scenes:
 		app.add_scene(scene_name, scene_class)
