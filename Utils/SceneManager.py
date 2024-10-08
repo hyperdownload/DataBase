@@ -39,17 +39,7 @@ class SceneManager(ctk.CTk):
             traceback.print_exc()
             # Relanza la excepción para no perder la traza original
             raise
-
-    '''def create_thread(self, task:function)->any:
-        # Crea un hilo y le asigna la función my_task
-        thread = threading.Thread(target=task)
-        
-        # Inicia el hilo
-        thread.start()
-        
-        # Devuelve el hilo para que pueda ser gestionado externamente si es necesario
-        return thread'''
-        
+       
     def add_scene(self, name:str, scene_class:object)->None:
         """Agrega una nueva escena al gestor."""
         if name in self.scenes:
@@ -73,20 +63,6 @@ class SceneManager(ctk.CTk):
         else:
             print(f"Escena '{name}' no encontrada.")
 
-    def force_switch_scene(self, name:str) -> None:
-        """Cambia de escena y fuerza la eliminación de la escena actual."""
-        if self.current_scene:
-            # Destruye todos los widgets de la escena actual
-            for widget in self.current_scene.winfo_children():
-                widget.destroy()
-
-            self.current_scene.destroy()
-
-        if scene_class := self.scenes.get(name):
-            self.current_scene = scene_class(self, self)
-            self.current_scene.pack(fill='both', expand=True)
-        else:
-            print(f"Escena '{name}' no encontrada.")
 # Clase base para las escenas
 class BaseScene(ctk.CTkFrame):
     def __init__(self, parent, manager):
@@ -121,35 +97,12 @@ class Scene1(BaseScene):
                               command=lambda: manager.switch_scene("Scene2"))
         button.pack(pady=20)  # Empaqueta el botón con un relleno vertical
 
-# Otro ejemplo de una escena
-class Scene2(BaseScene):
-    def __init__(self, parent, manager):
-        """Inicializa la segunda escena.
-
-        Configura la interfaz para Scene2, incluyendo una etiqueta y un botón.
-
-        Args:
-            parent (ctk.CTk): Ventana principal o gestor de escenas.
-            manager (SceneManager): Gestor de escenas que maneja esta escena.
-        """
-        super().__init__(parent, manager)
-
-        # Crea una etiqueta con texto para Scene2
-        label = ctk.CTkLabel(self, text="This is Scene 2")
-        label.pack(pady=20)  # Empaqueta la etiqueta con un relleno vertical
-
-        # Crea un botón para cambiar a Scene1
-        button = ctk.CTkButton(self, text="Go to Scene 1", 
-                              command=lambda: manager.switch_scene("Scene1"))
-        button.pack(pady=20)  # Empaqueta el botón con un relleno vertical
-
 if __name__ == "__main__":
     app = SceneManager()  # Crea una instancia del gestor de escenas
     app.geometry("400x300")  # Establece el tamaño de la ventana
 
     # Añade las escenas al gestor
     app.add_scene("Scene1", Scene1)
-    app.add_scene("Scene2", Scene2)
 
     # Inicia la aplicación con la primera escena visible
     app.switch_scene("Scene1")
