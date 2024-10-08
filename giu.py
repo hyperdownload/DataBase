@@ -24,25 +24,23 @@ class Login(BaseScene):
 
 	def login(self):
 		self.manager.title("Login")
-		login_container = ctk.CTkFrame(self.manager, width = 800, height = 600, fg_color= color_p)
-		login_container.place(x = 0, y = 0)
+		login_container = ctk.CTkFrame(self.manager, width=800, height=600, fg_color=color_p)
+		login_container.place(x=0, y=0)
 		
-		bienvenida_lb = ctk.CTkLabel(login_container,text_color=black, text = "Welcome to back", font=('Plus Jakarta Sans', 28, 'bold'))
-		bienvenida_lb.place(relx= 0.5, y=185, anchor= "center")
-		user_lb = ctk.CTkLabel(login_container, text = "Urbanlive", font=('Plus Jakarta Sans', 16, 'bold'), text_color= "#BEBEBE")
-		user_lb.place(relx = 0.5 , y=215, anchor= "center")
+		labels = [("Welcome to back", 185, 28), ("Urbanlive", 215, 16)]
+		for text, y_pos, font_size in labels:
+			ctk.CTkLabel(login_container, text=text, font=('Plus Jakarta Sans', font_size, 'bold'), text_color=black if font_size == 28 else "#BEBEBE").place(relx=0.5, y=y_pos, anchor="center")
 
-		self.user_entry = ClearableEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su nombre de usuario...")
-		self.user_entry.place(relx=0.5, y=260, anchor= "center")
+		self.user_entry = ClearableEntry(login_container, height=35, width=350, corner_radius=20, placeholder_text="Ingrese su nombre de usuario...")
+		self.user_entry.place(relx=0.5, y=260, anchor="center")
 		self.user_entry.bind('<Return>', self.login_logic)
 
-		self.password_entry = ClearableEntry(login_container, height = 35, width = 350, corner_radius = 20, placeholder_text = "Ingrese su contraseña...")
-		self.password_entry.place(relx=0.5, y=310, anchor= "center")
+		self.password_entry = ClearableEntry(login_container, height=35, width=350, corner_radius=20, placeholder_text="Ingrese su contraseña...")
+		self.password_entry.place(relx=0.5, y=310, anchor="center")
 		self.password_entry.bind('<Return>', self.login_logic)
-		self.password_entry.bind('<MouseWheel>', lambda event:self.login_logic(autologin=True)) # Esta linea en algun momento hay name_product eliminarla
+		self.password_entry.bind('<MouseWheel>', lambda event: self.login_logic(autologin=True))
 
-		submit = ctk.CTkButton(login_container, text = "Login", height = 35, width = 350, corner_radius = 20, fg_color = black, text_color = color_p, hover_color = "#454545", command = self.login_logic)
-		submit.place(relx=0.5, y=360, anchor= "center")
+		ctk.CTkButton(login_container, text="Login", height=35, width=350, corner_radius=20, fg_color=black, text_color=color_p, hover_color="#454545", command=self.login_logic).place(relx=0.5, y=360, anchor="center")
   
 	def login_logic(self, event=None, autologin=False):
 		if not autologin:
@@ -112,13 +110,10 @@ class Men_p(BaseScene):
 	
 	def cambiar_color(self, widget, text_color, fg_color, event=None):
 		widget.configure(text_color=text_color, fg_color=fg_color)
-	#--------------------------------------------------------------------------------------------------------------------------------------------
 
 	def col_atajo(self):
 		self.atajos_frame = ctk.CTkFrame(self.main_fr, width= 270, height= self.altura_fr, fg_color= color_p)
 		self.atajos_frame.grid(row=1, column=1, padx = 12)
-
-		#--------------------------------------------------------------------------------------------------------------------------------------------
 
 		self.cargar_prod_lb = ctk.CTkLabel(self.atajos_frame, width= 270, height= self.h_grid1, fg_color= grey,
 											corner_radius= 40, text= "")
@@ -152,7 +147,6 @@ class Men_p(BaseScene):
 									corner_radius= 40, text = "Futuro grafico| proyecto en mantenimiento")
 		self.grafico.grid(row=2, column=0, columnspan=2, ipady= 6)
 
-		# value = {'JJ': 5, 'OO': 0, 'WW': 7, 'TT': 3, 'GG': 15, 'FF': 10, 'HH': 1, 'PP': 12, "AA": 4}
 		value = {'Remeras': 5, 'Accesorios': 0, 'Vestidos': 7, 'Calzado': 3, 'Pantalones': 15}
 
 		CTkChart(self.grafico, value, corner_radius=20, fg_color= color_s, stat_color= black, chart_fg_color= color_s,
