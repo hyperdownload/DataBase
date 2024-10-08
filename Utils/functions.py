@@ -112,8 +112,6 @@ def header(manager) -> any:
 
     return header_fr
 
-
-
 def levenshtein_distance(s1: str, s2: str) -> int:
     """Calcula la distancia de Levenshtein entre dos cadenas."""
     if len(s1) > len(s2):
