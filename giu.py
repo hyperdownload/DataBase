@@ -513,38 +513,29 @@ class New_user(BaseScene):
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
 		self.inputs_col()
 	def inputs_col(self):
-		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 475, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
+		self.inputs_fr = ctk.CTkFrame(self.main_fr, width=400, height=475, fg_color=color_p, corner_radius=20, border_width=2, border_color=color_s)
 		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
-		
-		lb = ctk.CTkLabel(self.inputs_fr, text_color=black,text= "Nuevo usuario", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
 
-		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
-		
-		self.nombre_empleado = ClearableEntry(self.inputs_fr, text_color=black,placeholder_text= 'Ingrese nombre del empleado', **self.input_config)
-		self.nombre_empleado.place(relx=0.5, y=150, anchor="center")
-		
-		self.correo_empleado= ClearableEntry(self.inputs_fr, text_color=black, placeholder_text= 'Ingrese correo electronico del empleado', **self.input_config)
-		self.correo_empleado.place(relx=0.5, y=210, anchor="center")
-		
-		self.contraseña=ClearableEntry(self.inputs_fr, text_color=black, placeholder_text= 'Ingrese contraseña', **self.input_config)
-		self.contraseña.place(relx=0.5, y=270, anchor="center")
-  
-		self.sucursal=ctk.CTkOptionMenu(self.inputs_fr, values = get_all_branch_names(), font= ('Plus jakarta Sans', 14, 'bold'), text_color= black
-											, width = 350, height = 50, fg_color = "#f2f2f2", button_color = "#efefef"
-											, corner_radius= 25, button_hover_color = grey, dropdown_fg_color= color_p, dropdown_text_color=black)
+		ctk.CTkLabel(self.inputs_fr, text_color=black, text="Nuevo usuario", font=('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
+
+		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent",'width': 350,'height': 50,'corner_radius': 35,'border_color': "#dcdcdc",'placeholder_text_color': "#BEBEBE"}
+
+		fields = [('nombre_empleado', 'Ingrese nombre del empleado', 150),('correo_empleado', 'Ingrese correo electronico del empleado', 210),('contraseña', 'Ingrese contraseña', 270)]
+
+		for attr, placeholder, y_pos in fields:
+			setattr(self, attr, ClearableEntry(self.inputs_fr, text_color=black, placeholder_text=placeholder, **self.input_config))
+			getattr(self, attr).place(relx=0.5, y=y_pos, anchor="center")
+
+		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
 		self.sucursal.place(relx=0.5, y=330, anchor="center")
 
-		rangos = ["Ingrese nivel de permisos", "Normal User", "Admin","General Admin"]
-		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values = rangos, font= ('Plus jakarta Sans', 14, 'bold'), text_color= black
-											, width = 350, height = 50, fg_color = "#f2f2f2", button_color = "#efefef"
-											, corner_radius= 25, button_hover_color = grey, dropdown_fg_color= color_p, dropdown_text_color=black)
-		self.permisos.place(relx = 0.5, y=390, anchor="center")
+		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values=["Ingrese nivel de permisos", "Normal User", "Admin", "General Admin"], font=('Plus jakarta Sans', 14, 'bold'), text_color=black, width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+		self.permisos.place(relx=0.5, y=390, anchor="center")
 
-		self.new_product = ctk.CTkButton(self.inputs_fr,text= "Cargar empleado", font= ('Plus jakarta Sans', 14, 'bold')
-								,height=50, width = 350, corner_radius= 35, fg_color= black, hover_color= "#454545",
-								command= self.new_product_def)
-		self.new_product.place(relx = 0.5, y=450, anchor="center")
-		self.contraseña.bind('<Return>',self.new_product_def)
+		self.new_product = ctk.CTkButton(self.inputs_fr, text="Cargar empleado", font=('Plus jakarta Sans', 14, 'bold'),height=50, width=350, corner_radius=35, fg_color=black, hover_color="#454545", command=self.new_product_def)
+		self.new_product.place(relx=0.5, y=450, anchor="center")
+
+		self.contraseña.bind('<Return>', self.new_product_def)
 
 	def new_product_def(self, event=None):
 		nombre, correo, contraseña, permisos, sucursal = self.nombre_empleado.get_and_clear(), self.correo_empleado.get_and_clear(), self.contraseña.get_and_clear(), self.permisos.get(), self.sucursal.get_and_clear()
