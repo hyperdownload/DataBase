@@ -528,30 +528,36 @@ class New_user(BaseScene):
 		
 		self.contraseña=ClearableEntry(self.inputs_fr, text_color=black, placeholder_text= 'Ingrese contraseña', **self.input_config)
 		self.contraseña.place(relx=0.5, y=270, anchor="center")
+  
+		self.sucursal=ctk.CTkOptionMenu(self.inputs_fr, values = get_all_branch_names(), font= ('Plus jakarta Sans', 14, 'bold'), text_color= black
+											, width = 350, height = 50, fg_color = "#f2f2f2", button_color = "#efefef"
+											, corner_radius= 25, button_hover_color = grey, dropdown_fg_color= color_p, dropdown_text_color=black)
+		self.sucursal.place(relx=0.5, y=330, anchor="center")
 
 		rangos = ["Ingrese nivel de permisos", "Normal User", "Admin","General Admin"]
 		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values = rangos, font= ('Plus jakarta Sans', 14, 'bold'), text_color= black
 											, width = 350, height = 50, fg_color = "#f2f2f2", button_color = "#efefef"
 											, corner_radius= 25, button_hover_color = grey, dropdown_fg_color= color_p, dropdown_text_color=black)
-		self.permisos.place(relx = 0.5, y=330, anchor="center")
+		self.permisos.place(relx = 0.5, y=390, anchor="center")
 
 		self.new_product = ctk.CTkButton(self.inputs_fr,text= "Cargar empleado", font= ('Plus jakarta Sans', 14, 'bold')
 								,height=50, width = 350, corner_radius= 35, fg_color= black, hover_color= "#454545",
 								command= self.new_product_def)
-		self.new_product.place(relx = 0.5, y=390, anchor="center")
+		self.new_product.place(relx = 0.5, y=450, anchor="center")
 		self.contraseña.bind('<Return>',self.new_product_def)
 
 	def new_product_def(self, event=None):
-		nombre, correo, contraseña, permisos = self.nombre_empleado.get_and_clear(), self.correo_empleado.get_and_clear(), self.contraseña.get_and_clear(), self.permisos.get()
-		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"correo": correo,"contraseña": contraseña,"permisos": permisos,}.items()if not valor]:	show_notification(self.manager, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
+		nombre, correo, contraseña, permisos, sucursal = self.nombre_empleado.get_and_clear(), self.correo_empleado.get_and_clear(), self.contraseña.get_and_clear(), self.permisos.get(), self.sucursal.get_and_clear()
+		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"correo": correo,"contraseña": contraseña,"permisos": permisos, "sucursal": sucursal,}.items()if not valor]:	show_notification(self.manager, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
 		elif permisos == "Ingrese nivel de permisos":
-			show_notification(self.manager, "Asigne un rango válido")
+			show_notification(self.manager, "Asigne un rango válido.")
 		else:
 			permisos_map = {"Normal User": 1, "Admin": 2, "General Admin": 3}
 			permisos = permisos_map.get(permisos)
 			try:
-				show_notification(self.manager, register_user(nombre, correo, contraseña, permisos, "Retiro"))
-			except Exception:
+				show_notification(self.manager, register_user(nombre, correo, contraseña, permisos, sucursal))
+			except Exception as e:
+				print(e)
 				show_notification(self.manager, "Hubo un error al registrar el empleado")
 
 class Users(BaseScene):

@@ -577,6 +577,19 @@ def branch_exists(branch_name: str) -> bool:
     result = cursor.fetchone()
     return result is not None
 
+def get_all_branches()->list:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT name
+    FROM Branches
+    ''')
+
+    branches = cursor.fetchall()
+    conn.close()
+    return branches
+
 if __name__ == "__main__":
     
     ''' Literalmente aca solo copie y pegue del archivo example.py por cuestion de que se utilizaria
