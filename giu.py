@@ -58,7 +58,7 @@ class Login(BaseScene):
 				if len(r[0][0]) != 0:
 					show_notification(app, "Hay productos sin stock.")
 					text = ''.join(f"ID:{id}, name:{name}, brand:{brand}, stock:{stock}"for id, name, brand, stock in get_products_out_of_stock())
-					notifications.append(NotificationPlaceHolder("Hay productos sin stock.", f"Los productos sin stock son:{text}"))
+					notifications.append(NotificationPlaceHolder("Hay productos sin stock.", f"Los productos sin stock son:{text}", "stock"))
 			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
 				self.user_entry.configure(border_color = "green")
 				self.password_entry.configure(border_color = "red")
@@ -67,7 +67,6 @@ class Login(BaseScene):
 			self.user_entry.configure(border_color = "red")
 			self.password_entry.configure(border_color = "red")
 			show_notification(app, "Usuario o contraseña incorrectos.")
-			print(e)
 
 	def _extracted_from_login_logic_10(self, user, arg1):
 		app.save_variable("user_role",get_user_details(get_user_id(user))[1])
@@ -162,21 +161,22 @@ class C_producto(BaseScene):
 		self.manager.title("Carga de productos")
 		self.header_fr = header(self.manager)
 		self.main()
-		print(app.get_variable("user_bran"))
 
 	def search(self, event = None):
-		if self.buscar_producto.get_and_clear():
+		if self.buscar_producto.get():
 			self.tv_stock.delete(*self.tv_stock.get_children())
-			search=search_function(get_products_in_stock(),self.buscar_producto.get_and_clear())
+			search=search_function(get_products_in_stock(),self.buscar_producto.get())
 			for product in search:
-				self.tv_stock.insert("",tk.END, text=f"{product.name}",
-						values=(product.price,product.brand,product.size, product.description))
+				if product.branch_name.lower() == app.get_variable('branch_user').lower():
+					self.tv_stock.insert("",tk.END, text=f"{product.name}",
+							values=(product.price,product.brand,product.size, product.description))
 		else:
 			self.tv_stock.delete(*self.tv_stock.get_children())
 			products_in_stock = get_products_in_stock()
 			for product in products_in_stock:
-				self.tv_stock.insert("",tk.END, text=f"{product.name}",
-						values=(product.price,product.brand,product.size, product.description))
+				if product.branch_name.lower() == app.get_variable('branch_user').lower():
+					self.tv_stock.insert("",tk.END, text=f"{product.name}",
+							values=(product.price,product.brand,product.size, product.description))
     
 	def update_stock(self):
 		focus = self.tv_stock.focus()
@@ -184,6 +184,7 @@ class C_producto(BaseScene):
 		try:
 			record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get_and_clear())
 			show_notification(app, f"Reestock exitoso\n stock actual: {get_stock_product(get_name_per_id(str(name_product)))}")
+			#notifications = [n for n in notifications if n.tag != 'stock']
 		except TypeError:
 			show_notification(app, "Error al reestockear\n procure seleccionar un\n producto de la tabla")
 
@@ -198,7 +199,7 @@ class C_producto(BaseScene):
 										corner_radius=35, border_color= "#dcdcdc", text_color= "#252525")
 		self.buscar_producto.place(x = 185, rely = 0.5, anchor= "center")
 
-		app.bind('<Key>', self.search)
+		self.buscar_producto.bind('<Key>', self.search)
 
 		bp_btn = ctk.CTkButton(self.cp_fr, text= "", image = lupa, fg_color= color_s, hover_color= "#dcdcdc"
 									, height= 50, width= 50, corner_radius= 15, cursor = "hand2", command = self.search)
@@ -237,8 +238,6 @@ class C_producto(BaseScene):
 				self.tv_stock.insert("",tk.END, text=f"{product.name}",
 						values=(product.price,product.brand,product.size, product.description))
 	
-	#--------------------------------------------------------------------------------------------------------------------------------------------
-
 class C_ventas(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
@@ -322,7 +321,7 @@ class C_ventas(BaseScene):
 			self.treeviewt.column(col, width=width)
 			self.treeviewt.heading(col, text=col if col != "#0" else "Producto", anchor=tk.CENTER)
 
-		self.pago = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get_and_clear()}", font=('Plus Jakarta Sans', 16, 'bold'))
+		self.pago = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
 		self.pago.place(x=75, y=320)
 
 		registrar_venta = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text="Registrar Venta", font=('Plus Jakarta Sans', 16, 'bold', 'underline'), cursor = "hand2")
@@ -580,7 +579,7 @@ class Users(BaseScene):
 		# 	card.grid(row = x, column = 0,pady = 10, sticky="ew")
 
 		for notification in notifications:
-			card = Card(self.noti_container, notification.title, notification.text)
+			card = Card(self.noti_container, notification.title, notification.text, notification.tag)
 			card.grid(row = 1, column = 0,pady = 10, sticky="ew") 
 
 if __name__ == "__main__":

@@ -544,7 +544,7 @@ def get_restock_date(restock_id: int, target_timezone: str = 'America/Argentina/
 
     restock_date = cursor.fetchone()
     conn.close()
-    if restock_date:
+    if restock_date and restock_date[0]:
         # Convierte el string a objeto datetime asumiendo que esta en UTC
         restock_datetime_utc = datetime.strptime(restock_date[0], '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
 
