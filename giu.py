@@ -392,10 +392,8 @@ class Ventas_nav(BaseScene):
 		[treeview.column(col, width=width) for col, width in [("#0", 110), ("Fecha", 100), ("Vendedor", 100), ("Estado", 50), ("Precio", 50), ("Cantidad", 50)]]
 		treeview.heading("#0", text="Producto", anchor=tk.CENTER); [treeview.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER) for col in ["Fecha", "Vendedor", "Estado", "Precio", "Cantidad"]]
 		
-  		# Obtiene los datos de la base de datos
 		sales_data = get_all_sales()
 	
-		# Inserta los datos en el Treeview
 		try:
 			[treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6])) for sale in sales_data if sale[3].lower() == app.get_variable("branch_user").lower()]
 		except AttributeError as e:
@@ -460,45 +458,50 @@ class New_stock(BaseScene):
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
 		self.inputs_col()
 	def inputs_col(self):
-		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 475, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
+		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 500, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
 		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
 		
-		lb = ctk.CTkLabel(self.inputs_fr, text_color=black,text= "Nuevo producto", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
+		lb = ctk.CTkLabel(self.inputs_fr, text_color=black,text= "Nuevo producto", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=35, anchor="center")
 
-		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
+		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
 		
 		self.nombre_producto = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre del producto', **self.input_config)
-		self.nombre_producto.place(relx=0.5, y=150, anchor="center")
+		self.nombre_producto.place(relx=0.5, y=100, anchor="center")
 		
 		self.marca_produc= ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese marca del producto', **self.input_config)
-		self.marca_produc.place(relx=0.5, y=210, anchor="center")
+		self.marca_produc.place(relx=0.5, y=160, anchor="center")
 		
 		self.talle_produc=ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese talle del producto', **self.input_config)
-		self.talle_produc.place(relx=0.5, y=270, anchor="center")
+		self.talle_produc.place(relx=0.5, y=220, anchor="center")
 		
 		self.precio_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese precio', **self.input_config)
-		self.precio_produc.place(x=111, y=330, anchor="center")
+		self.precio_produc.place(x=111, y=280, anchor="center")
 		self.precio_produc.configure(width = 173)
 
 		self.stock_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese stock', **self.input_config)
-		self.stock_produc.place(x=289, y=330, anchor="center")
+		self.stock_produc.place(x=289, y=280, anchor="center")
 		self.stock_produc.configure(width = 173)
+  
+		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+		self.sucursal.place(relx=0.5, y=340, anchor="center")
+
+		self.desc_produc=ctk.CTkTextbox(self.inputs_fr, width=350, height=15, fg_color=grey, text_color=black, font=('Plus jakarta Sans', 14, 'bold'), corner_radius=15,)
+		self.desc_produc.place(relx=0.5, y=400, anchor="center")
 
 		self.new_product = ctk.CTkButton(self.inputs_fr,text= "Subir producto", font= ('Plus jakarta Sans', 14, 'bold')
 								,height=50, width = 350, corner_radius= 35, fg_color= black, hover_color= "#454545",
 								command= self.new_product_def)
-		self.new_product.place(relx = 0.5, y=390, anchor="center")
+		self.new_product.place(relx = 0.5, y=460, anchor="center")
 		self.stock_produc.bind('<Return>',self.new_product_def)
 
 	def new_product_def(self, event = None):
-		# Obtener los valores de los inputs
-		nombre, marca, talle, precio, stock = (self.nombre_producto.get_and_clear(),self.marca_produc.get_and_clear(),self.talle_produc.get_and_clear(),self.precio_produc.get_and_clear(),self.stock_produc.get_and_clear())
-
-		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"marca": marca,"talle": talle,"precio": precio,"stock": stock,}.items()if not valor]:
+		nombre, marca, talle, precio, stock, sucursal, desc = (self.nombre_producto.get_and_clear(),self.marca_produc.get_and_clear(),self.talle_produc.get_and_clear(),self.precio_produc.get_and_clear(),self.stock_produc.get_and_clear(), self.sucursal.get(), self.desc_produc.get('1.0', ctk.END))
+		self.desc_produc.delete('1.0', ctk.END)
+		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"marca": marca,"talle": talle,"precio": precio,"stock": stock, "sucursal": sucursal, "desc":desc,}.items()if not valor]:
 			show_notification(app, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
 		else:
 			show_notification(app, "Nuevo producto cargado con éxito")
-			print(nombre, marca, talle, precio, stock)
+			add_product(Product(name=nombre, brand=marca, size=talle, price=precio, stock=stock, branch_name=sucursal, description=desc, image=None))
 
 class New_user(BaseScene):
 	def __init__(self, parent, manager):
