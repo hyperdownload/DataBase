@@ -107,8 +107,12 @@ def header(manager) -> any:
     }
 
     btn_nav = roles.get(manager.get_variable('user_role'), [])
+
     for text, x_offset in btn_nav:
-        ctk.CTkButton(nav, text=text, image=None, **btn_config, width=70, command=lambda t=text: manager.switch_scene(f"{t}_nav" if t != "Home" else "Men_p_admin" if t == "Home" else t)).place(x=203 + x_offset, rely=0.5, anchor="center")
+        ctk.CTkButton(nav, text=text, image=None, **btn_config, width=70, 
+                    command=lambda t=text: manager.switch_scene(f"{t}_nav" if t != "Home" else ("Men_p_admin" if manager.get_variable('user_role') == 'General Admin' else "Men_p"))
+                    ).place(x=203 + x_offset, rely=0.5, anchor="center")
+
 
     return header_fr
 
@@ -133,6 +137,7 @@ def levenshtein_distance(s1: str, s2: str) -> int:
         distances = distances_
 
     return distances[-1]
+
 
 def normalize_string(s: str) -> str:
     """Normaliza una cadena para eliminar espacios en blanco adicionales y convertir a minúsculas."""

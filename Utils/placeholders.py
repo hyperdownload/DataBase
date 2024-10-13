@@ -163,12 +163,13 @@ class Menu_user(ctk.CTkFrame):
         time.sleep(0.01)
 
 class NotificationPlaceHolder():
-    def __init__(self, title, text):
+    def __init__(self, title:str, text:str, tag:str=None):
         self.title = title
         self.text = text     
+        self.tag = tag
         
 class Card(ctk.CTkFrame):
-    def __init__(self, parent, title, text, width=400, height=100, corner_radius = 10, bg_color= "#EDEBE9", text_color="#000000"):
+    def __init__(self, parent, title, text, tag, width=400, height=100, corner_radius = 10, bg_color= "#EDEBE9", text_color="#000000"):
         super().__init__(parent, width=width, height=height, fg_color=bg_color, corner_radius = corner_radius)  
 
         self.title = title
@@ -176,6 +177,7 @@ class Card(ctk.CTkFrame):
         self.text_color = text_color
         self.initial_height = height
         self.is_expanded = False
+        self.tag = tag
         
         self.title_label = ctk.CTkLabel(self, text=self.title, font=("Arial", 20, "bold"), text_color=text_color)
         self.title_label.pack(pady=10, padx=20, anchor="w")

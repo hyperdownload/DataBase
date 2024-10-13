@@ -544,7 +544,7 @@ def get_restock_date(restock_id: int, target_timezone: str = 'America/Argentina/
 
     restock_date = cursor.fetchone()
     conn.close()
-    if restock_date:
+    if restock_date and restock_date[0]:
         # Convierte el string a objeto datetime asumiendo que esta en UTC
         restock_datetime_utc = datetime.strptime(restock_date[0], '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
 
@@ -576,6 +576,19 @@ def branch_exists(branch_name: str) -> bool:
     cursor.execute("SELECT 1 FROM Branches WHERE name = ?", (branch_name,))
     result = cursor.fetchone()
     return result is not None
+
+def get_all_branches()->list:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT name
+    FROM Branches
+    ''')
+
+    branches = cursor.fetchall()
+    conn.close()
+    return branches
 
 if __name__ == "__main__":
     

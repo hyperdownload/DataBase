@@ -47,8 +47,8 @@ class Login(BaseScene):
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
 		else:
-			user = 'mauriñoelbr@gmail.com'
-			password = '123456789'
+			user = 'carlos@example.com'
+			password = 'superadmin789'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -58,7 +58,7 @@ class Login(BaseScene):
 				if len(r[0][0]) != 0:
 					show_notification(app, "Hay productos sin stock.")
 					text = ''.join(f"ID:{id}, name:{name}, brand:{brand}, stock:{stock}"for id, name, brand, stock in get_products_out_of_stock())
-					notifications.append(NotificationPlaceHolder("Hay productos sin stock.", f"Los productos sin stock son:{text}"))
+					notifications.append(NotificationPlaceHolder("Hay productos sin stock.", f"Los productos sin stock son:{text}", "stock"))
 			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
 				self.user_entry.configure(border_color = "green")
 				self.password_entry.configure(border_color = "red")
@@ -67,7 +67,6 @@ class Login(BaseScene):
 			self.user_entry.configure(border_color = "red")
 			self.password_entry.configure(border_color = "red")
 			show_notification(app, "Usuario o contraseña incorrectos.")
-			print(e)
 
 	def _extracted_from_login_logic_10(self, user, arg1):
 		app.save_variable("user_role",get_user_details(get_user_id(user))[1])
@@ -162,21 +161,22 @@ class C_producto(BaseScene):
 		self.manager.title("Carga de productos")
 		self.header_fr = header(self.manager)
 		self.main()
-		print(app.get_variable("user_bran"))
 
 	def search(self, event = None):
-		if self.buscar_producto.get_and_clear():
+		if self.buscar_producto.get():
 			self.tv_stock.delete(*self.tv_stock.get_children())
-			search=search_function(get_products_in_stock(),self.buscar_producto.get_and_clear())
+			search=search_function(get_products_in_stock(),self.buscar_producto.get())
 			for product in search:
-				self.tv_stock.insert("",tk.END, text=f"{product.name}",
-						values=(product.price,product.brand,product.size, product.description))
+				if product.branch_name.lower() == app.get_variable('branch_user').lower():
+					self.tv_stock.insert("",tk.END, text=f"{product.name}",
+							values=(product.price,product.brand,product.size, product.description))
 		else:
 			self.tv_stock.delete(*self.tv_stock.get_children())
 			products_in_stock = get_products_in_stock()
 			for product in products_in_stock:
-				self.tv_stock.insert("",tk.END, text=f"{product.name}",
-						values=(product.price,product.brand,product.size, product.description))
+				if product.branch_name.lower() == app.get_variable('branch_user').lower():
+					self.tv_stock.insert("",tk.END, text=f"{product.name}",
+							values=(product.price,product.brand,product.size, product.description))
     
 	def update_stock(self):
 		focus = self.tv_stock.focus()
@@ -184,6 +184,7 @@ class C_producto(BaseScene):
 		try:
 			record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get_and_clear())
 			show_notification(app, f"Reestock exitoso\n stock actual: {get_stock_product(get_name_per_id(str(name_product)))}")
+			#notifications = [n for n in notifications if n.tag != 'stock']
 		except TypeError:
 			show_notification(app, "Error al reestockear\n procure seleccionar un\n producto de la tabla")
 
@@ -198,7 +199,7 @@ class C_producto(BaseScene):
 										corner_radius=35, border_color= "#dcdcdc", text_color= "#252525")
 		self.buscar_producto.place(x = 185, rely = 0.5, anchor= "center")
 
-		app.bind('<Key>', self.search)
+		self.buscar_producto.bind('<Key>', self.search)
 
 		bp_btn = ctk.CTkButton(self.cp_fr, text= "", image = lupa, fg_color= color_s, hover_color= "#dcdcdc"
 									, height= 50, width= 50, corner_radius= 15, cursor = "hand2", command = self.search)
@@ -237,8 +238,6 @@ class C_producto(BaseScene):
 				self.tv_stock.insert("",tk.END, text=f"{product.name}",
 						values=(product.price,product.brand,product.size, product.description))
 	
-	#--------------------------------------------------------------------------------------------------------------------------------------------
-
 class C_ventas(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
@@ -322,7 +321,7 @@ class C_ventas(BaseScene):
 			self.treeviewt.column(col, width=width)
 			self.treeviewt.heading(col, text=col if col != "#0" else "Producto", anchor=tk.CENTER)
 
-		self.pago = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get_and_clear()}", font=('Plus Jakarta Sans', 16, 'bold'))
+		self.pago = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text=f"Metodo de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
 		self.pago.place(x=75, y=320)
 
 		registrar_venta = ctk.CTkLabel(self.ticket_col, text_color = color_p, fg_color=black, text="Registrar Venta", font=('Plus Jakarta Sans', 16, 'bold', 'underline'), cursor = "hand2")
@@ -392,10 +391,8 @@ class Ventas_nav(BaseScene):
 		[treeview.column(col, width=width) for col, width in [("#0", 110), ("Fecha", 100), ("Vendedor", 100), ("Estado", 50), ("Precio", 50), ("Cantidad", 50)]]
 		treeview.heading("#0", text="Producto", anchor=tk.CENTER); [treeview.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER) for col in ["Fecha", "Vendedor", "Estado", "Precio", "Cantidad"]]
 		
-  		# Obtiene los datos de la base de datos
 		sales_data = get_all_sales()
 	
-		# Inserta los datos en el Treeview
 		try:
 			[treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6])) for sale in sales_data if sale[3].lower() == app.get_variable("branch_user").lower()]
 		except AttributeError as e:
@@ -460,57 +457,50 @@ class New_stock(BaseScene):
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
 		self.inputs_col()
 	def inputs_col(self):
-		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 700, height= 475, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
+		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 500, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
 		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
 		
-		lb = ctk.CTkLabel(self.inputs_fr, text_color=black,text= "Nuevo producto", font= ('Plus jakarta Sans', 28, 'bold')).place(x=200, y=65, anchor="center")
+		lb = ctk.CTkLabel(self.inputs_fr, text_color=black,text= "Nuevo producto", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=35, anchor="center")
 
-		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
+		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
 		
 		self.nombre_producto = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre del producto', **self.input_config)
-		self.nombre_producto.place(x=200, y=150, anchor="center")
+		self.nombre_producto.place(relx=0.5, y=100, anchor="center")
 		
 		self.marca_produc= ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese marca del producto', **self.input_config)
-		self.marca_produc.place(x=200, y=210, anchor="center")
+		self.marca_produc.place(relx=0.5, y=160, anchor="center")
 		
 		self.talle_produc=ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese talle del producto', **self.input_config)
-		self.talle_produc.place(x=200, y=270, anchor="center")
+		self.talle_produc.place(relx=0.5, y=220, anchor="center")
 		
 		self.precio_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese precio', **self.input_config)
-		self.precio_produc.place(x=111, y=330, anchor="center")
+		self.precio_produc.place(x=111, y=280, anchor="center")
 		self.precio_produc.configure(width = 173)
 
 		self.stock_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese stock', **self.input_config)
-		self.stock_produc.place(x=289, y=330, anchor="center")
+		self.stock_produc.place(x=289, y=280, anchor="center")
 		self.stock_produc.configure(width = 173)
+  
+		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+		self.sucursal.place(relx=0.5, y=340, anchor="center")
 
-		self.brand = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese brand del producto', **self.input_config)
-		self.brand.place(x= 530, y=150, anchor="center")
-		self.brand.configure(width = 285)
-
-		self.description = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese descripcion del producto', **self.input_config)
-		self.description.place(x= 530, y=210, anchor="center")
-		self.description.configure(width = 285)
-
-		self.sucursal_productos = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese sucursal del producto', **self.input_config)
-		self.sucursal_productos.place(x= 530, y=270, anchor="center")
-		self.sucursal_productos.configure(width = 285)
+		self.desc_produc=ctk.CTkTextbox(self.inputs_fr, width=350, height=15, fg_color=grey, text_color=black, font=('Plus jakarta Sans', 14, 'bold'), corner_radius=15,)
+		self.desc_produc.place(relx=0.5, y=400, anchor="center")
 
 		self.new_product = ctk.CTkButton(self.inputs_fr,text= "Subir producto", font= ('Plus jakarta Sans', 14, 'bold')
 								,height=50, width = 350, corner_radius= 35, fg_color= black, hover_color= "#454545",
 								command= self.new_product_def)
-		self.new_product.place(x = 200, y=390, anchor="center")
+		self.new_product.place(relx = 0.5, y=460, anchor="center")
 		self.stock_produc.bind('<Return>',self.new_product_def)
 
 	def new_product_def(self, event = None):
-		# Obtener los valores de los inputs
-		nombre, marca, talle, precio, stock, brand, description, sucursal = (self.nombre_producto.get_and_clear(),self.marca_produc.get_and_clear(),self.talle_produc.get_and_clear(),self.precio_produc.get_and_clear(),self.stock_produc.get_and_clear(), self.brand.get_and_clear(),self.description.get_and_clear(), self.sucursal_productos.get_and_clear())
-
-		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"marca": marca,"talle": talle,"precio": precio,"stock": stock,"brand":brand,"description":description,"sucursal":sucursal,}.items()if not valor]:
+		nombre, marca, talle, precio, stock, sucursal, desc = (self.nombre_producto.get_and_clear(),self.marca_produc.get_and_clear(),self.talle_produc.get_and_clear(),self.precio_produc.get_and_clear(),self.stock_produc.get_and_clear(), self.sucursal.get(), self.desc_produc.get('1.0', ctk.END))
+		self.desc_produc.delete('1.0', ctk.END)
+		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"marca": marca,"talle": talle,"precio": precio,"stock": stock, "sucursal": sucursal, "desc":desc,}.items()if not valor]:
 			show_notification(app, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
 		else:
 			show_notification(app, "Nuevo producto cargado con éxito")
-			print(nombre, marca, talle, precio, stock, brand, description, sucursal)
+			add_product(Product(name=nombre, brand=marca, size=talle, price=precio, stock=stock, branch_name=sucursal, description=desc, image=None))
 
 class New_user(BaseScene):
 	def __init__(self, parent, manager):
@@ -525,48 +515,42 @@ class New_user(BaseScene):
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
 		self.inputs_col()
 	def inputs_col(self):
-		self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 475, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
+		self.inputs_fr = ctk.CTkFrame(self.main_fr, width=400, height=475, fg_color=color_p, corner_radius=20, border_width=2, border_color=color_s)
 		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
-		
-		lb = ctk.CTkLabel(self.inputs_fr, text_color=black,text= "Nuevo usuario", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=50, anchor="center")
 
-		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
-		
-		self.nombre_empleado = ClearableEntry(self.inputs_fr, text_color=black,placeholder_text= 'Ingrese nombre del empleado', **self.input_config)
-		self.nombre_empleado.place(relx=0.5, y=120, anchor="center")
-		
-		self.correo_empleado= ClearableEntry(self.inputs_fr, text_color=black, placeholder_text= 'Ingrese correo electronico del empleado', **self.input_config)
-		self.correo_empleado.place(relx=0.5, y=180, anchor="center")
-		
-		self.contraseña=ClearableEntry(self.inputs_fr, text_color=black, placeholder_text= 'Ingrese contraseña', **self.input_config)
-		self.contraseña.place(relx=0.5, y=240, anchor="center")
+		ctk.CTkLabel(self.inputs_fr, text_color=black, text="Nuevo usuario", font=('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
 
-		self.sucursal = ClearableEntry(self.inputs_fr, text_color=black, placeholder_text= 'Ingrese sucursal', **self.input_config)
-		self.sucursal.place(relx=0.5, y=300, anchor="center")
+		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent",'width': 350,'height': 50,'corner_radius': 35,'border_color': "#dcdcdc",'placeholder_text_color': "#BEBEBE"}
 
-		rangos = ["Ingrese nivel de permisos", "Normal User", "Admin","General Admin"]
-		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values = rangos, font= ('Plus jakarta Sans', 14, 'bold'), text_color= black
-											, width = 350, height = 50, fg_color = "#f2f2f2", button_color = "#efefef"
-											, corner_radius= 25, button_hover_color = grey, dropdown_fg_color= color_p, dropdown_text_color=black)
-		self.permisos.place(relx = 0.5, y=360, anchor="center")
+		fields = [('nombre_empleado', 'Ingrese nombre del empleado', 150),('correo_empleado', 'Ingrese correo electronico del empleado', 210),('contraseña', 'Ingrese contraseña', 270)]
 
-		self.new_product = ctk.CTkButton(self.inputs_fr,text= "Cargar empleado", font= ('Plus jakarta Sans', 14, 'bold')
-								,height=50, width = 350, corner_radius= 35, fg_color= black, hover_color= "#454545",
-								command= self.new_product_def)
-		self.new_product.place(relx = 0.5, y=420, anchor="center")
-		self.contraseña.bind('<Return>',self.new_product_def)
+		for attr, placeholder, y_pos in fields:
+			setattr(self, attr, ClearableEntry(self.inputs_fr, text_color=black, placeholder_text=placeholder, **self.input_config))
+			getattr(self, attr).place(relx=0.5, y=y_pos, anchor="center")
+
+		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+		self.sucursal.place(relx=0.5, y=330, anchor="center")
+
+		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values=["Ingrese nivel de permisos", "Normal User", "Admin", "General Admin"], font=('Plus jakarta Sans', 14, 'bold'), text_color=black, width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+		self.permisos.place(relx=0.5, y=390, anchor="center")
+
+		self.new_product = ctk.CTkButton(self.inputs_fr, text="Cargar empleado", font=('Plus jakarta Sans', 14, 'bold'),height=50, width=350, corner_radius=35, fg_color=black, hover_color="#454545", command=self.new_product_def)
+		self.new_product.place(relx=0.5, y=450, anchor="center")
+
+		self.contraseña.bind('<Return>', self.new_product_def)
 
 	def new_product_def(self, event=None):
-		nombre, correo, sucursal, contraseña, permisos = self.nombre_empleado.get_and_clear(), self.correo_empleado.get_and_clear(), self.sucursal.get_and_clear(), self.contraseña.get_and_clear(), self.permisos.get()
-		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"correo": correo, "sucursal":sucursal,"contraseña": contraseña,"permisos": permisos,}.items()if not valor]:	show_notification(self.manager, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
+		nombre, correo, contraseña, permisos, sucursal = self.nombre_empleado.get_and_clear(), self.correo_empleado.get_and_clear(), self.contraseña.get_and_clear(), self.permisos.get(), self.sucursal.get_and_clear()
+		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"correo": correo,"contraseña": contraseña,"permisos": permisos, "sucursal": sucursal,}.items()if not valor]:	show_notification(self.manager, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
 		elif permisos == "Ingrese nivel de permisos":
-			show_notification(self.manager, "Asigne un rango válido")
+			show_notification(self.manager, "Asigne un rango válido.")
 		else:
 			permisos_map = {"Normal User": 1, "Admin": 2, "General Admin": 3}
 			permisos = permisos_map.get(permisos)
 			try:
 				show_notification(self.manager, register_user(nombre, correo, contraseña, permisos, sucursal))
-			except Exception:
+			except Exception as e:
+				print(e)
 				show_notification(self.manager, "Hubo un error al registrar el empleado")
 
 class Users(BaseScene):
@@ -580,12 +564,22 @@ class Users(BaseScene):
 
 	def main(self):
 		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
-		self.main_fr.place(relx=0.5, y=335, anchor="center") 
+		self.main_fr.place(relx=0.5, y=335, anchor="center")
+		# lb = ctk.CTkLabel(self.main_fr, text_color=black, text = "En mantenimiento").place(relx=0.5, rely=0.5, anchor="center")
+		# for notification in notifications:
+		# 	card = Card(self.main_fr, notification.title, notification.text)
+		# 	card.pack()  
 		self.noti_container = ctk.CTkScrollableFrame(self.main_fr, width= 400, height= 425, fg_color= color_p, corner_radius= 40, border_width= 2, border_color= color_s, scrollbar_button_color= grey, scrollbar_button_hover_color= color_s)
 		self.noti_container.place(relx=0.5, rely=0.5, anchor="center")
 
+		style_card = {'width': 360, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'text_color': black}
+		# cord = [(0, "San Miguel"),(1, "Jose c Paz"),(2, "Retiro")]
+		# for x, text in cord:
+		# 	card = ctk.CTkLabel(self.noti_container, text = text, **style_card)
+		# 	card.grid(row = x, column = 0,pady = 10, sticky="ew")
+
 		for notification in notifications:
-			card = Card(self.noti_container, notification.title, notification.text)
+			card = Card(self.noti_container, notification.title, notification.text, notification.tag)
 			card.grid(row = 1, column = 0,pady = 10, sticky="ew") 
 
 if __name__ == "__main__":
