@@ -62,7 +62,7 @@ def create_scrollable_frame(manager, color_p, branch_user, fg_color="black", fon
 
     # Añade el botón si es General Admin y está en la escena correcta
     if user_role == 'General Admin' and manager.current_scene_name == 'Men_p_admin':
-        ctk.CTkButton(sucursal_fr, text_color=fg_color, text="+ Sucursal", font=('Plus Jakarta Sans', 16, 'bold'), fg_color=grey, hover_color=color_s, width=150, height=40, corner_radius=20).place(relx=0.88, rely=0.5, anchor="center")
+        ctk.CTkButton(sucursal_fr, text_color=fg_color, text="+ Sucursal", font=('Plus Jakarta Sans', 16, 'bold'), fg_color=grey, hover_color=color_s, width=150, height=40, corner_radius=20, command= lambda: manager.switch_scene("New_branch")).place(relx=0.88, rely=0.5, anchor="center")
 
     return main_fr, sucursal_fr, sucursal_lb
 

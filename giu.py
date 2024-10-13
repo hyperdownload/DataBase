@@ -443,6 +443,40 @@ class Men_p_admin(BaseScene):
 			card.configure(fg_color = black, hover_color = "#232323", text_color = color_p)
 			card.grid(row = 0, column = x, padx = 10, pady = 15, sticky="e")
 
+class New_branch(BaseScene):
+	def __init__(self, parent, manager):
+		super().__init__(parent, manager)
+
+		self.manager=manager
+		self.header_fr = header(self.manager)
+		self.main()
+		self.manager.title("Nueva sucursal")
+	def main(self):
+		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
+		self.main_fr.place(relx=0.5, y=335, anchor="center")
+
+		self.inputs_fr = ctk.CTkFrame(self.main_fr, width=400, height=295, fg_color=color_p, corner_radius=20, border_width=2, border_color=color_s)
+		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
+
+		ctk.CTkLabel(self.inputs_fr, text_color=black, text="Nueva sucursal", font=('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=50, anchor="center")
+
+		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent",'width': 350,'height': 50,'corner_radius': 35,'border_color': "#dcdcdc",'placeholder_text_color': "#BEBEBE"}
+
+		self.branch_name=ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre de la sucursal', **self.input_config)
+		self.branch_name.place(relx=0.5, y=120, anchor="center")
+		self.direction_branch=ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese direccion de la sucursal', **self.input_config)
+		self.direction_branch.place(relx=0.5, y=180, anchor="center")
+
+		self.new_product = ctk.CTkButton(self.inputs_fr, text="Crear sucursal", font=('Plus jakarta Sans', 14, 'bold'),height=50, width=350, corner_radius=35, fg_color=black, hover_color="#454545", command=self.new_product_def)
+		self.new_product.place(relx=0.5, y=240, anchor="center")
+
+	def new_product_def(self, event = None):
+		nombre, direction = (self.branch_name.get_and_clear(),self.direction_branch.get_and_clear())
+		if campos_vacios := [campo for campo, valor in {"nombre":nombre,"direction": direction,}.items()if not valor]:	show_notification(self.manager,f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
+		else:
+			show_notification(app, "Nueva sucursal cargada con éxito")
+			print(nombre, direction)
+		
 class New_stock(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
@@ -484,7 +518,7 @@ class New_stock(BaseScene):
 		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
 		self.sucursal.place(relx=0.5, y=340, anchor="center")
 
-		self.desc_produc=ctk.CTkTextbox(self.inputs_fr, width=350, height=15, fg_color=grey, text_color=black, font=('Plus jakarta Sans', 14, 'bold'), corner_radius=15,)
+		self.desc_produc=ctk.CTkTextbox(self.inputs_fr, width=350, height=10, fg_color=color_p, border_width=2, border_color= "#dcdcdc", text_color=black, font=('Plus jakarta Sans', 14, 'bold'), corner_radius=10,)
 		self.desc_produc.place(relx=0.5, y=400, anchor="center")
 
 		self.new_product = ctk.CTkButton(self.inputs_fr,text= "Subir producto", font= ('Plus jakarta Sans', 14, 'bold')
@@ -518,26 +552,24 @@ class New_user(BaseScene):
 		self.inputs_fr = ctk.CTkFrame(self.main_fr, width=400, height=475, fg_color=color_p, corner_radius=20, border_width=2, border_color=color_s)
 		self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
 
-		ctk.CTkLabel(self.inputs_fr, text_color=black, text="Nuevo usuario", font=('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=65, anchor="center")
+		ctk.CTkLabel(self.inputs_fr, text_color=black, text="Nuevo usuario", font=('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=50, anchor="center")
 
 		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent",'width': 350,'height': 50,'corner_radius': 35,'border_color': "#dcdcdc",'placeholder_text_color': "#BEBEBE"}
 
-		fields = [('nombre_empleado', 'Ingrese nombre del empleado', 150),('correo_empleado', 'Ingrese correo electronico del empleado', 210),('contraseña', 'Ingrese contraseña', 270)]
+		fields = [('nombre_empleado', 'Ingrese nombre del empleado', 120),('correo_empleado', 'Ingrese correo electronico del empleado', 180),('contraseña', 'Ingrese contraseña', 240)]
 
 		for attr, placeholder, y_pos in fields:
 			setattr(self, attr, ClearableEntry(self.inputs_fr, text_color=black, placeholder_text=placeholder, **self.input_config))
 			getattr(self, attr).place(relx=0.5, y=y_pos, anchor="center")
 
 		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
-		self.sucursal.place(relx=0.5, y=330, anchor="center")
+		self.sucursal.place(relx=0.5, y=300, anchor="center")
 
 		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values=["Ingrese nivel de permisos", "Normal User", "Admin", "General Admin"], font=('Plus jakarta Sans', 14, 'bold'), text_color=black, width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
-		self.permisos.place(relx=0.5, y=390, anchor="center")
+		self.permisos.place(relx=0.5, y=360, anchor="center")
 
 		self.new_product = ctk.CTkButton(self.inputs_fr, text="Cargar empleado", font=('Plus jakarta Sans', 14, 'bold'),height=50, width=350, corner_radius=35, fg_color=black, hover_color="#454545", command=self.new_product_def)
-		self.new_product.place(relx=0.5, y=450, anchor="center")
-
-		self.contraseña.bind('<Return>', self.new_product_def)
+		self.new_product.place(relx=0.5, y=420, anchor="center")
 
 	def new_product_def(self, event=None):
 		nombre, correo, contraseña, permisos, sucursal = self.nombre_empleado.get_and_clear(), self.correo_empleado.get_and_clear(), self.contraseña.get_and_clear(), self.permisos.get(), self.sucursal.get_and_clear()
@@ -556,28 +588,28 @@ class New_user(BaseScene):
 class Users(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
-
 		self.manager=manager
 		self.header_fr = header(self.manager)
 		self.main()
 		self.manager.title("Usuarios")
+	def main(self):
+		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
+		self.main_fr.place(relx=0.5, y=335, anchor="center")
+
+class Notifications(BaseScene):
+	def __init__(self, parent, manager):
+		super().__init__(parent, manager)
+
+		self.manager=manager
+		self.header_fr = header(self.manager)
+		self.main()
+		self.manager.title("Notificaciones")
 
 	def main(self):
 		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
-		# lb = ctk.CTkLabel(self.main_fr, text_color=black, text = "En mantenimiento").place(relx=0.5, rely=0.5, anchor="center")
-		# for notification in notifications:
-		# 	card = Card(self.main_fr, notification.title, notification.text)
-		# 	card.pack()  
 		self.noti_container = ctk.CTkScrollableFrame(self.main_fr, width= 400, height= 425, fg_color= color_p, corner_radius= 40, border_width= 2, border_color= color_s, scrollbar_button_color= grey, scrollbar_button_hover_color= color_s)
 		self.noti_container.place(relx=0.5, rely=0.5, anchor="center")
-
-		style_card = {'width': 360, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'text_color': black}
-		# cord = [(0, "San Miguel"),(1, "Jose c Paz"),(2, "Retiro")]
-		# for x, text in cord:
-		# 	card = ctk.CTkLabel(self.noti_container, text = text, **style_card)
-		# 	card.grid(row = x, column = 0,pady = 10, sticky="ew")
-
 		for notification in notifications:
 			card = Card(self.noti_container, notification.title, notification.text, notification.tag)
 			card.grid(row = 1, column = 0,pady = 10, sticky="ew") 
@@ -598,7 +630,7 @@ if __name__ == "__main__":
 
 	# Añade las escenas al gestor
 	scenes = [("Stock_nav", Stock_nav),("Ventas_nav", Ventas_nav),("C_ventas", C_ventas),("C_producto", C_producto),("Men_p", Men_p),("Login", Login),("Men_p_admin", Men_p_admin),
-    ("New_stock", New_stock),("New_user",New_user), ("Users_nav", Users), ("Notifications_nav", Users)]
+    ("New_stock", New_stock),("New_user",New_user), ("Users_nav", Users), ("Notifications_nav", Notifications), ("New_branch", New_branch),]
 
 	for scene_name, scene_class in scenes:
 		app.add_scene(scene_name, scene_class)
