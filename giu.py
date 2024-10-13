@@ -1,8 +1,9 @@
+import contextlib
 from Utils.SceneManager import *
 from Utils.database import *
 from Utils.functions import *
 from CTkDataVisualizingWidgets import *
-from PIL import Image 
+from PIL import Image
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk
@@ -54,11 +55,11 @@ class Login(BaseScene):
 				self._extracted_from_login_logic_10(user, "Men_p")
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2] and app.get_variable('user_role') == 'General Admin':
 				self._extracted_from_login_logic_10(user, "Men_p_admin")
-				r = dynamic_thread_executor([(get_products_out_of_stock, ())])
-				if len(r[0][0]) != 0:
-					show_notification(app, "Hay productos sin stock.")
-					text = ''.join(f"ID:{id}, name:{name}, brand:{brand}, stock:{stock}"for id, name, brand, stock in get_products_out_of_stock())
-					notifications.append(NotificationPlaceHolder("Hay productos sin stock.", f"Los productos sin stock son:{text}", "stock"))
+				with contextlib.suppress(Exception):
+					if len(get_products_out_of_stock[0]) != 0:
+						show_notification(app, "Hay productos sin stock.")
+						text = ''.join(f"ID:{id}, name:{name}, brand:{brand}, stock:{stock}"for id, name, brand, stock in get_products_out_of_stock())
+						notifications.append(NotificationPlaceHolder("Hay productos sin stock.", f"Los productos sin stock son:{text}", "stock"))
 			elif hashlib.sha256(password.encode()).hexdigest() != get_user_details(get_user_id(user))[2]:
 				self.user_entry.configure(border_color = "green")
 				self.password_entry.configure(border_color = "red")
@@ -361,16 +362,27 @@ class Stock_nav(BaseScene):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
 		if app.get_variable('user_role') != 'Normal user': 
-			atajos = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=75, width=800); atajos.grid(row=2, column=0)
-			self.u_venta_btn = ctk.CTkButton(atajos, text="Cargar stock", fg_color=grey, text_color=black, corner_radius=25, width=100, height=50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color="#454545", command=lambda: self.manager.switch_scene("C_producto")); self.u_venta_btn.place(x=135, y=25, anchor="center"); self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, black, event)); self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
+			self._extracted_from_main_5()
 	#--------------------------------------------------------------------------------------------------------------------------------------------
-		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800); tabla.grid(row=3, column=0)
-		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40); self.tabla_venta.place(relx=0.5, y=200, anchor="center")
-		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act", "stock")); stockTreeView.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
+		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800)
+		tabla.grid(row=3, column=0)
+		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40)
+		self.tabla_venta.place(relx=0.5, y=200, anchor="center")
+		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act", "stock"))
+		stockTreeView.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
 		[stockTreeView.column(col, width=width) for col, width in [("#0", 110), ("cod_barra", 40), ("precio", 40), ("talle", 30), ("Fecha_act", 115), ("stock", 30)]]
-		stockTreeView.heading("#0", text="Producto", anchor=tk.CENTER); [stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER) for col in ["cod_barra", "precio", "talle", "Fecha_act", "stock"]]
+		stockTreeView.heading("#0", text="Producto", anchor=tk.CENTER)
+		[stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER) for col in ["cod_barra", "precio", "talle", "Fecha_act", "stock"]]
 		products_in_stock = get_products_in_stock()
 		[stockTreeView.insert("", "end", text=product.name, values=(product.id, product.price, product.size, get_restock_date(product.id), product.stock)) if product.branch_name.lower() == app.get_variable("branch_user").lower() else stockTreeView.insert("", "end", text=product.name, values=(product.id, product.price, product.size, get_restock_date(product.id), product.stock)) for product in products_in_stock]
+
+	def _extracted_from_main_5(self):
+		atajos = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=75, width=800)
+		atajos.grid(row=2, column=0)
+		self.u_venta_btn = ctk.CTkButton(atajos, text="Cargar stock", fg_color=grey, text_color=black, corner_radius=25, width=100, height=50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color="#454545", command=lambda: self.manager.switch_scene("C_producto"))
+		self.u_venta_btn.place(x=135, y=25, anchor="center")
+		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, black, event))
+		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
 		
 class Ventas_nav(BaseScene):
 	def __init__(self, parent, manager):
@@ -476,8 +488,11 @@ class New_branch(BaseScene):
 		nombre, direction = (self.branch_name.get_and_clear(),self.direction_branch.get_and_clear())
 		if campos_vacios := [campo for campo, valor in {"nombre":nombre,"direction": direction,}.items()if not valor]:	show_notification(self.manager,f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
 		else:
-			show_notification(app, "Nueva sucursal cargada con éxito")
-			print(nombre, direction)
+			try:
+				create_new_branch(nombre, direction)
+				show_notification(app, "Nueva sucursal cargada con éxito")
+			except Exception as e:
+				show_notification(app, "Algo fallo.")
 		
 class New_stock(BaseScene):
 	def __init__(self, parent, manager):

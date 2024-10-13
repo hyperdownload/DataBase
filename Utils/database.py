@@ -590,6 +590,13 @@ def get_all_branches()->list:
     conn.close()
     return branches
 
+@log_database_action("New_Branch")
+def create_new_branch(name, address)->None:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', (name, address))
+    conn.close()
+
 if __name__ == "__main__":
     
     ''' Literalmente aca solo copie y pegue del archivo example.py por cuestion de que se utilizaria
