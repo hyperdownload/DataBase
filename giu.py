@@ -360,6 +360,10 @@ class Stock_nav(BaseScene):
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 	#--------------------------------------------------------------------------------------------------------------------------------------------
+		if app.get_variable('user_role') != 'Normal user': 
+			atajos = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=75, width=800); atajos.grid(row=2, column=0)
+			self.u_venta_btn = ctk.CTkButton(atajos, text="Cargar stock", fg_color=grey, text_color=black, corner_radius=25, width=100, height=50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color="#454545", command=lambda: self.manager.switch_scene("C_producto")); self.u_venta_btn.place(x=135, y=25, anchor="center"); self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, black, event)); self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
+	#--------------------------------------------------------------------------------------------------------------------------------------------
 		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800); tabla.grid(row=3, column=0)
 		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40); self.tabla_venta.place(relx=0.5, y=200, anchor="center")
 		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("cod_barra", "precio", "talle", "Fecha_act", "stock")); stockTreeView.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
@@ -367,9 +371,7 @@ class Stock_nav(BaseScene):
 		stockTreeView.heading("#0", text="Producto", anchor=tk.CENTER); [stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER) for col in ["cod_barra", "precio", "talle", "Fecha_act", "stock"]]
 		products_in_stock = get_products_in_stock()
 		[stockTreeView.insert("", "end", text=product.name, values=(product.id, product.price, product.size, get_restock_date(product.id), product.stock)) if product.branch_name.lower() == app.get_variable("branch_user").lower() else stockTreeView.insert("", "end", text=product.name, values=(product.id, product.price, product.size, get_restock_date(product.id), product.stock)) for product in products_in_stock]
-		atajos = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=75, width=800); atajos.grid(row=2, column=0)
-		if app.get_variable('user_role') == 'Admin': self.u_venta_btn = ctk.CTkButton(atajos, text="Cargar stock", fg_color=grey, text_color=black, corner_radius=25, width=100, height=50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color="#454545", command=lambda: self.manager.switch_scene("C_producto")); self.u_venta_btn.place(x=135, y=25, anchor="center"); self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, black, event)); self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
-	
+		
 class Ventas_nav(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
@@ -384,6 +386,16 @@ class Ventas_nav(BaseScene):
   
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
+		
+		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
+		atajos.grid(row=2, column=0)
+		
+		self.u_venta_btn = ctk.CTkButton(atajos, text= "Nueva venta", fg_color= "#222325", text_color= color_p, corner_radius=25,
+											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_ventas"))
+		self.u_venta_btn.place(x = 135, y= 25, anchor = "center")        
+
+		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
+		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, grey, "#222325", event))
 
 		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800); tabla.grid(row=3, column=0)
 		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40); self.tabla_venta.place(relx=0.5, y=200, anchor="center")
@@ -399,16 +411,6 @@ class Ventas_nav(BaseScene):
 			print(f"Hubo un error {e}. Se asume name_product el usuario es {'Super admin, mostrando todas las sucursales.' if app.get_variable('branch_user') is None else app.get_variable('branch_user')}")
 			[treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6])) for sale in sales_data]
 		
-		atajos = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 75, width = 800)
-		atajos.grid(row=2, column=0)
-		
-		self.u_venta_btn = ctk.CTkButton(atajos, text= "Nueva venta", fg_color= "#222325", text_color= color_p, corner_radius=25,
-											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_ventas"))
-		self.u_venta_btn.place(x = 135, y= 25, anchor = "center")        
-
-		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
-		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, grey, "#222325", event))
-
 # VENTANAS DE ADMINISTRADOR 
 
 class Men_p_admin(BaseScene):
@@ -562,10 +564,18 @@ class New_user(BaseScene):
 			setattr(self, attr, ClearableEntry(self.inputs_fr, text_color=black, placeholder_text=placeholder, **self.input_config))
 			getattr(self, attr).place(relx=0.5, y=y_pos, anchor="center")
 
-		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+		if self.manager.get_variable('user_role') == 'Admin':
+			values = ["Ingrese nivel de permisos", "Normal User"]
+			values_branch = [self.manager.get_variable('branch_user')]
+			print(self.manager.get_variable('branch_user'))
+		else:
+			values = ["Ingrese nivel de permisos", "Normal User", "Admin", "General Admin"]
+			values_branch = get_all_branch_names()
+
+		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values= values_branch, font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
 		self.sucursal.place(relx=0.5, y=300, anchor="center")
 
-		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values=["Ingrese nivel de permisos", "Normal User", "Admin", "General Admin"], font=('Plus jakarta Sans', 14, 'bold'), text_color=black, width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+		self.permisos = ctk.CTkOptionMenu(self.inputs_fr, values=values, font=('Plus jakarta Sans', 14, 'bold'), text_color=black, width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
 		self.permisos.place(relx=0.5, y=360, anchor="center")
 
 		self.new_product = ctk.CTkButton(self.inputs_fr, text="Cargar empleado", font=('Plus jakarta Sans', 14, 'bold'),height=50, width=350, corner_radius=35, fg_color=black, hover_color="#454545", command=self.new_product_def)
@@ -595,6 +605,23 @@ class Users(BaseScene):
 	def main(self):
 		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
+
+		columns = [("#0", "Name", 120), 
+           ("email", "Email", 100), 
+           ("role_id", "Role_id", 30), 
+           ("Branch_if", "Branch", 50), 
+           ("registration_date", "Registration date", 90)]
+		
+		user_style  = ttk.Style()
+		user_style.configure("Custom.Treeview.Heading", background= color_p, foreground= black, font=("Arial", 12, "bold"), relief = "flat")
+		user_style.configure("Custom.Treeview", background= color_p, foreground= black, fieldbackground=color_p, borderwidth=0, relief = "flat")
+		style.map("Treeview.Heading", background=[("selected",  "#efefef"), ("active",  "#efefef")])
+
+		self.tabla =ttk.Treeview(self.main_fr,selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]], style= "Custom.Treeview")
+		self.tabla.place(relx=0.5, rely=0.5, anchor="center", width=790, height=530)
+		for col, heading, width in columns:
+			self.tabla.column(col, width=width)
+			self.tabla.heading(col, text=heading, anchor=tk.CENTER)
 
 class Notifications(BaseScene):
 	def __init__(self, parent, manager):

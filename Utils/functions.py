@@ -54,14 +54,14 @@ def create_scrollable_frame(manager, color_p, branch_user, fg_color="black", fon
 
     # Determina el texto del label según el rol del usuario
     user_role = manager.get_variable('user_role')
-    text = f'Sucursal {branch_user}' if user_role in ['Normal User', 'Admin'] else "Sucursales"
-    sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text=text, font=font) if user_role != 'General Admin' or manager.current_scene_name != 'Men_p_admin' else None
-
+    text = f'Sucursal {branch_user}'
+    sucursal_lb = ctk.CTkLabel(sucursal_fr, text_color=fg_color, text=text, font=font)
     if sucursal_lb:
-        sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + (115 if user_role in ['Normal User', 'Admin'] else 75), rely=0.5, anchor="center")
+        sucursal_lb.place(x=(sucursal_lb.winfo_width()) // 2 + (115 if manager.current_scene_name != 'Men_p_admin' else 75), rely=0.5, anchor="center")
 
     # Añade el botón si es General Admin y está en la escena correcta
     if user_role == 'General Admin' and manager.current_scene_name == 'Men_p_admin':
+        sucursal_lb.configure(text = "Sucursales")
         ctk.CTkButton(sucursal_fr, text_color=fg_color, text="+ Sucursal", font=('Plus Jakarta Sans', 16, 'bold'), fg_color=grey, hover_color=color_s, width=150, height=40, corner_radius=20, command= lambda: manager.switch_scene("New_branch")).place(relx=0.88, rely=0.5, anchor="center")
 
     return main_fr, sucursal_fr, sucursal_lb
@@ -79,7 +79,13 @@ def header(manager) -> any:
             fr.place(relx=0.49, rely=0.12, anchor="center")
             ctk.CTkLabel(fr, width=65, height=65, corner_radius=10, image=ctk.CTkImage(Image.open("img/person.png"), size=(40, 40)), text="").place(relx=0.16, rely=0.5, anchor="center")
             ctk.CTkLabel(fr, text_color=black, text=get_user_name(manager.get_variable("user_id")), font=('Plus Jakarta Sans', 14, 'bold')).place(relx=0.6, rely=0.5, anchor="center")
-            
+            if manager.get_variable('user_role') != 'Normal User': 
+                ctk.CTkButton(menu_user, width=260, height=35, corner_radius=10, fg_color=grey, hover_color=color_s, text="Notificaciones", text_color=black, font=('Plus jakarta Sans', 14, 'bold'), command=lambda: manager.switch_scene("Notifications_nav")).place(relx=0.49, y= 135, anchor="center")
+                ctk.CTkButton(menu_user, width=260, height=35, corner_radius=10, fg_color=grey, hover_color=color_s, text="Nuevo usuario", text_color=black, font=('Plus jakarta Sans', 14, 'bold'), command=lambda: manager.switch_scene("New_user")).place(relx=0.49, y= 175, anchor="center")
+                if manager.get_variable('user_role') == 'General Admin': 
+                    ctk.CTkButton(menu_user, width=260, height=35, corner_radius=10, fg_color=grey, hover_color=color_s, text="Cargar stock", text_color=black, font=('Plus jakarta Sans', 14, 'bold'), command=lambda: manager.switch_scene("Stock_nav")).place(relx=0.49, y= 215, anchor="center")
+                    ctk.CTkButton(menu_user, width=260, height=35, corner_radius=10, fg_color=grey, hover_color=color_s, text="Historial de venta", text_color=black, font=('Plus jakarta Sans', 14, 'bold'), command=lambda: manager.switch_scene("Ventas_nav")).place(relx=0.49, y= 255, anchor="center")
+
             ctk.CTkButton(menu_user, width=260, height=35, corner_radius=10, fg_color=grey, hover_color=color_s, text="Cerrar sesion", text_color=black, font=('Plus jakarta Sans', 14, 'bold'), command=log_out_def).place(relx=0.49, rely=0.9, anchor="center")
             menu_user.is_active = True
         else:
