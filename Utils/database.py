@@ -4,22 +4,19 @@ import inspect
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import functools
+import sqlite3, csv
 
 class Product:
-    def __init__(self, name:str, price:int, brand:str, size:any, image:any, description:str, branch_name:str, stock:int, image_path=None, id:int=None):
+    def __init__(self, name:str, price:int, brand:str, size:any, category:str, description:str, branch_name:str, stock:int, category_path=None, id:int=None):
         self.id = id
         self.name = name
         self.price = price
         self.brand = brand
         self.size = size
         self.stock = stock
-        self.image = self.convert_image_to_binary(image_path) if image_path else image
+        self.category = category
         self.description = description
         self.branch_name = branch_name
-
-    def convert_image_to_binary(self, image_path)->bytearray:
-        with open(image_path, 'rb') as file:
-            return file.read()
 
     @classmethod
     def from_row(cls, row)->tuple:
@@ -30,10 +27,10 @@ class Product:
             price=row[2],
             brand=row[3],
             size=row[4],
-            image=row[5],  
+            category=row[5],  
             description=row[6],
             branch_name=row[7],
-            stock=row[8]
+            stock=row[8],
         )
 
 dataBasePath = './Bd/clothing_store.db'
@@ -79,7 +76,7 @@ def create_database()->None:
         price REAL NOT NULL,
         brand TEXT NOT NULL,
         size TEXT NOT NULL,
-        image BLOB,
+        category TEXT NOT NULL,
         description TEXT,
         branch_name TEXT NOT NULL,
         stock INTEGER DEFAULT 0,
@@ -96,6 +93,8 @@ def create_database()->None:
         quantity INTEGER NOT NULL,
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         price INTEGER NOT NULL,
+        category TEXT NOT NULL,
+        FOREIGN KEY (category) REFERENCES products (category)
         FOREIGN KEY (product_id) REFERENCES Products(id),
         FOREIGN KEY (user_id) REFERENCES Users(id),
         FOREIGN KEY (branch_name) REFERENCES Branches(name)
@@ -246,14 +245,30 @@ def add_product(product)->None:
     cursor = conn.cursor()
 
     cursor.execute('''
-    INSERT INTO Products (name, price, brand, size, image, description, branch_name, stock)
+    INSERT INTO Products (name, price, brand, size, category, description, branch_name, stock)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (product.name, product.price, product.brand, product.size, product.image, product.description, product.branch_name, product.stock))
+    ''', (product.name, product.price, product.brand, product.size, product.category, product.description, product.branch_name, product.stock))
     
     conn.commit()
     conn.close()
 
     print(f"Product {product.name} added successfully.")
+    
+def get_product_category(id_product:int)->str:
+    '''
+    Obtiene la categoría de un producto a partir de su ID.
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+    SELECT category FROM Products WHERE id = ?
+    ''', (id_product,))
+    
+    category = cursor.fetchone()
+    conn.close()
+    
+    return category[0] if category else None
 
 @log_database_action("Sale")
 def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, price:int)->bool:
@@ -274,28 +289,21 @@ def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, pric
         if current_stock >= quantity:
             # Registra la venta
             cursor.execute('''
-            INSERT INTO Sales (product_id, user_id, branch_name, quantity, price)
-            VALUES (?, ?, ?, ?, ?)
-            ''', (product_id, user_id, branch_name, quantity, price))
+            INSERT INTO Sales (product_id, user_id, branch_name, quantity, price, category)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ''', (product_id, user_id, branch_name, quantity, price, get_product_category(product_id)))
 
             # Reduce el stock
             new_stock = current_stock - quantity
             cursor.execute('UPDATE Products SET stock = ? WHERE id = ?', (new_stock, product_id))
 
-            # Registra la acción en los logs
-            cursor.execute('''
-            INSERT INTO Logs (action, user_id, product_id, branch_name, quantity, price)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ''', ('Sale', user_id, product_id, branch_name, quantity, price))
-
             conn.commit()
+            conn.close()
             print(f"Venta guardada .Stock: {new_stock}")
             return True
         else:
             print("Error: No hay suficiente stock.")
             return False
-
-        conn.close()
     else:
         print(f"La sucursal '{branch_name}' no existe.")
         
@@ -470,6 +478,7 @@ def get_all_branch_names()->list:
 def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> list:
     '''
     Obtiene todos los registros de la tabla Sales y convierte la fecha de cada venta a la zona horaria deseada.
+    id[0], product_id[1], user_id [2], branch_name[3], quantity[4], date[5], price[6], category[7]
     :param target_timezone: Zona horaria a la que se desea convertir la fecha (por defecto 'America/Argentina/Buenos_Aires')
     :return: Lista de ventas con las fechas convertidas en la zona horaria especificada
     '''
@@ -477,7 +486,7 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
     cursor = conn.cursor()
 
     cursor.execute('''
-    SELECT id, product_id, user_id, branch_name, quantity, date, price
+    SELECT id, product_id, user_id, branch_name, quantity, date, price, category
     FROM Sales
     ''')
 
@@ -486,7 +495,7 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
 
     sales_converted = []
     for sale in sales:
-        sale_id, product_id, user_id, branch_name, quantity, sale_date, price = sale
+        sale_id, product_id, user_id, branch_name, quantity, sale_date, price, category = sale
 
         # Convierte el string a objeto datetime asumiendo que la fecha está en UTC
         sale_datetime_utc = datetime.strptime(sale_date, '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
@@ -495,7 +504,7 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
         sale_datetime_local = sale_datetime_utc.astimezone(ZoneInfo(target_timezone))
 
         # Guarda los datos con la fecha convertida en la lista final
-        sale_with_converted_date = (sale_id, product_id, user_id, branch_name, quantity, sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'), price)
+        sale_with_converted_date = (sale_id, product_id, user_id, branch_name, quantity, sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'), price, category)
         sales_converted.append(sale_with_converted_date)
 
     return sales_converted
@@ -597,6 +606,18 @@ def create_new_branch(name, address)->None:
     cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', (name, address))
     conn.close()
 
+def get_products_in_branch(name)->list:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Products WHERE branch_name =?", (name,))
+    products = cursor.fetchall()
+    conn.close()
+    return products
+
+def export_to_file(path_to_export='sales_export.csv') -> csv:
+    conn = sqlite3.connect(dataBasePath);cursor = conn.cursor();cursor.execute("SELECT * FROM Sales")
+    with open('sales_export.csv', 'w', newline='', encoding='utf-8') as f:  writer = csv.writer(f);writer.writerow([i[0] for i in cursor.description])  ;writer.writerows(cursor.fetchall()) ; conn.close()
+
 if __name__ == "__main__":
     
     ''' Literalmente aca solo copie y pegue del archivo example.py por cuestion de que se utilizaria
@@ -608,8 +629,8 @@ if __name__ == "__main__":
     register_user('Jane Smith', 'jane@example.com', 'admin456', 2, "Jose c paz")
     register_user('Carlos Torres', 'carlos@example.com', 'superadmin789', 3, "Retiro")
 
-    product1 = Product('White T-shirt', 19.99, 'Brand X', 'M', None, 'White cotton t-shirt', "San Miguel", image_path='image1.jpg', stock=10)
-    product2 = Product('Blue Jeans', 39.99, 'Brand Y', 'L', None, 'Blue denim jeans', "San Miguel", image_path='image1.jpg', stock=10)
+    product1 = Product('White T-shirt', 19.99, 'Brand X', 'M', "T-Shirt", 'White cotton t-shirt', "San Miguel" , stock=10)
+    product2 = Product('Blue Jeans', 39.99, 'Brand Y', 'L', "Jeans", 'Blue denim jeans', "San Miguel", stock=10)
 
     add_product(product1)
     add_product(product2)
