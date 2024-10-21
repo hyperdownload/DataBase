@@ -48,8 +48,8 @@ class Login(BaseScene):
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
 		else:
-			user = 'john@example.com'
-			password = 'password123'
+			user = 'carlos@example.com'
+			password = 'superadmin789'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -404,7 +404,11 @@ class Ventas_nav(BaseScene):
 		
 		self.u_venta_btn = ctk.CTkButton(atajos, text= "Nueva venta", fg_color= "#222325", text_color= color_p, corner_radius=25,
 											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_ventas"))
-		self.u_venta_btn.place(x = 135, y= 25, anchor = "center")        
+		self.u_venta_btn.place(x = 135, y= 25, anchor = "center")     
+  
+		self.u_export_btn = ctk.CTkButton(atajos, text= "Exportar ventas", fg_color= "#222325", text_color= color_p, corner_radius=25,
+											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command= lambda:export_to_file(self.manager))
+		self.u_export_btn.place(x = 635, y= 25, anchor = "center")   
 
 		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
 		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, grey, "#222325", event))
@@ -622,21 +626,26 @@ class Users(BaseScene):
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
 
 		columns = [("#0", "Name", 120), 
-           ("email", "Email", 100), 
-           ("role_id", "Role_id", 30), 
-           ("Branch_if", "Branch", 50), 
-           ("registration_date", "Registration date", 90)]
+				("email", "Email", 100), 
+				("role_id", "Role_id", 30), 
+				("Branch_id", "Branch", 50),]
 		
-		user_style  = ttk.Style()
-		user_style.configure("Custom.Treeview.Heading", background= color_p, foreground= black, font=("Arial", 12, "bold"), relief = "flat")
-		user_style.configure("Custom.Treeview", background= color_p, foreground= black, fieldbackground=color_p, borderwidth=0, relief = "flat")
-		style.map("Treeview.Heading", background=[("selected",  "#efefef"), ("active",  "#efefef")])
+		user_style = ttk.Style()
+		user_style.configure("Custom.Treeview.Heading", background=color_p, foreground=black, font=("Arial", 12, "bold"), relief="flat")
+		user_style.configure("Custom.Treeview", background=color_p, foreground=black, fieldbackground=color_p, borderwidth=0, relief="flat")
+		user_style.map("Treeview.Heading", background=[("selected",  "#efefef"), ("active",  "#efefef")])
 
-		self.tabla =ttk.Treeview(self.main_fr,selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]], style= "Custom.Treeview")
+		self.tabla = ttk.Treeview(self.main_fr, selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]], style="Custom.Treeview")
 		self.tabla.place(relx=0.5, rely=0.5, anchor="center", width=790, height=530)
+
 		for col, heading, width in columns:
 			self.tabla.column(col, width=width)
 			self.tabla.heading(col, text=heading, anchor=tk.CENTER)
+
+		# Obtener detalles de los usuarios e insertarlos en el Treeview
+		users_details = get_all_users_details()
+		for user in users_details:
+			self.tabla.insert("", "end", text=user[1], values=(user[2], user[3], user[5], "N/A"))  # "N/A" para la fecha de registro
 
 class Notifications(BaseScene):
 	def __init__(self, parent, manager):
@@ -652,10 +661,13 @@ class Notifications(BaseScene):
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
 		self.noti_container = ctk.CTkScrollableFrame(self.main_fr, width= 400, height= 425, fg_color= color_p, corner_radius= 40, border_width= 2, border_color= color_s, scrollbar_button_color= grey, scrollbar_button_hover_color= color_s)
 		self.noti_container.place(relx=0.5, rely=0.5, anchor="center")
-		for notification in notifications:
-			card = Card(self.noti_container, notification.title, notification.text, notification.tag)
+		if len(notifications) != 0:
+			for notification in notifications:
+				card = Card(self.noti_container, notification.title, notification.text, notification.tag)
+				card.grid(row = 1, column = 0,pady = 10, sticky="ew") 
+		else:
+			card = Card(self.noti_container, "Informacion", "No hay notificaciones pendientes.", "Muajajaj", width=400)
 			card.grid(row = 1, column = 0,pady = 10, sticky="ew") 
-
 if __name__ == "__main__":
 	notifications=[]
 	app = SceneManager()  # Crea una instancia del gestor de escenas

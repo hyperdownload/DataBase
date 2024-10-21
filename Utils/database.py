@@ -5,7 +5,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import functools
 import sqlite3, csv
-
+from Utils.placeholders import *
 class Product:
     def __init__(self, name:str, price:int, brand:str, size:any, category:str, description:str, branch_name:str, stock:int, category_path=None, id:int=None):
         self.id = id
@@ -509,6 +509,23 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
 
     return sales_converted
 
+def get_all_users_details() -> list:
+    '''
+    Obtiene todos los detalles de los usuarios y los devuelve como una lista de tuplas.
+    id[0], name[1], email[2], role[3], password[4], branch[5]
+    :return: Lista de tuplas con los detalles de los usuarios
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    cursor.execute('''
+    SELECT Users.id, Users.name, Users.email, Roles.name as role, Users.password, Branches.name as branch
+    FROM Users
+    LEFT JOIN Roles ON Users.role_id = Roles.id
+    LEFT JOIN Branches ON Users.branch_id = Branches.name''')
+    users_details = cursor.fetchall()
+    conn.close()
+    return users_details
+
 def get_product_name(id:int)->str:
     '''
     Obtiene el nombre de un producto
@@ -614,9 +631,10 @@ def get_products_in_branch(name)->list:
     conn.close()
     return products
 
-def export_to_file(path_to_export='sales_export.csv') -> csv:
+def export_to_file(manager, path_to_export:str='sales_export.csv') -> csv:
     conn = sqlite3.connect(dataBasePath);cursor = conn.cursor();cursor.execute("SELECT * FROM Sales")
     with open('sales_export.csv', 'w', newline='', encoding='utf-8') as f:  writer = csv.writer(f);writer.writerow([i[0] for i in cursor.description])  ;writer.writerows(cursor.fetchall()) ; conn.close()
+    Slideout(manager, side="right", width=250, height=75, bg_color= "#EDEBE9", text="Archivo exportado a la raiz del programa.", text_color='#000000').slide_in()
 
 if __name__ == "__main__":
     
