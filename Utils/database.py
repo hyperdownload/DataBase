@@ -636,6 +636,13 @@ def export_to_file(manager, path_to_export:str='sales_export.csv') -> csv:
     with open('sales_export.csv', 'w', newline='', encoding='utf-8') as f:  writer = csv.writer(f);writer.writerow([i[0] for i in cursor.description])  ;writer.writerows(cursor.fetchall()) ; conn.close()
     Slideout(manager, side="right", width=250, height=75, bg_color= "#EDEBE9", text="Archivo exportado a la raiz del programa.", text_color='#000000').slide_in()
 
+def get_branch_properties(branch_name:str):
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Branches WHERE name =?", (branch_name,))
+    branch = cursor.fetchone()
+    conn.close()
+    return branch
 if __name__ == "__main__":
     
     ''' Literalmente aca solo copie y pegue del archivo example.py por cuestion de que se utilizaria

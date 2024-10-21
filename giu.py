@@ -444,23 +444,26 @@ class Men_p_admin(BaseScene):
 		self.sucursales_fr()
 	
 	def sucursales_fr(self):
-		sucursales_fr = ctk.CTkScrollableFrame(self.main_fr, height=240, width= 750, fg_color= color_p, scrollbar_button_color= color_p, scrollbar_button_hover_color= color_s)
-		sucursales_fr.grid(row = 1, column = 0, columnspan=4, sticky = "ew")
+		self.sucursales_fr = ctk.CTkScrollableFrame(self.main_fr, height=240, width= 750, fg_color= color_p, scrollbar_button_color= color_p, scrollbar_button_hover_color= color_s)
+		self.sucursales_fr.grid(row = 1, column = 0, columnspan=4, sticky = "ew")
 
 		style_card = {'width': 235, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'hover_color': color_s, 'text_color': black}
 		cord = [(i, branch[0]) for i, branch in enumerate(get_all_branches())]
 		for x, text in cord:
-			card = ctk.CTkButton(sucursales_fr, text = text, command=lambda:app.clear_current_scene(sucursales_fr), **style_card)
+			card = ctk.CTkButton(self.sucursales_fr, text = text, command=lambda:self.sucursal_vw(text), **style_card)
 			card.grid(row = 0, column = x,pady = 10, padx = 10, sticky="e")
 
-		fr = ctk.CTkFrame(self.main_fr, height=100, width= 750, fg_color= color_p)
-		fr.grid(row = 2, column = 0, columnspan=4, padx = 6, sticky = "ew")
+		self.fr = ctk.CTkFrame(self.main_fr, height=100, width= 750, fg_color= color_p)
+		self.fr.grid(row = 2, column = 0, columnspan=4, padx = 6, sticky = "ew")
 		cord_functions = [(0, "Nuevos productos",lambda: app.switch_scene("New_stock")),(1, "Nuevo usuario",lambda: app.switch_scene("New_user"))]
 		for x, text, command in cord_functions:
-			card = ctk.CTkButton(fr, text = text, **style_card, command= command)
+			card = ctk.CTkButton(self.fr, text = text, **style_card, command= command)
 			card.configure(fg_color = black, hover_color = "#232323", text_color = color_p)
 			card.grid(row = 0, column = x, padx = 10, pady = 15, sticky="e")
-
+	def sucursal_vw(self, sucursal_name):
+		app.clear_widget(self.sucursales_fr, self.fr)
+		print(get_branch_properties(sucursal_name))
+		ctk.CTkLabel(self.sucursal_fr, width=100, text=get_branch_properties(sucursal_name), text_color=black).place(x=100, y=100)
 class New_branch(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
