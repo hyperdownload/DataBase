@@ -448,9 +448,9 @@ class Men_p_admin(BaseScene):
 		sucursales_fr.grid(row = 1, column = 0, columnspan=4, sticky = "ew")
 
 		style_card = {'width': 235, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'hover_color': color_s, 'text_color': black}
-		cord = [(0, "San Miguel"),(1, "Jose c Paz"),(2, "Retiro")]
+		cord = [(i, branch[0]) for i, branch in enumerate(get_all_branches())]
 		for x, text in cord:
-			card = ctk.CTkButton(sucursales_fr, text = text, **style_card)
+			card = ctk.CTkButton(sucursales_fr, text = text, command=lambda:app.clear_current_scene(sucursales_fr), **style_card)
 			card.grid(row = 0, column = x,pady = 10, padx = 10, sticky="e")
 
 		fr = ctk.CTkFrame(self.main_fr, height=100, width= 750, fg_color= color_p)
@@ -668,6 +668,7 @@ class Notifications(BaseScene):
 		else:
 			card = Card(self.noti_container, "Informacion", "No hay notificaciones pendientes.", "Muajajaj", width=400)
 			card.grid(row = 1, column = 0,pady = 10, sticky="ew") 
+
 if __name__ == "__main__":
 	notifications=[]
 	app = SceneManager()  # Crea una instancia del gestor de escenas

@@ -62,6 +62,33 @@ class SceneManager(ctk.CTk):
             self.current_scene.pack(fill='both', expand=True)
         else:
             print(f"Escena '{name}' no encontrada.")
+    
+    def clear_current_scene(self, frame):
+        """Elimina todos."""
+        try:
+
+            for widget in frame.winfo_children():
+                widget.pack_forget()  
+                widget.grid_forget()
+                widget.place_forget()
+                widget.destroy() 
+
+            print("Todos los elementos de la escena actual han sido eliminados.")
+        except Exception as e:
+            traceback.print_exc()
+            print(f"Error al intentar eliminar los elementos de la escena: {e}")
+
+    def refresh_current_scene(self):
+        """Actualiza la escena actual recargándola."""
+        try:
+            if not self.current_scene_name:
+                raise ValueError("No hay una escena actual para refrescar.")
+            self.clear_current_scene()
+            self.switch_scene(self.current_scene_name)
+            print(f"Escena '{self.current_scene_name}' refrescada con éxito.")
+        except Exception as e:
+            traceback.print_exc()
+            print(f"Error al intentar refrescar la escena: {e}")
 
 # Clase base para las escenas
 class BaseScene(ctk.CTkFrame):
