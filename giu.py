@@ -462,7 +462,9 @@ class Men_p_admin(BaseScene):
 			card.grid(row = 0, column = x, padx = 10, pady = 15, sticky="e")
 	def sucursal_vw(self, sucursal_name):
 		app.clear_widget(self.sucursales_fr, self.fr)
-		ctk.CTkLabel(app, width=100, text=get_branch_properties(sucursal_name), bg_color='#FFFFFF',text_color=black).place(x=100, y=100)
+		sucursal_name = get_branch_properties(sucursal_name)
+		text = f'El nombre de la sucursal es { sucursal_name[1] }, el ID es { sucursal_name[0] } y su Direccion { sucursal_name[2] } '
+		ctk.CTkLabel(self.main_fr, width=100, text=text, bg_color='#FFFFFF',text_color=black).grid(row = 1, column = 0, columnspan=4, sticky = "ew")
 class New_branch(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
