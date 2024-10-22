@@ -449,8 +449,8 @@ class Men_p_admin(BaseScene):
 
 		style_card = {'width': 235, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'hover_color': color_s, 'text_color': black}
 		cord = [(i, branch[0]) for i, branch in enumerate(get_all_branches())]
-		for x, text in cord:
-			card = ctk.CTkButton(self.sucursales_fr, text = text, command=lambda:self.sucursal_vw(text), **style_card)
+		for x, texts in cord:
+			card = ctk.CTkButton(self.sucursales_fr, text = texts, command=lambda:self.sucursal_vw(texts), **style_card)
 			card.grid(row = 0, column = x,pady = 10, padx = 10, sticky="e")
 
 		self.fr = ctk.CTkFrame(self.main_fr, height=100, width= 750, fg_color= color_p)
@@ -462,8 +462,7 @@ class Men_p_admin(BaseScene):
 			card.grid(row = 0, column = x, padx = 10, pady = 15, sticky="e")
 	def sucursal_vw(self, sucursal_name):
 		app.clear_widget(self.sucursales_fr, self.fr)
-		print(get_branch_properties(sucursal_name))
-		ctk.CTkLabel(self.sucursal_fr, width=100, text=get_branch_properties(sucursal_name), text_color=black).place(x=100, y=100)
+		ctk.CTkLabel(app, width=100, text=get_branch_properties(sucursal_name), bg_color='#FFFFFF',text_color=black).place(x=100, y=100)
 class New_branch(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
