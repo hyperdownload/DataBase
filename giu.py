@@ -144,15 +144,13 @@ class Men_p(BaseScene):
 		#--------------------------------------------------------------------------------------------------------------------------------------------
 	def grafico(self):
 		self.grafico = ctk.CTkLabel(self.main_fr, width= 765, height= self.h_grid2, fg_color= grey,
-									corner_radius= 40, text = "Futuro grafico| proyecto en mantenimiento")
+									corner_radius= 40)
 		self.grafico.grid(row=2, column=0, columnspan=2, ipady= 6)
 
-		value = {'Remeras': 5, 'Accesorios': 0, 'Vestidos': 7, 'Calzado': 3, 'Pantalones': 15}
-
-		CTkChart(self.grafico, value, corner_radius=20, fg_color= color_s, stat_color= black, chart_fg_color= color_s,
-         show_indicators=(False, True), stat_info_show=(False, True), chart_arrow="none",
+		CTkChart(self.grafico, get_sales_per_categorie(), corner_radius=20, fg_color= color_s, stat_color= black, chart_fg_color= color_s,
+         show_indicators=(False, False), stat_info_show=(True, True), chart_arrow="none",
 		 indicator_line_color= blue, indicator_text_color= blue, stat_width=35,
-         stat_title_color= blue, chart_axis_width=3, width=700, height= self.h_grid2 - 50).place( relx = 0.5, rely = 0.5, anchor = "center")
+         stat_title_color= blue, stat_text_color= '#FFFFFF', chart_axis_width=3, width=700, height= self.h_grid2 - 50).place( relx = 0.5, rely = 0.5, anchor = "center")
 		
 class C_producto(BaseScene):
 	def __init__(self, parent, manager):
@@ -450,7 +448,7 @@ class Men_p_admin(BaseScene):
 		style_card = {'width': 235, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'hover_color': color_s, 'text_color': black}
 		cord = [(i, branch[0]) for i, branch in enumerate(get_all_branches())]
 		for x, texts in cord:
-			card = ctk.CTkButton(self.sucursales_fr, text = texts, command=lambda:self.sucursal_vw(texts), **style_card)
+			card = ctk.CTkButton(self.sucursales_fr, text = texts, command=lambda texts=texts: self.sucursal_vw(texts), **style_card)
 			card.grid(row = 0, column = x,pady = 10, padx = 10, sticky="e")
 
 		self.fr = ctk.CTkFrame(self.main_fr, height=100, width= 750, fg_color= color_p)
@@ -463,8 +461,29 @@ class Men_p_admin(BaseScene):
 	def sucursal_vw(self, sucursal_name):
 		app.clear_widget(self.sucursales_fr, self.fr)
 		sucursal_name = get_branch_properties(sucursal_name)
-		text = f'El nombre de la sucursal es { sucursal_name[1] }, el ID es { sucursal_name[0] } y su Direccion { sucursal_name[2] } '
-		ctk.CTkLabel(self.main_fr, width=100, text=text, bg_color='#FFFFFF',text_color=black).grid(row = 1, column = 0, columnspan=4, sticky = "ew")
+		sales = get_all_sales_of_branch(sucursal_name[1])
+
+		columns = ('ID', 'Producto', 'Usuario', 'Sucursal', 'Cantidad', 'Fecha', 'Precio', 'Categoría')
+		
+		self.treeview = ttk.Treeview(self.main_fr, columns=columns, show='headings')
+		self.treeview.grid(row=1, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
+
+		for col in columns:
+			self.treeview.heading(col, text=col)
+			self.treeview.column(col, anchor='center', width=100)
+
+		for sale in sales:
+			self.treeview.insert('', 'end', values=(sale[0], sale[1], sale[2], sale[3], sale[4], sale[5], f"${sale[6]:.2f}", sale[7]))
+
+		text_info = (
+			f"El nombre de la sucursal es: {sucursal_name[1]}\n"
+			f"El ID es: {sucursal_name[0]}\n"
+			f"Dirección: {sucursal_name[2]}\n"
+			f"Usuarios en la sucursal: {', '.join([f'{user[0]}' for user in get_user_per_branch(sucursal_name[1])])}"
+		)
+		label_info = ctk.CTkLabel(self.main_fr, text=text_info, fg_color='#FFFFFF', text_color='black')
+		label_info.grid(row=0, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
+
 class New_branch(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)

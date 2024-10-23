@@ -636,13 +636,65 @@ def export_to_file(manager, path_to_export:str='sales_export.csv') -> csv:
     with open('sales_export.csv', 'w', newline='', encoding='utf-8') as f:  writer = csv.writer(f);writer.writerow([i[0] for i in cursor.description])  ;writer.writerows(cursor.fetchall()) ; conn.close()
     Slideout(manager, side="right", width=250, height=75, bg_color= "#EDEBE9", text="Archivo exportado a la raiz del programa.", text_color='#000000').slide_in()
 
-def get_branch_properties(branch_name:str):
+def get_branch_properties(branch_name:str)->list:
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Branches WHERE name =?", (branch_name,))
     branch = cursor.fetchone()
     conn.close()
     return branch
+
+def get_user_per_branch(branch_name:str)->list:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM Users WHERE branch_id =?", (branch_name,))
+    users = cursor.fetchall()
+    conn.close()
+    return users
+
+def get_all_categories() -> list:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * category FROM Products")
+    categories = cursor.fetchall()
+    conn.close()
+    return [category[0] for category in categories]
+
+def get_sales_per_categorie() -> dict:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    cursor.execute("SELECT category, SUM(quantity) as total_sold FROM Sales GROUP BY category")
+    sales_per_category = cursor.fetchall()
+    conn.close()
+
+    # Convertir la lista de tuplas en un diccionario
+    return dict(sales_per_category)
+
+def get_all_sales_of_branch(branch_name) -> list:
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Sales WHERE branch_name = ?", (branch_name,))
+    sales = cursor.fetchall()
+    conn.close()
+
+    sales_list = []
+
+    for sale in sales:
+        sale_id, product_id, user_id, branch_name, quantity, sale_date, price, category = sale
+
+        sales_list.append([
+            sale_id, 
+            get_name_product(product_id), 
+            get_user_name(user_id),        
+            branch_name, 
+            quantity, 
+            sale_date, 
+            price, 
+            category
+        ])
+
+    return sales_list
+
 if __name__ == "__main__":
     
     ''' Literalmente aca solo copie y pegue del archivo example.py por cuestion de que se utilizaria
