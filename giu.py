@@ -268,7 +268,6 @@ class C_ventas(BaseScene):
 				self.inputq = ClearableEntry(self.inputs_fr, placeholder_text= text, **self.input_config)
 				self.inputq.grid(row = y_cord, column = 1, pady = 5, padx = 25)
 
-
 		borrar = ["Efectivo", "Credito", "Debito","Transferencia"]
 		self.metodo_pago = ctk.CTkOptionMenu(self.inputs_fr, values = borrar, font= ('Plus jakarta Sans', 14, 'bold'), text_color= black
 											, width = 350, height = 50, fg_color = color_s, button_color = grey
@@ -542,20 +541,25 @@ class New_stock(BaseScene):
 
 		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
 		
-		self.nombre_producto = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre del producto', **self.input_config)
+		self.nombre_producto = ClearableEntry(self.inputs_fr, placeholder_text= 'Nombre del producto', **self.input_config)
 		self.nombre_producto.place(relx=0.5, y=100, anchor="center")
 		
-		self.marca_produc= ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese marca del producto', **self.input_config)
+		self.marca_produc= ClearableEntry(self.inputs_fr, placeholder_text= 'Marca del producto', **self.input_config)
 		self.marca_produc.place(relx=0.5, y=160, anchor="center")
 		
-		self.talle_produc=ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese talle del producto', **self.input_config)
-		self.talle_produc.place(relx=0.5, y=220, anchor="center")
+		self.talle_produc=ClearableEntry(self.inputs_fr, placeholder_text= 'Talle del producto', **self.input_config)
+		self.talle_produc.place(x=111, y=220, anchor="center")
+		self.talle_produc.configure(width = 173)
 		
-		self.precio_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese precio', **self.input_config)
+		self.cat_produc=ClearableEntry(self.inputs_fr, placeholder_text= 'Cat. del producto', **self.input_config)
+		self.cat_produc.place(x=289, y=220, anchor="center")
+		self.cat_produc.configure(width = 173)
+
+		self.precio_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Precio', **self.input_config)
 		self.precio_produc.place(x=111, y=280, anchor="center")
 		self.precio_produc.configure(width = 173)
 
-		self.stock_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese stock', **self.input_config)
+		self.stock_produc = ClearableEntry(self.inputs_fr, placeholder_text= 'Stock', **self.input_config)
 		self.stock_produc.place(x=289, y=280, anchor="center")
 		self.stock_produc.configure(width = 173)
   
@@ -572,13 +576,13 @@ class New_stock(BaseScene):
 		self.stock_produc.bind('<Return>',self.new_product_def)
 
 	def new_product_def(self, event = None):
-		nombre, marca, talle, precio, stock, sucursal, desc = (self.nombre_producto.get_and_clear(),self.marca_produc.get_and_clear(),self.talle_produc.get_and_clear(),self.precio_produc.get_and_clear(),self.stock_produc.get_and_clear(), self.sucursal.get(), self.desc_produc.get('1.0', ctk.END))
+		nombre, marca, talle, cat, precio, stock, sucursal, desc = (self.nombre_producto.get_and_clear(),self.marca_produc.get_and_clear(),self.talle_produc.get_and_clear(),self.cat_produc.get_and_clear(),self.precio_produc.get_and_clear(),self.stock_produc.get_and_clear(), self.sucursal.get(), self.desc_produc.get('1.0', ctk.END))
 		self.desc_produc.delete('1.0', ctk.END)
-		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"marca": marca,"talle": talle,"precio": precio,"stock": stock, "sucursal": sucursal, "desc":desc,}.items()if not valor]:
+		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"marca": marca,"talle": talle,"precio": precio,"stock": stock, "sucursal": sucursal, "desc":desc, 'cat':cat,}.items()if not valor]:
 			show_notification(app, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
 		else:
 			show_notification(app, "Nuevo producto cargado con éxito")
-			add_product(Product(name=nombre, brand=marca, size=talle, price=precio, stock=stock, branch_name=sucursal, description=desc, image=None))
+			add_product(Product(name=nombre, brand=marca, size=talle,category=cat, price=precio, stock=stock, branch_name=sucursal, description=desc))
 
 class New_user(BaseScene):
 	def __init__(self, parent, manager):
