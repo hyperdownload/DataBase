@@ -94,6 +94,8 @@ def create_database()->None:
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         price INTEGER NOT NULL,
         category TEXT NOT NULL,
+        payment_method TEXT NOT NULL,
+        discount INTEGER NOT NULL,
         FOREIGN KEY (category) REFERENCES products (category)
         FOREIGN KEY (product_id) REFERENCES Products(id),
         FOREIGN KEY (user_id) REFERENCES Users(id),
@@ -271,7 +273,7 @@ def get_product_category(id_product:int)->str:
     return category[0] if category else None
 
 @log_database_action("Sale")
-def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, price:int)->bool:
+def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, price:int, payment_mothed:str, discount:int=0)->bool:
     '''
     Guarda una venta de un producto y reduce el stock del producto.
     '''
@@ -289,9 +291,9 @@ def record_sale(product_id:int, user_id:int, branch_name:str, quantity:int, pric
         if current_stock >= quantity:
             # Registra la venta
             cursor.execute('''
-            INSERT INTO Sales (product_id, user_id, branch_name, quantity, price, category)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ''', (product_id, user_id, branch_name, quantity, price, get_product_category(product_id)))
+            INSERT INTO Sales (product_id, user_id, branch_name, quantity, price, category, payment_method, discount)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (product_id, user_id, branch_name, quantity, price, get_product_category(product_id), payment_mothed, discount))
 
             # Reduce el stock
             new_stock = current_stock - quantity
@@ -486,7 +488,7 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
     cursor = conn.cursor()
 
     cursor.execute('''
-    SELECT id, product_id, user_id, branch_name, quantity, date, price, category
+    SELECT id, product_id, user_id, branch_name, quantity, date, price, category, payment_method, discount
     FROM Sales
     ''')
 
@@ -495,7 +497,7 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
 
     sales_converted = []
     for sale in sales:
-        sale_id, product_id, user_id, branch_name, quantity, sale_date, price, category = sale
+        sale_id, product_id, user_id, branch_name, quantity, sale_date, price, category, payment_method, discount = sale
 
         # Convierte el string a objeto datetime asumiendo que la fecha está en UTC
         sale_datetime_utc = datetime.strptime(sale_date, '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
@@ -504,7 +506,7 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
         sale_datetime_local = sale_datetime_utc.astimezone(ZoneInfo(target_timezone))
 
         # Guarda los datos con la fecha convertida en la lista final
-        sale_with_converted_date = (sale_id, product_id, user_id, branch_name, quantity, sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'), price, category)
+        sale_with_converted_date = (sale_id, product_id, user_id, branch_name, quantity, sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'), price, category, payment_method, discount)
         sales_converted.append(sale_with_converted_date)
 
     return sales_converted
