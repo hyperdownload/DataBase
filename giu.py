@@ -27,29 +27,41 @@ class Login(BaseScene):
 		self.manager.title("Login")
 		login_container = ctk.CTkFrame(self.manager, width=800, height=600, fg_color=color_p)
 		login_container.place(x=0, y=0)
-		
+
 		labels = [("Welcome to back", 185, 28), ("Urbanlive", 215, 16)]
 		for text, y_pos, font_size in labels:
 			ctk.CTkLabel(login_container, text=text, font=('Plus Jakarta Sans', font_size, 'bold'), text_color=black if font_size == 28 else "#BEBEBE").place(relx=0.5, y=y_pos, anchor="center")
 
-		self.user_entry = ClearableEntry(login_container, height=35, width=350, corner_radius=20, placeholder_text="Ingrese su nombre de usuario...")
-		self.user_entry.place(relx=0.5, y=260, anchor="center")
-		self.user_entry.bind('<Return>', self.login_logic)
-
-		self.password_entry = ClearableEntry(login_container, height=35, width=350, corner_radius=20, placeholder_text="Ingrese su contraseña...")
-		self.password_entry.place(relx=0.5, y=310, anchor="center")
-		self.password_entry.bind('<Return>', self.login_logic)
+		self.user_entry = self._extracted_from_login_10(
+			login_container, "Ingrese su nombre de usuario...", 260
+		)
+		self.password_entry = self._extracted_from_login_10(
+			login_container, "Ingrese su contraseña...", 310
+		)
 		self.password_entry.bind('<MouseWheel>', lambda event: self.login_logic(autologin=True))
 
 		ctk.CTkButton(login_container, text="Login", height=35, width=350, corner_radius=20, fg_color=black, text_color=color_p, hover_color="#454545", command=self.login_logic).place(relx=0.5, y=360, anchor="center")
+
+	def _extracted_from_login_10(self, login_container, placeholder_text, y):
+		result = ClearableEntry(
+			login_container,
+			height=35,
+			width=350,
+			corner_radius=20,
+			placeholder_text=placeholder_text,
+		)
+		result.place(relx=0.5, y=y, anchor="center")
+		result.bind('<Return>', self.login_logic)
+
+		return result
   
 	def login_logic(self, event=None, autologin=False):
 		if not autologin:
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
 		else:
-			user = 'john@example.com'
-			password = 'password123'
+			user = 'carlos@example.com'
+			password = 'superadmin789'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -183,7 +195,7 @@ class C_producto(BaseScene):
 		try:
 			record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get_and_clear())
 			show_notification(app, f"Reestock exitoso\n stock actual: {get_stock_product(get_name_per_id(str(name_product)))}")
-			#notifications = [n for n in notifications if n.tag != 'stock']
+			notifications = [n for n in notifications if n.tag != 'stock']
 		except TypeError:
 			show_notification(app, "Error al reestockear,\n procure seleccionar un\n producto de la tabla")
 
@@ -435,8 +447,8 @@ class Ventas_nav(BaseScene):
 											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command= lambda:export_to_file(self.manager))
 		self.u_export_btn.place(x = 635, y= 25, anchor = "center")   
 
-		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
-		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, grey, "#222325", event))
+		# self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
+		# self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, grey, "#222325", event))
 
 		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800)
 		tabla.grid(row=3, column=0)
@@ -506,22 +518,41 @@ class Men_p_admin(BaseScene):
 			card = ctk.CTkButton(self.fr, text = text, **style_card, command= command)
 			card.configure(fg_color = black, hover_color = "#232323", text_color = color_p)
 			card.grid(row = 0, column = x, padx = 10, pady = 15, sticky="e")
+
 	def sucursal_vw(self, sucursal_name):
 		app.clear_widget(self.sucursales_fr, self.fr)
+
 		sucursal_name = get_branch_properties(sucursal_name)
 		sales = get_all_sales_of_branch(sucursal_name[1])
 
-		columns = ('ID', 'Producto', 'Usuario', 'Sucursal', 'Cantidad', 'Fecha', 'Precio', 'Categoría')
-		
-		self.treeview = ttk.Treeview(self.main_fr, columns=columns, show='headings')
-		self.treeview.grid(row=1, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
+		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=725, width=800)
+		tabla.grid(row=2, column=0, padx=20, pady=20)
 
-		for col in columns:
-			self.treeview.heading(col, text=col)
-			self.treeview.column(col, anchor='center', width=100)
+		self.tabla_ventas = ctk.CTkFrame(tabla, width=775, height=400, fg_color=black, corner_radius=40)
+		self.tabla_ventas.place(relx=0.5, rely=0.5, anchor="center")
+
+		columns = [("#0", "ID", 30), 
+				("Producto", "Producto", 90), 
+				("Usuario", "Usuario", 60), 
+				("Sucursal", "Sucursal", 70), 
+				("Cantidad", "Cantidad", 70), 
+				("Fecha", "Fecha", 110), 
+				("Precio", "Precio", 50), 
+				("Categoria", "Categoria", 80), 
+				("M. Pago", "M. Pago", 70), 
+				("Descuento", "Descuento", 60)]
+
+		self.tv_ventas = ttk.Treeview(self.tabla_ventas, selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]])
+		self.tv_ventas.place(relx=0.5, rely=0.5, anchor="center", width=725, height=350)
+
+		for col, heading, width in columns:
+			self.tv_ventas.column(col, width=width)
+			self.tv_ventas.heading(col, text=heading, anchor=tk.CENTER)
 
 		for sale in sales:
-			self.treeview.insert('', 'end', values=(sale[0], sale[1], sale[2], sale[3], sale[4], sale[5], f"${sale[6]:.2f}", sale[7]))
+			self.tv_ventas.insert("", tk.END, text=f"{sale[0]}", 
+								values=(sale[1], sale[2], sale[3], sale[4], sale[5], 
+										f"${sale[6]:.2f}", sale[7], sale[8], sale[9]))
 
 		text_info = (
 			f"El nombre de la sucursal es: {sucursal_name[1]}\n"
@@ -529,6 +560,7 @@ class Men_p_admin(BaseScene):
 			f"Dirección: {sucursal_name[2]}\n"
 			f"Usuarios en la sucursal: {', '.join([f'{user[0]}' for user in get_user_per_branch(sucursal_name[1])])}"
 		)
+		
 		label_info = ctk.CTkLabel(self.main_fr, text=text_info, fg_color='#FFFFFF', text_color='black')
 		label_info.grid(row=0, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
 
@@ -698,27 +730,21 @@ class Users(BaseScene):
 		self.main()
 		self.manager.title("Usuarios")
 	def main(self):
-		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
+		self.main_fr = ctk.CTkFrame(self.manager, fg_color=black, height=475, width=700)
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
 
 		columns = [("#0", "Name", 120), 
 				("email", "Email", 100), 
 				("role_id", "Role_id", 30), 
 				("Branch_id", "Branch", 50),]
-		
-		user_style = ttk.Style()
-		user_style.configure("Custom.Treeview.Heading", background=color_p, foreground=black, font=("Arial", 12, "bold"), relief="flat")
-		user_style.configure("Custom.Treeview", background=color_p, foreground=black, fieldbackground=color_p, borderwidth=0, relief="flat")
-		user_style.map("Treeview.Heading", background=[("selected",  "#efefef"), ("active",  "#efefef")])
 
-		self.tabla = ttk.Treeview(self.main_fr, selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]], style="Custom.Treeview")
-		self.tabla.place(relx=0.5, rely=0.5, anchor="center", width=790, height=530)
+		self.tabla = ttk.Treeview(self.main_fr, selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]],)
+		self.tabla.place(relx=0.5, rely=0.5, anchor="center", width=650, height=450)
 
 		for col, heading, width in columns:
 			self.tabla.column(col, width=width)
 			self.tabla.heading(col, text=heading, anchor=tk.CENTER)
 
-		# Obtener detalles de los usuarios e insertarlos en el Treeview
 		users_details = get_all_users_details()
 		for user in users_details:
 			self.tabla.insert("", "end", text=user[1], values=(user[2], user[3], user[5], "N/A"))  # "N/A" para la fecha de registro

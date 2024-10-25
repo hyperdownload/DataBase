@@ -682,7 +682,7 @@ def get_all_sales_of_branch(branch_name) -> list:
     sales_list = []
 
     for sale in sales:
-        sale_id, product_id, user_id, branch_name, quantity, sale_date, price, category = sale
+        sale_id, product_id, user_id, branch_name, quantity, sale_date, price, category, mpago, desc = sale
 
         sales_list.append([
             sale_id, 
@@ -692,7 +692,9 @@ def get_all_sales_of_branch(branch_name) -> list:
             quantity, 
             sale_date, 
             price, 
-            category
+            category,
+            mpago,
+            desc
         ])
 
     return sales_list
