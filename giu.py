@@ -223,7 +223,7 @@ class C_producto(BaseScene):
 		bp_btn.place(x = 355, rely = 0.5, anchor= "center")
 
 		self.c_stock = ClearableEntry(self.cp_fr, placeholder_text= "Cantidad a subir...", width= 250, height=50,
-										corner_radius=35, border_color= "#dcdcdc", text_color= black )
+										corner_radius=35, border_color= "#dcdcdc", text_color= "#FFFFFF" )
 		self.c_stock.place(x = 525, rely= 0.5, anchor= "center")
 
 		c_btn = ctk.CTkButton(self.cp_fr, text= "Subir", fg_color= black, hover_color= "#dcdcdc"
@@ -235,7 +235,7 @@ class C_producto(BaseScene):
 
 		columns = [("#0", "Product", 117), ("price", "Price", 50), ("brand", "Brand", 50), ("size", "Size", 50), ("description", "Description", 117)]
         
-		self.tabla_stock = Table(tabla, columns=columns, color_tabla="black", color_frame="white", width=675, height=400)
+		self.tabla_stock = Table(tabla, columns=columns, color_tabla=black, color_frame=black, width=675, height=400)
 		self.tabla_stock.place(relx=0.5, y=200, anchor="center")
         
 		branch_user = app.get_variable('branch_user').lower()
