@@ -506,7 +506,7 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
         sale_datetime_local = sale_datetime_utc.astimezone(ZoneInfo(target_timezone))
 
         # Guarda los datos con la fecha convertida en la lista final
-        sale_with_converted_date = (sale_id, product_id, user_id, branch_name, quantity, sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'), price, category, payment_method, discount)
+        sale_with_converted_date = [sale_id, get_product_name(product_id), get_user_name(user_id), branch_name, quantity, sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'), price, category, payment_method, discount]
         sales_converted.append(sale_with_converted_date)
 
     return sales_converted
@@ -515,18 +515,23 @@ def get_all_users_details() -> list:
     '''
     Obtiene todos los detalles de los usuarios y los devuelve como una lista de tuplas.
     id[0], name[1], email[2], role[3], password[4], branch[5]
-    :return: Lista de tuplas con los detalles de los usuarios
+
+    :return: Lista de tuplas con los detalles de los usuarios. Si no hay usuarios, retorna una lista vacía.
     '''
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     cursor.execute('''
-    SELECT Users.id, Users.name, Users.email, Roles.name as role, Users.password, Branches.name as branch
-    FROM Users
-    LEFT JOIN Roles ON Users.role_id = Roles.id
-    LEFT JOIN Branches ON Users.branch_id = Branches.name''')
+        SELECT Users.id, Users.name, Users.email, Roles.name as role, Users.password, Branches.name as branch
+        FROM Users
+        LEFT JOIN Roles ON Users.role_id = Roles.id
+        LEFT JOIN Branches ON Users.branch_id = Branches.id
+    ''')
+
     users_details = cursor.fetchall()
+    
     conn.close()
-    return users_details
+
+    return users_details or []
 
 def get_product_name(id:int)->str:
     '''

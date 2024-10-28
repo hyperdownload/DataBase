@@ -1,7 +1,9 @@
 import threading
 import time
 import customtkinter as ctk
-
+import tkinter as tk
+from tkinter import ttk
+import tkinter.font as tkFont
 class Slideout(ctk.CTkFrame):
     active_slideout = None  # Variable de clase para mantener referencia al slideout activo
 
@@ -49,7 +51,7 @@ class Slideout(ctk.CTkFrame):
             self.place(x=-self.width, y=(self.parent.winfo_height() - self.height) // self.y_axis)
 
     def slide_in(self):
-        # Ejecuta el movimiento en un hilo separado para no bloquear la ventana
+        # Ejecuta el movimiento en un hilo separado para no bloquear la elementna
         threading.Thread(target=self._animate_in).start()
 
     def slide_out(self):
@@ -115,7 +117,7 @@ class Menu_user(ctk.CTkFrame):
 
        
     def slide_in(self):
-        # Ejecuta el movimiento en un hilo separado para no bloquear la ventana
+        # Ejecuta el movimiento en un hilo separado para no bloquear la elementna
         if not Menu_user.is_in_animation:
             Menu_user.is_in_animation = not Menu_user.is_in_animation
             threading.Thread(target=self._animate_in).start()
@@ -217,3 +219,124 @@ class ClearableEntry(ctk.CTkEntry):
         value = self.get()  # Obtiene el valor del input
         self.delete(0, ctk.END)  # Borra el contenido del input
         return value  # Retorna el valor obtenido
+
+class Table:
+    def __init__(self, master: ttk.Widget, columns: list, color_tabla: str, color_frame: str, width: int = 775, height: int = 400):
+        """
+        Inicializa una tabla con protección contra overflow de texto en celdas.
+
+        Args:
+            master (tk.Widget): El contenedor donde se coloca la tabla.
+            columns (list): Lista de columnas con el formato [(id_col, nombre_col, ancho_col)].
+            color_tabla (str): Color de fondo de la tabla principal.
+            color_frame (str): Color de fondo del frame contenedor.
+            width (int): Ancho de la tabla en píxeles. Default: 775.
+            height (int): Alto de la tabla en píxeles. Default: 400.
+        """
+        self.frame = ctk.CTkFrame(master, width=width, height=height, fg_color=color_tabla, corner_radius=40)
+
+        # Configuracion de las columnas del Treeview
+        self.treeview = ttk.Treeview(self.frame, columns=[col[0] for col in columns[1:]])
+        self.treeview.place(relx=0.5, rely=0.5, anchor="center", width=width - 50, height=height - 50)
+
+        # Definicion de columnas y encabezados
+        for col_id, heading, col_width in columns:
+            self.treeview.column(col_id, width=col_width, minwidth=col_width, anchor="w")
+            self.treeview.heading(col_id, text=heading, anchor="w")
+
+        # Fuente por defecto para medir texto
+        self.default_font = tkFont.nametofont("TkDefaultFont")
+        
+        # Inicializa tooltip para mostrar texto completo en caso de overflow
+        self.tooltip = None
+        self.treeview.bind("<Motion>", self._show_tooltip)
+
+    def _show_tooltip(self, event):
+        """
+        Muestra un tooltip con el texto completo cuando el texto de una celda es más ancho que la columna.
+        """
+        region = self.treeview.identify("region", event.x, event.y)
+        if region == "cell":
+            row_id = self.treeview.identify_row(event.y)
+            col_id = self.treeview.identify_column(event.x)
+            if row_id and col_id:
+                cell_value = self.treeview.item(row_id, "values")[int(col_id[1:]) - 1]
+
+                # Comprueba si el texto de la celda es mas largo que el ancho de la columna
+                col_width = self.treeview.column(col_id, "width")
+                text_width = self.default_font.measure(cell_value)
+                if text_width > col_width:
+                    if self.tooltip is None:
+                        self.tooltip = tk.Toplevel(self.treeview)
+                        self.tooltip.wm_overrideredirect(True)
+                        label = tk.Label(self.tooltip, text=cell_value, background="yellow", relief="solid", borderwidth=1)
+                        label.pack()
+                    self.tooltip.wm_geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
+                elif self.tooltip:
+                    self.tooltip.destroy()
+                    self.tooltip = None
+        elif self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
+    def grid(self, *args, **kwargs):
+        """
+        Método para colocar el frame en el layout usando grid.
+
+        Args:
+            *args, **kwargs: Argumentos y parametros para el metodo grid de tkinter.
+        """
+        self.frame.grid(*args, **kwargs)
+
+    def place(self, *args, **kwargs):
+        """
+        Método para colocar el frame en el layout usando place.
+
+        Args:
+            *args, **kwargs: Argumentos y parametros para el metodo place de tkinter.
+        """
+        self.frame.place(*args, **kwargs)
+
+    def insert(self, elements):
+        """
+        Inserta los datos de Elementos en la tabla.
+
+        Args:
+            elements (list): Lista de elementos, cada uno como lista con valores en el mismo orden que las columnas.
+        """
+        self.treeview.delete(*self.treeview.get_children())
+
+        for element in elements:
+            if len(element) >= len(self.treeview["columns"]) + 1:
+                text_value = element[0]  # El primer valor es para el 'text'
+                column_values = element[1:]  # Los demás son para las columnas
+                self.treeview.insert("", tk.END, text=text_value, values=column_values)
+            else:
+                print(f"Advertencia: La cantidad de valores {len(element)} no coincide con el número de columnas + text {len(self.treeview['columns']) + 1}")
+            
+    def clear(self):
+        """Elimina todas las filas actuales de la tabla."""
+        for item in self.treeview.get_children():
+            self.treeview.delete(item)
+    
+    def get_children(self):
+        """Devuelve los elementos hijos del Treeview."""
+        return self.treeview.get_children()
+    
+    def item(self, item_id, option=None, **kw):
+        """
+        Interactúa con los elementos del Treeview.
+
+        Args:
+            item_id (str): ID del elemento en el Treeview.
+            option (str, opcional): Opción específica para obtener o establecer.
+            **kw: Argumentos adicionales para modificar el elemento.
+        
+        Returns:
+            dict o str: Información del elemento o valor de la opción especificada.
+        """
+        return self.treeview.item(item_id, option=option, **kw)
+
+    def focus(self):
+        """Devuelve el ID del elemento actualmente seleccionado en el Treeview."""
+        return self.treeview.focus()

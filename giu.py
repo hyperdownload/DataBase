@@ -60,8 +60,8 @@ class Login(BaseScene):
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
 		else:
-			user = 'carlos@example.com'
-			password = 'superadmin789'
+			user = 'john@example.com'
+			password = 'password123'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -173,28 +173,34 @@ class C_producto(BaseScene):
 		self.header_fr = header(self.manager)
 		self.main()
 
-	def search(self, event = None):
+	def search(self, event=None):
 		if self.buscar_producto.get():
-			self.tv_stock.delete(*self.tv_stock.get_children())
-			search=search_function(get_products_in_stock(),self.buscar_producto.get())
-			for product in search:
-				if product.branch_name.lower() == app.get_variable('branch_user').lower():
-					self.tv_stock.insert("",tk.END, text=f"{product.name}",
-							values=(product.price,product.brand,product.size, product.description))
+			self.tabla_stock.clear()
+			search_results = search_function(get_products_in_stock(), self.buscar_producto.get())
+
+			branch_user = app.get_variable('branch_user').lower()
+			rows = [
+				(product.name, product.price, product.brand, product.size, product.description)
+				for product in search_results if product.branch_name.lower() == branch_user
+			]
 		else:
-			self.tv_stock.delete(*self.tv_stock.get_children())
+			self.tabla_stock.clear()
 			products_in_stock = get_products_in_stock()
-			for product in products_in_stock:
-				if product.branch_name.lower() == app.get_variable('branch_user').lower():
-					self.tv_stock.insert("",tk.END, text=f"{product.name}",
-							values=(product.price,product.brand,product.size, product.description))
-    
+			rows = [
+				(product.name, product.price, product.brand, product.size, product.description)
+				for product in products_in_stock if product.branch_name.lower() == app.get_variable('branch_user').lower()
+			]
+
+		self.tabla_stock.insert(rows)
+
 	def update_stock(self):
-		focus = self.tv_stock.focus()
-		name_product=self.tv_stock.item(focus,'text')
+		focus = self.tabla_stock.focus()
+		name_product = self.tabla_stock.item(focus, 'text')
 		try:
 			record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get_and_clear())
-			show_notification(app, f"Reestock exitoso\n stock actual: {get_stock_product(get_name_per_id(str(name_product)))}")
+			current_stock = get_stock_product(get_name_per_id(str(name_product)))
+			show_notification(app, f"Reestock exitoso\n stock actual: {current_stock}")
+			
 			notifications = [n for n in notifications if n.tag != 'stock']
 		except TypeError:
 			show_notification(app, "Error al reestockear,\n procure seleccionar un\n producto de la tabla")
@@ -227,27 +233,17 @@ class C_producto(BaseScene):
 		tabla = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 425, width = 800)
 		tabla.grid(row=2, column=0)
 
-		self.tabla_stock = ctk.CTkFrame(tabla, width= 675, height= 400, fg_color= black, corner_radius= 40)
-		self.tabla_stock.place(relx = 0.5, y= 200, anchor= "center")
-
-		columns = [("#0", "Product", 117), 
-           ("price", "Price", 50), 
-           ("brand", "Brand", 50), 
-           ("size", "Size", 50), 
-           ("description", "Description", 117)]
-
-		self.tv_stock = ttk.Treeview(self.tabla_stock,selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]])
-		self.tv_stock.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
-  
-		for col, heading, width in columns:
-			self.tv_stock.column(col, width=width)
-			self.tv_stock.heading(col, text=heading, anchor=tk.CENTER)
-
-		products_in_stock = get_products_in_stock()
-		for product in products_in_stock:
-			if product.branch_name.lower() == app.get_variable('branch_user').lower():
-				self.tv_stock.insert("",tk.END, text=f"{product.name}",
-						values=(product.price,product.brand,product.size, product.description))
+		columns = [("#0", "Product", 117), ("price", "Price", 50), ("brand", "Brand", 50), ("size", "Size", 50), ("description", "Description", 117)]
+        
+		self.tabla_stock = Table(tabla, columns=columns, color_tabla="black", color_frame="white", width=675, height=400)
+		self.tabla_stock.place(relx=0.5, y=200, anchor="center")
+        
+		branch_user = app.get_variable('branch_user').lower()
+		rows = [
+            (product.name, product.price, product.brand, product.size, product.description)
+            for product in get_products_in_stock() if product.branch_name.lower() == branch_user
+        ]
+		self.tabla_stock.insert(rows)
 	
 class C_ventas(BaseScene):
 	def __init__(self, parent, manager):
@@ -282,7 +278,7 @@ class C_ventas(BaseScene):
 				self.input_discount = ClearableEntry(self.inputs_fr, placeholder_text=text, **self.input_config)
 				self.input_discount.grid(row=y_cord, column=1, pady=5, padx=25)
 
-		metodos_pago = ["Efectivo", "Crédito", "Débito", "Transferencia"]
+		metodos_pago = ["Efectivo", "Credito", "Debito", "Transferencia"]
 		self.metodo_pago = ctk.CTkOptionMenu(self.inputs_fr, values=metodos_pago, font=('Plus jakarta Sans', 14, 'bold'), text_color=black,
 											 width=350, height=50, fg_color=color_s, button_color=grey,
 											 corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black, command=self.credito)
@@ -309,22 +305,19 @@ class C_ventas(BaseScene):
 		final_price = price * (1 - discount_value) * quantity
 
 		self.pago.configure(text=f"Método de pago: {self.metodo_pago.get()}")
-		self.treeviewt.insert(
-			"",
-			tk.END,
-			text=product_name,
-			values=(final_price, quantity)
-		)
+		items=[(product_name, final_price, quantity)]
+		self.treeviewt.insert(elements=items)
 		self.id_product.append(self.inputid.get())
 
 	def credito(self, metodo):
-		if metodo in ["Crédito", "Débito"]:
+		if metodo in ["Credito", "Debito"]:
 			self.input_c = ClearableEntry(self.inputs_fr, placeholder_text="Ingrese tarjeta", **self.input_config)
 			self.input_c.grid(row=3, column=1, pady=5, padx=25)
 			self.input_c.bind('<KeyRelease>', self.detect_card_type)
 			self.cardText = ctk.CTkLabel(app,width=30, text='', text_color=black, bg_color='#FFFFFF')
 			self.cardText.place(x=385,y=360)
-
+		else:
+			self.input_c.destroy()
 	def detect_card_type(self, event):
 		card_number = self.input_c.get().replace(" ", "")[:6]
 		if card_type := self.get_card_type(card_number):
@@ -355,12 +348,10 @@ class C_ventas(BaseScene):
 		ticket_fr = ctk.CTkFrame(self.ticket_col, width=300, height=400, fg_color=black, corner_radius=20, border_color=grey, border_width=3)
 		ticket_fr.place(relx=0.5, rely=0.5, anchor="center")
 
-		self.treeviewt = ttk.Treeview(ticket_fr, columns=("Precio", "Cantidad"))
-		self.treeviewt.place(relx=0.5, y=195, anchor="center", width=280, height=350)
+		columns = [("#0", "Producto", 50),   ("Precio", "Precio", 50),("Cantidad", "Cantidad", 50)]
 
-		for col, width in zip(("#0", "Precio", "Cantidad"), [50, 50, 50]):
-			self.treeviewt.column(col, width=width)
-			self.treeviewt.heading(col, text=col if col != "#0" else "Producto", anchor=tk.CENTER)
+		self.treeviewt = Table(master=ticket_fr,columns=columns,color_tabla=black,color_frame=black,width=280,height=350)
+		self.treeviewt.frame.place(relx=0.5, y=195, anchor="center")
 
 		self.pago = ctk.CTkLabel(self.ticket_col, text_color=color_p, fg_color=black, text=f"Método de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
 		self.pago.place(x=75, y=320)
@@ -401,17 +392,19 @@ class Stock_nav(BaseScene):
 		if app.get_variable('user_role') != 'Normal user': 
 			self._extracted_from_main_5()
 	#--------------------------------------------------------------------------------------------------------------------------------------------
-		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800)
+		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=600, width=800)
 		tabla.grid(row=3, column=0)
-		self.tabla_venta = ctk.CTkFrame(tabla, width=675, height=400, fg_color=black, corner_radius=40)
-		self.tabla_venta.place(relx=0.5, y=200, anchor="center")
-		stockTreeView = ttk.Treeview(self.tabla_venta, columns=("ID", "Precio", "Talle", "Fecha_act", "Stock"))
-		stockTreeView.place(relx=0.5, rely=0.5, anchor="center", width=625, height=350)
-		[stockTreeView.column(col, width=width) for col, width in [("#0", 110), ("ID", 40), ("Precio", 40), ("Talle", 30), ("Fecha_act", 115), ("Stock", 30)]]
-		stockTreeView.heading("#0", text="Producto", anchor=tk.CENTER)
-		[stockTreeView.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.CENTER) for col in ["ID", "Precio", "Talle", "Fecha_act", "Stock"]]
-		products_in_stock = get_products_in_stock()
-		[stockTreeView.insert("", "end", text=product.name, values=(product.id, product.price, product.size, get_restock_date(product.id), product.stock)) if product.branch_name.lower() == app.get_variable("branch_user").lower() else None for product in products_in_stock]
+		columns = [("#0", "Producto", 110),   ("ID", "ID", 40),("Precio", "Precio", 40),("Talle", "Talle", 30),("Fecha_act", "Fecha act.", 115),("Stock", "Stock", 30)]
+
+		self.tabla_stock = Table(master=tabla, columns=columns, color_tabla=black, color_frame=black, width=625, height=600)
+		self.tabla_stock.grid(row=0, column=0, padx=20, pady=20)
+
+		datos_filtrados = [
+			(product.name,product.id,product.price,product.size,get_restock_date(product.id),product.stock)
+			for product in get_products_in_stock()
+			if product.branch_name.lower() == app.get_variable("branch_user").lower()]
+
+		self.tabla_stock.insert(datos_filtrados)
 
 	def _extracted_from_main_5(self):
 		atajos = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=75, width=800)
@@ -447,44 +440,25 @@ class Ventas_nav(BaseScene):
 											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command= lambda:export_to_file(self.manager))
 		self.u_export_btn.place(x = 635, y= 25, anchor = "center")   
 
-		# self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
-		# self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, grey, "#222325", event))
-
 		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800)
 		tabla.grid(row=3, column=0)
-		self.tabla_venta = ctk.CTkFrame(tabla, width=775, height=400, fg_color=black, corner_radius=40)
-		self.tabla_venta.place(relx=0.5, y=200, anchor="center")
-		treeview = ttk.Treeview(self.tabla_venta, columns=("Fecha", "Vendedor", "Categoria", "Precio", "Cantidad", "M de Pago", "Descuento"))
-		treeview.place(relx=0.5, rely=0.5, anchor="center", width=725, height=350)
-		[treeview.column(col, width=width) for col, width in [("#0", 60), ("Fecha", 100), ("Vendedor", 75), ("Categoria", 50), ("Precio", 30), ("Cantidad", 45), ("M de Pago", 50), ("Descuento", 50),]]
-		treeview.heading("#0", text="Producto", anchor=tk.CENTER)
-		[treeview.heading(col, text=col.replace("_", " ").capitalize(), anchor=tk.W) for col in ["Fecha", "Vendedor", "Categoria", "Precio", "Cantidad", "M de Pago", "Descuento"]]
 
-		sales_data = get_all_sales()
+		columns = [
+			("#0", "N. Venta", 50),
+			("Prod", "Prod", 50),
+			("Usuario", "Usuario", 75),
+			("Sucursal", "Sucursal", 50),
+			("Cantidad", "Cantidad", 30),
+			("Fecha", "Fecha", 45),
+			("Precio", "Precio", 50),
+			("Categoria", "Categoria", 50),
+    		("PayMethod", "Metodo de Pago", 50),
+      		("Descuento", "Descuento", 50)
+		]
+		self.sales_view = Table(tabla, columns=columns, width=725, height=750,color_frame=black, color_tabla=black)
+		self.sales_view.place(x=25,y=0)
+		self.sales_view.insert(get_all_sales())
 
-		try:
-			[
-				treeview.insert(
-					"",
-					"end",
-					text=get_name_product(sale[1]),
-					values=(
-						sale[5],
-						get_user_name(sale[2]),
-						sale[7],
-						sale[6],
-						sale[4],
-						sale[8],
-						f"{str(sale[9])}%",
-					),
-				)
-				for sale in sales_data
-				if sale[3].lower() == app.get_variable("branch_user").lower()
-			]
-		except AttributeError as e:
-			print(f"Hubo un error {e}. Se asume name_product el usuario es {'Super admin, mostrando todas las sucursales.' if app.get_variable('branch_user') is None else app.get_variable('branch_user')}")
-			[treeview.insert("", "end", text=get_name_product(sale[1]), values=(sale[5], get_user_name(sale[2]), sale[4], sale[6])) for sale in sales_data]
-		
 # VENTANAS DE ADMINISTRADOR 
 
 class Men_p_admin(BaseScene):
@@ -523,36 +497,22 @@ class Men_p_admin(BaseScene):
 		app.clear_widget(self.sucursales_fr, self.fr)
 
 		sucursal_name = get_branch_properties(sucursal_name)
-		sales = get_all_sales_of_branch(sucursal_name[1])
-
-		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=725, width=800)
-		tabla.grid(row=2, column=0, padx=20, pady=20)
-
-		self.tabla_ventas = ctk.CTkFrame(tabla, width=775, height=400, fg_color=black, corner_radius=40)
-		self.tabla_ventas.place(relx=0.5, rely=0.5, anchor="center")
 
 		columns = [("#0", "ID", 30), 
 				("Producto", "Producto", 90), 
 				("Usuario", "Usuario", 60), 
 				("Sucursal", "Sucursal", 70), 
 				("Cantidad", "Cantidad", 70), 
-				("Fecha", "Fecha", 110), 
+				("Fecha", "Fecha", 80), 
 				("Precio", "Precio", 50), 
 				("Categoria", "Categoria", 80), 
-				("M. Pago", "M. Pago", 70), 
-				("Descuento", "Descuento", 60)]
+				("M. Pago", "M. Pago", 50), 
+				("Descuento", "Descuento", 70)]
 
-		self.tv_ventas = ttk.Treeview(self.tabla_ventas, selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]])
-		self.tv_ventas.place(relx=0.5, rely=0.5, anchor="center", width=725, height=350)
+		self.tabla = Table(self.main_fr, columns=columns,color_frame=black, color_tabla=black, height=725, width=800)
+		self.tabla.grid(row=1, column=0, padx=20, pady=20)
 
-		for col, heading, width in columns:
-			self.tv_ventas.column(col, width=width)
-			self.tv_ventas.heading(col, text=heading, anchor=tk.CENTER)
-
-		for sale in sales:
-			self.tv_ventas.insert("", tk.END, text=f"{sale[0]}", 
-								values=(sale[1], sale[2], sale[3], sale[4], sale[5], 
-										f"${sale[6]:.2f}", sale[7], sale[8], sale[9]))
+		self.tabla.insert(get_all_sales_of_branch(sucursal_name[1]))
 
 		text_info = (
 			f"El nombre de la sucursal es: {sucursal_name[1]}\n"
@@ -562,7 +522,7 @@ class Men_p_admin(BaseScene):
 		)
 		
 		label_info = ctk.CTkLabel(self.main_fr, text=text_info, fg_color='#FFFFFF', text_color='black')
-		label_info.grid(row=0, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
+		label_info.grid(row=0, column=0, columnspan=4, sticky="ew", padx=10)
 
 class New_branch(BaseScene):
 	def __init__(self, parent, manager):
@@ -709,8 +669,9 @@ class New_user(BaseScene):
 		self.new_product.place(relx=0.5, y=420, anchor="center")
 
 	def new_product_def(self, event=None):
-		nombre, correo, contraseña, permisos, sucursal = self.nombre_empleado.get_and_clear(), self.correo_empleado.get_and_clear(), self.contraseña.get_and_clear(), self.permisos.get(), self.sucursal.get_and_clear()
-		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"correo": correo,"contraseña": contraseña,"permisos": permisos, "sucursal": sucursal,}.items()if not valor]:	show_notification(self.manager, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
+		nombre, correo, contraseña, permisos, sucursal = self.nombre_empleado.get_and_clear(), self.correo_empleado.get_and_clear(), self.contraseña.get_and_clear(), self.permisos.get(), self.sucursal.get()
+		if campos_vacios := [campo for campo, valor in {"nombre": nombre,"correo": correo,"contraseña": contraseña,"permisos": permisos, "sucursal": sucursal,}.items()if not valor]:	
+			show_notification(self.manager, f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
 		elif permisos == "Ingrese nivel de permisos":
 			show_notification(self.manager, "Asigne un rango válido.")
 		else:
@@ -730,7 +691,7 @@ class Users(BaseScene):
 		self.main()
 		self.manager.title("Usuarios")
 	def main(self):
-		self.main_fr = ctk.CTkFrame(self.manager, fg_color=black, height=475, width=700)
+		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=525, width=800)
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
 
 		columns = [("#0", "Name", 120), 
@@ -738,16 +699,10 @@ class Users(BaseScene):
 				("role_id", "Role_id", 30), 
 				("Branch_id", "Branch", 50),]
 
-		self.tabla = ttk.Treeview(self.main_fr, selectmode=tk.BROWSE, columns=[col[0] for col in columns[1:]],)
-		self.tabla.place(relx=0.5, rely=0.5, anchor="center", width=650, height=450)
+		self.tabla = Table(self.main_fr, columns=columns,color_frame=black, color_tabla=black, height=725, width=750)
+		self.tabla.place(x=25,y=10)
 
-		for col, heading, width in columns:
-			self.tabla.column(col, width=width)
-			self.tabla.heading(col, text=heading, anchor=tk.CENTER)
-
-		users_details = get_all_users_details()
-		for user in users_details:
-			self.tabla.insert("", "end", text=user[1], values=(user[2], user[3], user[5], "N/A"))  # "N/A" para la fecha de registro
+		self.tabla.insert(get_all_users_details())
 
 class Notifications(BaseScene):
 	def __init__(self, parent, manager):
