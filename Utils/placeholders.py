@@ -4,6 +4,15 @@ import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
+from PIL import Image, ImageTk
+from datetime import datetime
+
+color_p = "#fafafa"
+color_s = "#efefef"
+grey = "#EDEBE9"
+blue = "#0080ff"
+black = "#131313"
+
 class Slideout(ctk.CTkFrame):
     active_slideout = None  # Variable de clase para mantener referencia al slideout activo
 
@@ -139,7 +148,6 @@ class Menu_user(ctk.CTkFrame):
                 self._extracted_from__animate_in_5(x)
         Menu_user.is_in_animation = not Menu_user.is_in_animation
 
-    # TODO Rename this here and in `_animate_in`
     def _extracted_from__animate_in_5(self, x):
         self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
         self.update_idletasks()  # Asegurar que se actualice la interfaz
@@ -221,7 +229,7 @@ class ClearableEntry(ctk.CTkEntry):
         return value  # Retorna el valor obtenido
 
 class Table:
-    def __init__(self, master: ttk.Widget, columns: list, color_tabla: str, color_frame: str, width: int = 775, height: int = 400):
+    def __init__(self, master: ttk.Widget, columns: list, color_tabla: str, color_frame: str, width: int = 775, height: int = 400, filterBool: bool = True):
         """
         Inicializa una tabla con protección contra overflow de texto en celdas.
 
@@ -234,50 +242,83 @@ class Table:
             height (int): Alto de la tabla en píxeles. Default: 400.
         """
         self.frame = ctk.CTkFrame(master, width=width, height=height, fg_color=color_tabla, corner_radius=40)
+        self.frame.grid_propagate(False)
 
         # Configuracion de las columnas del Treeview
         self.treeview = ttk.Treeview(self.frame, columns=[col[0] for col in columns[1:]])
-        self.treeview.place(relx=0.5, rely=0.5, anchor="center", width=width - 50, height=height - 50)
-
+        if filterBool:
+            self.treeview.place(relx=0.5, rely=0.55, anchor="center", width=width - 50, height=height - 50)
+        else:
+            self.treeview.place(relx=0.5, rely=0.46, anchor="center", width=width - 50, height=height - 50)
         # Definicion de columnas y encabezados
         for col_id, heading, col_width in columns:
             self.treeview.column(col_id, width=col_width, minwidth=col_width, anchor="w")
             self.treeview.heading(col_id, text=heading, anchor="w")
 
-        # Fuente por defecto para medir texto
-        self.default_font = tkFont.nametofont("TkDefaultFont")
-        
-        # Inicializa tooltip para mostrar texto completo en caso de overflow
-        self.tooltip = None
-        self.treeview.bind("<Motion>", self._show_tooltip)
+        if filterBool:
+            self.column_var = tk.StringVar(value="Seleccionar columna")
+            self.column_menu = ctk.CTkOptionMenu(self.frame, variable=self.column_var, values=[col[1] for col in columns], font=('Plus jakarta Sans', 14, 'bold'), text_color=black,fg_color=color_s, button_color=grey,
+                                            button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+            self.column_menu.place(relx=0.1, rely=0.02)
 
-    def _show_tooltip(self, event):
-        """
-        Muestra un tooltip con el texto completo cuando el texto de una celda es más ancho que la columna.
-        """
-        region = self.treeview.identify("region", event.x, event.y)
-        if region == "cell":
-            row_id = self.treeview.identify_row(event.y)
-            col_id = self.treeview.identify_column(event.x)
-            if row_id and col_id:
-                cell_value = self.treeview.item(row_id, "values")[int(col_id[1:]) - 1]
+            self.sort_var = tk.StringVar(value="Selecc. tipo de orden")
+            self.sort_menu = ctk.CTkOptionMenu(self.frame, variable=self.sort_var, values=["Ascending", "Descending"], font=('Plus jakarta Sans', 14, 'bold'), text_color=black,fg_color=color_s, button_color=grey,
+                                            button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+            self.sort_menu.place(relx=0.4, rely=0.02)
 
-                # Comprueba si el texto de la celda es mas largo que el ancho de la columna
-                col_width = self.treeview.column(col_id, "width")
-                text_width = self.default_font.measure(cell_value)
-                if text_width > col_width:
-                    if self.tooltip is None:
-                        self.tooltip = tk.Toplevel(self.treeview)
-                        self.tooltip.wm_overrideredirect(True)
-                        label = tk.Label(self.tooltip, text=cell_value, background="yellow", relief="solid", borderwidth=1)
-                        label.pack()
-                    self.tooltip.wm_geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
-                elif self.tooltip:
-                    self.tooltip.destroy()
-                    self.tooltip = None
-        elif self.tooltip:
-            self.tooltip.destroy()
-            self.tooltip = None
+            self.sort_button = ctk.CTkButton(self.frame, width=60, text="Filtrar", corner_radius=20, fg_color='#FFFFFF', text_color=black, hover_color='#ADACAA', command=self.apply_sort)
+            self.sort_button.place(relx=0.8, rely=0.02)
+
+            self.filter_image = ImageP(self.frame,"./img/filter.png", height=25, width=25,x=20,y=13)
+        self.full_data = []
+
+    def insert(self, elements):
+        """
+        Inserta los datos de Elementos en la tabla.
+
+        Args:
+            elements (list): Lista de elementos, cada uno como lista con valores en el mismo orden que las columnas.
+        """
+        self.full_data = elements  
+        self.treeview.delete(*self.treeview.get_children())
+
+        for element in elements:
+            if len(element) >= len(self.treeview["columns"]) + 1:
+                text_value = element[0]  
+                column_values = element[1:] 
+                self.treeview.insert("", tk.END, text=text_value, values=column_values)
+            else:
+                print(f"Advertencia: La cantidad de valores {len(element)} no coincide con el número de columnas + text {len(self.treeview['columns']) + 1}")
+
+    def apply_sort(self):
+        """Ordena el Treeview según la columna y el tipo de orden seleccionados en los menús."""
+        column_name = self.column_var.get()
+        order_type = self.sort_var.get()
+
+        column_index = next((i for i, col in enumerate(self.treeview["columns"], start=1) if self.treeview.heading(col, "text") == column_name), None)
+        if column_index is None:
+            return
+
+        reverse = order_type == "Descending"
+
+        try:
+            sorted_data = sorted(self.full_data, key=lambda x: self._parse_value(x[column_index]), reverse=reverse)
+            self.insert(sorted_data)
+        except ValueError:
+            print("Error: no se pudo ordenar la columna. Asegúrese de que los datos sean consistentes en el tipo de datos.")
+
+    def _parse_value(self, value):
+        """Intenta parsear el valor como int, float o fecha. Si falla, lo trata como texto."""
+        try:
+            return int(value)
+        except ValueError:
+            try:
+                return float(value)
+            except ValueError:
+                try:
+                    return datetime.strptime(value, "%Y-%m-%d")
+                except ValueError:
+                    return value  # Mantiene el valor como texto si no es fecha, int o float
 
     def grid(self, *args, **kwargs):
         """
@@ -297,23 +338,6 @@ class Table:
         """
         self.frame.place(*args, **kwargs)
 
-    def insert(self, elements):
-        """
-        Inserta los datos de Elementos en la tabla.
-
-        Args:
-            elements (list): Lista de elementos, cada uno como lista con valores en el mismo orden que las columnas.
-        """
-        self.treeview.delete(*self.treeview.get_children())
-
-        for element in elements:
-            if len(element) >= len(self.treeview["columns"]) + 1:
-                text_value = element[0]  # El primer valor es para el 'text'
-                column_values = element[1:]  # Los demás son para las columnas
-                self.treeview.insert("", tk.END, text=text_value, values=column_values)
-            else:
-                print(f"Advertencia: La cantidad de valores {len(element)} no coincide con el número de columnas + text {len(self.treeview['columns']) + 1}")
-            
     def clear(self):
         """Elimina todas las filas actuales de la tabla."""
         for item in self.treeview.get_children():
@@ -340,3 +364,43 @@ class Table:
     def focus(self):
         """Devuelve el ID del elemento actualmente seleccionado en el Treeview."""
         return self.treeview.focus()
+    
+    def delete(self, item_id):
+        """
+        Elimina un elemento específico de la tabla dado su item_id.
+
+        Args:
+            item_id (str): ID del elemento en el Treeview a eliminar.
+        """
+        self.treeview.delete(item_id)
+    
+class ImageP:
+    def __init__(self, manager: tk.Widget, image_path: str, height: int, width: int, x: int, y: int) -> None:
+        self.x = x
+        self.y = y
+        img = Image.open(image_path)
+        img = img.resize((width, height), Image.LANCZOS)
+        self.render = ImageTk.PhotoImage(img)
+        self.img = ctk.CTkLabel(manager, text='', image=self.render)
+        self.img.place(x=x, y=y)
+
+    def configure_y(self, y):
+        self.img.place(x=self.x, y=y)
+    
+    def animate_to(self, target_x: int, target_y: int, duration: float,smoothness:int=50) -> None:
+        def animation():
+            start_x, start_y = self.x, self.y
+            delta_x = (target_x - start_x)
+            delta_y = (target_y - start_y)
+            steps = int(duration * smoothness)  
+            step_delay = duration / steps
+
+            for step in range(1, steps + 1):
+                self.x = start_x + (delta_x * step / steps)
+                self.y = start_y + (delta_y * step / steps)
+                self.img.place(x=self.x, y=self.y)
+                time.sleep(step_delay)
+        
+        animation_thread = threading.Thread(target=animation)
+        animation_thread.daemon = True
+        animation_thread.start()

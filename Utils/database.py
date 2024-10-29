@@ -543,9 +543,12 @@ def get_product_name(id:int)->str:
     cursor = conn.cursor()
 
     cursor.execute('SELECT name FROM Products WHERE id = ?', (id,))
-
-    name = cursor.fetchone()[0]
-    conn.close()
+    try:
+        name = cursor.fetchone()[0]
+        conn.close()
+    except:
+        name = 'Producto no encontrado'
+        conn.close()
     return name
 
 def get_user_name(id:int)->str:
@@ -642,7 +645,7 @@ def get_products_in_branch(name)->list:
 
 def export_to_file(manager, path_to_export: str = 'sales_export.xlsx') -> None:
     conn = sqlite3.connect(dataBasePath); cursor = conn.cursor(); cursor.execute("SELECT * FROM Sales")
-    wb = Workbook(); ws = wb.active; ws.title = "Sales Data"; ws.append([i[0] for i in cursor.description]); [ws.append(row) for row in cursor.fetchall()]; wb.save(path_to_export); conn.close()
+    wb = Workbook(); ws = wb.active; ws.title = "Sales Data"; ws.append([i[0] for i in cursor.description]); [ws.append(row) for row in get_all_sales()]; wb.save(path_to_export)
     Slideout(manager, side="right", width=250, height=75, bg_color="#EDEBE9", text="Archivo exportado a la raíz del programa.", text_color='#000000').slide_in()
 
 def get_branch_properties(branch_name:str)->list:

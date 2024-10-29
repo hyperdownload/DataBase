@@ -5,9 +5,8 @@ from Utils.functions import *
 from CTkDataVisualizingWidgets import *
 from PIL import Image
 import customtkinter as ctk
-import tkinter as tk
 from tkinter import ttk
-
+from CTkToolTip import CTkToolTip
 
 color_p = "#fafafa"
 color_s = "#efefef"
@@ -31,7 +30,7 @@ class Login(BaseScene):
 		labels = [("Welcome to back", 185, 28), ("Urbanlive", 215, 16)]
 		for text, y_pos, font_size in labels:
 			ctk.CTkLabel(login_container, text=text, font=('Plus Jakarta Sans', font_size, 'bold'), text_color=black if font_size == 28 else "#BEBEBE").place(relx=0.5, y=y_pos, anchor="center")
-
+		
 		self.user_entry = self._extracted_from_login_10(
 			login_container, "Ingrese su nombre de usuario...", 260
 		)
@@ -39,7 +38,8 @@ class Login(BaseScene):
 			login_container, "Ingrese su contraseña...", 310
 		)
 		self.password_entry.bind('<MouseWheel>', lambda event: self.login_logic(autologin=True))
-
+		self.user=ImageP(login_container,"./img/person.png", height=18, width=18,x=545,y=247)
+		self.key=ImageP(login_container,"./img/key.png", height=18, width=18,x=545,y=297)
 		ctk.CTkButton(login_container, text="Login", height=35, width=350, corner_radius=20, fg_color=black, text_color=color_p, hover_color="#454545", command=self.login_logic).place(relx=0.5, y=360, anchor="center")
 
 	def _extracted_from_login_10(self, login_container, placeholder_text, y):
@@ -49,6 +49,7 @@ class Login(BaseScene):
 			width=350,
 			corner_radius=20,
 			placeholder_text=placeholder_text,
+			fg_color="#FFFFFF"
 		)
 		result.place(relx=0.5, y=y, anchor="center")
 		result.bind('<Return>', self.login_logic)
@@ -260,29 +261,39 @@ class C_ventas(BaseScene):
 		self.inputs_col()
 		self.visualizar_datos()
 
+	def conf(self):
+		self.tooltip1.configure(message=f"Producto: {get_product_name(self.inputid.get())}")
+
 	def inputs_col(self):
 		self.inputs_fr = ctk.CTkFrame(self.main_fr, width=400, height=300, fg_color=color_p)
 		self.inputs_fr.grid(row=1, column=0)
 		self.inputs_fr.grid_propagate(0)
 
 		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'fg_color': "transparent", 'width': 350, 'height': 50, 'corner_radius': 35, "border_color": "#dcdcdc", 'text_color': '#000000'}
-		input_style = [("Ingrese código de barra", 0), ("Ingrese cantidad", 1), ("Ingrese descuento (%)", 4)]
+		input_style = [("Ingrese código de barra", 0), ("Ingrese cantidad", 1), ("Ingrese descuento (Sin poner %)", 4)]
 		for text, y_cord in input_style:
 			if y_cord == 0:
 				self.inputid = ClearableEntry(self.inputs_fr, placeholder_text=text, **self.input_config)
-				self.inputid.grid(row=y_cord, column=1, pady=5, padx=25)
+				self.inputid.grid(row=y_cord, column=1, pady=5, padx=35)
+				self.inputid.bind("<Key>", lambda event: self.after(1, self.conf))
+				self.tooltip1 = CTkToolTip(self.inputid, message=f"Producto: {get_product_name(self.inputid.get())}")
 			elif y_cord == 1:
 				self.inputq = ClearableEntry(self.inputs_fr, placeholder_text=text, **self.input_config)
-				self.inputq.grid(row=y_cord, column=1, pady=5, padx=25)
+				self.inputq.grid(row=y_cord, column=1, pady=5, padx=35)
 			elif y_cord == 4:
 				self.input_discount = ClearableEntry(self.inputs_fr, placeholder_text=text, **self.input_config)
-				self.input_discount.grid(row=y_cord, column=1, pady=5, padx=25)
+				self.input_discount.grid(row=y_cord, column=1, pady=5, padx=35)
 
 		metodos_pago = ["Efectivo", "Credito", "Debito", "Transferencia"]
 		self.metodo_pago = ctk.CTkOptionMenu(self.inputs_fr, values=metodos_pago, font=('Plus jakarta Sans', 14, 'bold'), text_color=black,
 											 width=350, height=50, fg_color=color_s, button_color=grey,
 											 corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black, command=self.credito)
 		self.metodo_pago.grid(row=2, column=1, pady=5, padx=25)
+
+		self.p = ImageP(self.inputs_fr,"./img/id.png", height=25, width=25,x=5,y=15)
+		self.pr= ImageP(self.inputs_fr,"./img/prod.png", height=25, width=25,x=5,y=75)
+		self.c = ImageP(self.inputs_fr,"./img/credit-card.png", height=25, width=25,x=5,y=135)
+		self.d = ImageP(self.inputs_fr,"./img/dis.png", height=25, width=25,x=5,y=193)
 
 		btn_inputs = ctk.CTkFrame(self.main_fr, width=400, height=50, fg_color=color_p)
 		btn_inputs.grid(row=2, column=0)
@@ -291,6 +302,17 @@ class C_ventas(BaseScene):
 		registrar = ctk.CTkButton(btn_inputs, text="Ticket", fg_color=black, text_color=color_p, corner_radius=25, border_color=black, border_width=3,
 								  width=165, height=35, font=('Plus Jakarta Sans', 12, 'bold'), hover_color="#454545", command=self.generate_ticket)
 		registrar.grid(row=0, column=1, padx=5)
+  
+		delete = ctk.CTkButton(btn_inputs, text="Borrar ticket", fg_color=black, text_color=color_p, corner_radius=25, border_color=black, border_width=3,
+								  width=165, height=35, font=('Plus Jakarta Sans', 12, 'bold'), hover_color="#454545", command=self.delete_ticket)
+		delete.grid(row=0, column=2, padx=5)
+
+	def delete_ticket(self):
+		try:
+			self.treeviewt.delete(*self.treeviewt.get_children())
+			self.id_product.clear()
+		except Exception:
+			show_notification(app, "No hay nada que eliminar.")
 
 	def generate_ticket(self):
 		if discount := self.input_discount.get():
@@ -316,7 +338,9 @@ class C_ventas(BaseScene):
 			self.input_c.bind('<KeyRelease>', self.detect_card_type)
 			self.cardText = ctk.CTkLabel(app,width=30, text='', text_color=black, bg_color='#FFFFFF')
 			self.cardText.place(x=385,y=360)
+			self.d.animate_to(5,255,0.7,60)
 		else:
+			self.d.animate_to(5,193,0.7,60)
 			self.input_c.destroy()
 	def detect_card_type(self, event):
 		card_number = self.input_c.get().replace(" ", "")[:6]
@@ -348,9 +372,9 @@ class C_ventas(BaseScene):
 		ticket_fr = ctk.CTkFrame(self.ticket_col, width=300, height=400, fg_color=black, corner_radius=20, border_color=grey, border_width=3)
 		ticket_fr.place(relx=0.5, rely=0.5, anchor="center")
 
-		columns = [("#0", "Producto", 50),   ("Precio", "Precio", 50),("Cantidad", "Cantidad", 50)]
+		columns = [("#0", "Producto", 50),("Precio", "Precio", 50),("Cantidad", "Cantidad", 50)]
 
-		self.treeviewt = Table(master=ticket_fr,columns=columns,color_tabla=black,color_frame=black,width=280,height=350)
+		self.treeviewt = Table(master=ticket_fr,columns=columns,color_tabla=black,color_frame=black,width=280,height=350, filterBool=False)
 		self.treeviewt.frame.place(relx=0.5, y=195, anchor="center")
 
 		self.pago = ctk.CTkLabel(self.ticket_col, text_color=color_p, fg_color=black, text=f"Método de pago: {self.metodo_pago.get()}", font=('Plus Jakarta Sans', 16, 'bold'))
@@ -409,7 +433,7 @@ class Stock_nav(BaseScene):
 	def _extracted_from_main_5(self):
 		atajos = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=75, width=800)
 		atajos.grid(row=2, column=0)
-		self.u_venta_btn = ctk.CTkButton(atajos, text="Cargar stock", bg_color=grey, fg_color=grey, text_color=black, corner_radius=25, width=100, height=50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color="#454545", command=lambda: self.manager.switch_scene("C_producto"))
+		self.u_venta_btn = ctk.CTkButton(atajos, text="Cargar Restock", fg_color=grey, text_color=black, corner_radius=25, width=100, height=50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color="#454545", command=lambda: self.manager.switch_scene("C_producto"))
 		self.u_venta_btn.place(x=135, y=25, anchor="center")
 		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, black, event))
 		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
