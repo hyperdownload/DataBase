@@ -49,7 +49,8 @@ class Login(BaseScene):
 			width=350,
 			corner_radius=20,
 			placeholder_text=placeholder_text,
-			fg_color="#FFFFFF"
+			fg_color="#FFFFFF",
+			text_color=black, 
 		)
 		result.place(relx=0.5, y=y, anchor="center")
 		result.bind('<Return>', self.login_logic)
@@ -199,8 +200,7 @@ class C_producto(BaseScene):
 		name_product = self.tabla_stock.item(focus, 'text')
 		try:
 			record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get_and_clear())
-			current_stock = get_stock_product(get_name_per_id(str(name_product)))
-			show_notification(app, f"Reestock exitoso\n stock actual: {current_stock}")
+			show_notification(app, f"Reestock exitoso\n stock actual: {get_stock_product(get_name_per_id(str(name_product)))}")
 			
 			notifications = [n for n in notifications if n.tag != 'stock']
 		except TypeError:
@@ -255,7 +255,8 @@ class C_ventas(BaseScene):
 		self.manager.title("Cargar Ventas")
 		self.header_fr = header(self.manager)
 		self.main()
-
+		self.metodo = ''
+  
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
 		self.inputs_col()
@@ -314,34 +315,41 @@ class C_ventas(BaseScene):
 		except Exception:
 			show_notification(app, "No hay nada que eliminar.")
 
-	def generate_ticket(self):
-		if discount := self.input_discount.get():
-			discount_value = (float(discount) / 100)
-		else:
-			discount_value = 0
+	def generate_ticket(self):  # sourcery skip: extract-method
+		if self.metodo in ["Credito", "Debito"] and self.input_c.get():
+			return show_notification(app, "Tarjeta no ingresada")
+		discount_value = (
+			(float(discount) / 100) if (discount := self.input_discount.get()) else 0
+		)
+		try:
+			product_name = get_name_product(int(self.inputid.get()))
+			price = get_price_product(int(self.inputid.get()))
+			quantity = int(self.inputq.get())
+			
+			final_price = price * (1 - discount_value) * quantity
 
-		product_name = get_name_product(int(self.inputid.get()))
-		price = get_price_product(int(self.inputid.get()))
-		quantity = int(self.inputq.get())
-
-		final_price = price * (1 - discount_value) * quantity
-
-		self.pago.configure(text=f"Método de pago: {self.metodo_pago.get()}")
-		items=[(product_name, final_price, quantity)]
-		self.treeviewt.insert(elements=items)
-		self.id_product.append(self.inputid.get())
+			self.pago.configure(text=f"Método de pago: {self.metodo_pago.get()}")
+			items=[(product_name, final_price, quantity)]
+			self.treeviewt.insert(elements=items)
+			self.id_product.append(self.inputid.get())
+		except ValueError:
+			return show_notification(app, "Error en los datos ingresados.")
 
 	def credito(self, metodo):
-		if metodo in ["Credito", "Debito"]:
-			self.input_c = ClearableEntry(self.inputs_fr, placeholder_text="Ingrese tarjeta", **self.input_config)
-			self.input_c.grid(row=3, column=1, pady=5, padx=25)
-			self.input_c.bind('<KeyRelease>', self.detect_card_type)
-			self.cardText = ctk.CTkLabel(app,width=30, text='', text_color=black, bg_color='#FFFFFF')
-			self.cardText.place(x=385,y=360)
-			self.d.animate_to(5,255,0.7,60)
+		self.metodo = metodo
+		if self.metodo in ["Credito", "Debito"]:
+			self._extracted_from_credito_4()
 		else:
 			self.d.animate_to(5,193,0.7,60)
 			self.input_c.destroy()
+
+	def _extracted_from_credito_4(self):
+		self.input_c = ClearableEntry(self.inputs_fr, placeholder_text="Ingrese tarjeta", **self.input_config)
+		self.input_c.grid(row=3, column=1, pady=5, padx=25)
+		self.input_c.bind('<KeyRelease>', self.detect_card_type)
+		self.cardText = ctk.CTkLabel(app,width=30, text='', text_color=black, bg_color='#FFFFFF')
+		self.cardText.place(x=385,y=360)
+		self.d.animate_to(5,255,0.7,60)
 	def detect_card_type(self, event):
 		card_number = self.input_c.get().replace(" ", "")[:6]
 		if card_type := self.get_card_type(card_number):
@@ -385,18 +393,25 @@ class C_ventas(BaseScene):
 		registrar_venta.bind('<Button-1>', self.registrar_venta_func)
 
 	def registrar_venta_func(self, event):
-		product_id = int(self.inputid.get_and_clear())
-		branch_name = app.get_variable('branch_user')
+		try:
+			product_id = int(self.inputid.get_and_clear())
+			branch_name = app.get_variable('branch_user')
+			
+			if self.input_c.get():
+				for parent in self.treeviewt.get_children():
+					for id in self.id_product:
+						values = self.treeviewt.item(parent)["values"]
+						product_id = id
+						precio = float(values[0])
+						quantity = int(values[1])
 
-		for parent in self.treeviewt.get_children():
-			for id in self.id_product:
-				values = self.treeviewt.item(parent)["values"]
-				product_id = id
-				precio = float(values[0])
-				quantity = int(values[1])
-
-				if record_sale(product_id, app.get_variable('user_id'), branch_name, quantity, get_price_product(product_id), self.metodo_pago.get(), self.input_discount.get()):
-					show_notification(app, "Venta registrada")
+						if record_sale(product_id, app.get_variable('user_id'), branch_name, quantity, get_price_product(product_id), self.metodo_pago.get(), self.input_discount.get()):
+							show_notification(app, "Venta registrada")
+							self.input_c.delete(0, tk.END)
+			else:
+				show_notification(app, "Ingrese un numero de tarjeta.")
+		except ValueError:
+			show_notification(app, "Por favor ingrese todos los campos y suba el ticket.")
 	
 class Stock_nav(BaseScene):
 	def __init__(self, parent, manager):
@@ -511,7 +526,7 @@ class Men_p_admin(BaseScene):
 
 		self.fr = ctk.CTkFrame(self.main_fr, height=100, width= 750, fg_color= color_p)
 		self.fr.grid(row = 2, column = 0, columnspan=4, padx = 6, sticky = "ew")
-		cord_functions = [(0, "Nuevos productos",lambda: app.switch_scene("New_stock")),(1, "Nuevo usuario",lambda: app.switch_scene("New_user"))]
+		cord_functions = [(0, "Nuevos productos",lambda: app.switch_scene("New_stock")),(1, "Nuevo usuario",lambda: app.switch_scene("New_user")),(2, "Restockear",lambda: app.switch_scene("Restock"))]
 		for x, text, command in cord_functions:
 			card = ctk.CTkButton(self.fr, text = text, **style_card, command= command)
 			card.configure(fg_color = black, hover_color = "#232323", text_color = color_p)
@@ -750,6 +765,53 @@ class Notifications(BaseScene):
 			card = Card(self.noti_container, "Informacion", "No hay notificaciones pendientes.", "Muajajaj", width=400)
 			card.grid(row = 1, column = 0,pady = 10, sticky="ew") 
 
+class R_Prod(BaseScene):
+    def __init__(self, parent, manager):
+        super().__init__(parent, manager)
+        self.manager=manager
+        self.header_fr = header(self.manager)
+        self.main()
+        self.manager.title("Restock")
+        
+    def main(self):
+        self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=530, width=800)
+        self.main_fr.place(relx=0.5, y=335, anchor="center")
+        self.inputs_col()
+    
+    def conf(self):
+        self.tooltip2.configure(message=f"Producto: {get_product_name(self.product_id.get())}")
+        
+    def inputs_col(self):
+        self.inputs_fr = ctk.CTkFrame(self.main_fr, width= 400, height= 500, fg_color= color_p, corner_radius= 20, border_width= 2, border_color= color_s)
+        self.inputs_fr.place(relx=0.5, rely=0.5, anchor="center")
+        
+        lb = ctk.CTkLabel(self.inputs_fr, text_color=black,text= "Restock", font= ('Plus jakarta Sans', 28, 'bold')).place(relx=0.5, y=35, anchor="center")
+        
+        self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'), 'text_color': "#000000",'fg_color': "transparent", 'width': 350, 'height': 50,'corner_radius':35, 'border_color': "#dcdcdc", 'placeholder_text_color': "#BEBEBE",}
+        
+        self.product_id = ClearableEntry(self.inputs_fr, placeholder_text= 'ID del producto', **self.input_config)
+        self.product_id.place(relx=0.5, y=100, anchor="center")
+        self.product_id.bind("<Key>", lambda event: self.after(1, self.conf))
+        self.tooltip2 = CTkToolTip(self.product_id, message=f"Producto: {get_product_name(self.product_id.get())}")
+        
+        self.quantity= ClearableEntry(self.inputs_fr, placeholder_text= 'Cantidad', **self.input_config)
+        self.quantity.place(relx=0.5, y=160, anchor="center")
+        
+        self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
+        self.sucursal.place(relx=0.5, y=220, anchor="center")
+        
+        self.new_product = ctk.CTkButton(self.inputs_fr,text= "Actualizar producto", font= ('Plus jakarta Sans', 14, 'bold')
+								,height=50, width = 350, corner_radius= 35, fg_color= black, hover_color= "#454545",
+								command=self.upload)
+        self.new_product.place(relx = 0.5, y=280, anchor="center")
+    
+    def upload(self):  # sourcery skip: avoid-builtin-shadow
+        id = self.product_id.get()
+        quantity = self.quantity.get()
+        sucursal = self.sucursal.get()
+        record_restock(id, app.get_variable('user_id'), sucursal, quantity)
+        show_notification(self.manager,f"Producto restockeado\nstock actual: {get_stock_product(id)}")
+        
 if __name__ == "__main__":
 	notifications=[]
 	app = SceneManager()  # Crea una instancia del gestor de escenas
@@ -766,12 +828,12 @@ if __name__ == "__main__":
 
 	# Añade las escenas al gestor
 	scenes = [("Stock_nav", Stock_nav),("Ventas_nav", Ventas_nav),("C_ventas", C_ventas),("C_producto", C_producto),("Men_p", Men_p),("Login", Login),("Men_p_admin", Men_p_admin),
-    ("New_stock", New_stock),("New_user",New_user), ("Users_nav", Users), ("Notifications_nav", Notifications), ("New_branch", New_branch),]
+    ("New_stock", New_stock),("New_user",New_user), ("Users_nav", Users), ("Notifications_nav", Notifications), ("New_branch", New_branch),("Restock", R_Prod)]
 
 	for scene_name, scene_class in scenes:
 		app.add_scene(scene_name, scene_class)
   
-	# Inicia la aplicación con la primera escena visible
+	# Inicia la aplicacion con la primera escena visible
 	app.switch_scene("Login")
 
-	app.mainloop()  # Ejecuta el bucle principal de la aplicación
+	app.mainloop()  # Ejecuta el bucle principal de la aplicacion
