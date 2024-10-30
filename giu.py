@@ -62,8 +62,8 @@ class Login(BaseScene):
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
 		else:
-			user = 'john@example.com'
-			password = 'password123'
+			user = 'carlos@example.com'
+			password = 'superadmin789'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -679,6 +679,10 @@ class New_user(BaseScene):
 			values = ["Ingrese nivel de permisos", "Normal User", "Admin", "General Admin"]
 			values_branch = get_all_branch_names()
 
+		self.user = ImageP(self.inputs_fr, './img/person.png',height=25, width=25,x=340,y=105)
+		self.email = ImageP(self.inputs_fr, './img/email.png',height=25,width=25,x= 340, y=165)
+		self.key = ImageP(self.inputs_fr, './img/key.png',height=25,width=25,x= 340, y=225)
+
 		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values= values_branch, font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
 		self.sucursal.place(relx=0.5, y=300, anchor="center")
 
@@ -714,10 +718,11 @@ class Users(BaseScene):
 		self.main_fr = ctk.CTkFrame(self.manager, fg_color=color_p, height=525, width=800)
 		self.main_fr.place(relx=0.5, y=335, anchor="center")
 
-		columns = [("#0", "Name", 120), 
-				("email", "Email", 100), 
-				("role_id", "Role_id", 30), 
-				("Branch_id", "Branch", 50),]
+		columns = [("#0", "ID", 80), 
+				("name", "Name", 100), 
+				("emain", "Email", 50), 
+				("rol", "Rango", 50),
+				("branch", "Sucursal", 50),]
 
 		self.tabla = Table(self.main_fr, columns=columns,color_frame=black, color_tabla=black, height=725, width=750)
 		self.tabla.place(x=25,y=10)
@@ -774,9 +779,11 @@ class R_Prod(BaseScene):
         self.product_id.place(relx=0.5, y=100, anchor="center")
         self.product_id.bind("<Key>", lambda event: self.after(1, self.conf))
         self.tooltip2 = CTkToolTip(self.product_id, message=f"Producto: {get_product_name(self.product_id.get())}")
+        self.id = ImageP(self.inputs_fr, './img/id.png',height=25, width=25,x=340,y=85)
         
         self.quantity= ClearableEntry(self.inputs_fr, placeholder_text= 'Cantidad', **self.input_config)
         self.quantity.place(relx=0.5, y=160, anchor="center")
+        self.q = ImageP(self.inputs_fr, './img/prod.png',height=25, width=25,x=340,y=145)
         
         self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
         self.sucursal.place(relx=0.5, y=220, anchor="center")
@@ -787,12 +794,14 @@ class R_Prod(BaseScene):
         self.new_product.place(relx = 0.5, y=280, anchor="center")
     
     def upload(self):  # sourcery skip: avoid-builtin-shadow
-        id = self.product_id.get()
-        quantity = self.quantity.get()
-        sucursal = self.sucursal.get()
-        record_restock(id, app.get_variable('user_id'), sucursal, quantity)
-        show_notification(self.manager,f"Producto restockeado\nstock actual: {get_stock_product(id)}")
-        
+        try:
+            id = self.product_id.get_and_clear()
+            quantity = self.quantity.get_and_clear()
+            sucursal = self.sucursal.get()
+            record_restock(id, app.get_variable('user_id'), sucursal, quantity)
+            show_notification(self.manager,f"Producto restockeado\nstock actual: {get_stock_product(id)}")
+        except Exception:
+            show_notification(self.manager, "Asegurese de colocar todos los datos.")
 if __name__ == "__main__":
 	notifications=[]
 	app = SceneManager()  # Crea una instancia del gestor de escenas

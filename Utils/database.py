@@ -516,17 +516,16 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
 def get_all_users_details() -> list:
     '''
     Obtiene todos los detalles de los usuarios y los devuelve como una lista de tuplas.
-    id[0], name[1], email[2], role[3], password[4], branch[5]
+    id[0], name[1], email[2], role[3], branch[4]
 
     :return: Lista de tuplas con los detalles de los usuarios. Si no hay usuarios, retorna una lista vacía.
     '''
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
     cursor.execute('''
-        SELECT Users.id, Users.name, Users.email, Roles.name as role, Users.password, Branches.name as branch
+        SELECT Users.id, Users.name, Users.email, Roles.name as role, Users.branch_id
         FROM Users
         LEFT JOIN Roles ON Users.role_id = Roles.id
-        LEFT JOIN Branches ON Users.branch_id = Branches.id
     ''')
 
     users_details = cursor.fetchall()

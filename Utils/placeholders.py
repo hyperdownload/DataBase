@@ -381,7 +381,7 @@ class ImageP:
         img = Image.open(image_path)
         img = img.resize((width, height), Image.LANCZOS)
         self.render = ImageTk.PhotoImage(img)
-        self.img = ctk.CTkLabel(manager, text='', image=self.render)
+        self.img = ctk.CTkLabel(manager, text='', image=self.render, bg_color='transparent')
         self.img.place(x=x, y=y)
 
     def configure_y(self, y):
