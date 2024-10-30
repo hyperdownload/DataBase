@@ -106,65 +106,46 @@ class Men_p(BaseScene):
 		self.h_grid2= 400
 		self.altura_fr = self.h_grid1+self.h_grid2+50
 		
-		self.col_tabla()
 		self.col_atajo()
-		self.grafico()
 
-	def col_tabla(self):
-		self.width_tablas = 470
-		
-		self.tablas_frame = ctk.CTkFrame(self.main_fr, width= self.width_tablas, height= self.altura_fr, fg_color= color_p)
-		self.tablas_frame.grid(row=1, column=0, padx = 12)
-
-		self.tabla1 = ctk.CTkFrame(self.tablas_frame, width= self.width_tablas, height= self.h_grid1, fg_color= grey, corner_radius= 40)
-		self.tabla1.place(x = 0, y = 0)
-
-		self.tabla2 = ctk.CTkFrame(self.tablas_frame, width= self.width_tablas, height= self.h_grid2, fg_color= black, corner_radius= 40)
-		self.tabla2.place(x = 0, y = 325)
-	
 	def cambiar_color(self, widget, text_color, fg_color, event=None):
 		widget.configure(text_color=text_color, fg_color=fg_color)
 
 	def col_atajo(self):
-		self.atajos_frame = ctk.CTkFrame(self.main_fr, width= 270, height= self.altura_fr, fg_color= color_p)
+		self.atajos_frame = ctk.CTkFrame(self.main_fr, width= 800, height=470, fg_color= color_p)
 		self.atajos_frame.grid(row=1, column=1, padx = 12)
 
-		self.cargar_prod_lb = ctk.CTkLabel(self.atajos_frame, width= 270, height= self.h_grid1, fg_color= grey,
+		self.cargar_prod_lb = ctk.CTkLabel(self.atajos_frame, width= 270, height= 200, fg_color= grey,
 											corner_radius= 40, text= "")
-		self.cargar_prod_lb.place(x = 0, y = 0)
+		self.cargar_prod_lb.place(relx = 0.63, y = 0)
 
 		self.cargar_productos_txt = ctk.CTkLabel(self.cargar_prod_lb,text_color=black, text= "Cargar\nProductos", font=('Plus Jakarta Sans', 38, 'bold'), justify = "left")
-		self.cargar_productos_txt.place(x = 35, y = 50)
+		self.cargar_productos_txt.place(x = 35, y = 10)
 		self.c_productos_btn = ctk.CTkButton(self.cargar_prod_lb, text= "Cargar", fg_color= black, text_color= color_p, corner_radius=25,
 											width= 200, height= 50, font=('Plus Jakarta Sans', 24, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_producto"))
-		self.c_productos_btn.place(relx = 0.5, y = self.h_grid1 -75, anchor = "center")
+		self.c_productos_btn.place(relx = 0.5, y = 150, anchor = "center")
 
 		self.c_productos_btn.bind("<Enter>", lambda event: self.cambiar_color(self.c_productos_btn, grey, "#454545", event))
 		self.c_productos_btn.bind("<Leave>", lambda event: self.cambiar_color(self.c_productos_btn, grey, black, event))
 		#--------------------------------------------------------------------------------------------------------------------------------------------
 
-		self.ult_venta = ctk.CTkLabel(self.atajos_frame, width= 270, height= self.h_grid2, fg_color= black, corner_radius= 40)
-		self.ult_venta.place(relx = 0.5, y = self.altura_fr- (self.h_grid2//2)-25, anchor= "center")
+		self.ult_venta = ctk.CTkLabel(self.atajos_frame, width= 270, height= 230, fg_color= black, corner_radius= 40)
+		self.ult_venta.place(relx = 0.8, y = 320, anchor= "center")
 
 		self.ult_venta_txt = ctk.CTkLabel(self.ult_venta, text= "Registrar\nUltima venta", font=('Plus Jakarta Sans', 38, 'bold'), text_color= grey,
 										justify = "center", wraplength= 200)
-		self.ult_venta_txt.place(relx = 0.5, y = 150, anchor = "center")
+		self.ult_venta_txt.place(relx = 0.5, y = 80, anchor = "center")
 		self.u_venta_btn = ctk.CTkButton(self.ult_venta, text= "Registrar", fg_color= grey, text_color= black, corner_radius=25,
 											width= 200, height= 50, font=('Plus Jakarta Sans', 24, 'bold'), hover_color= "#454545", command=lambda: self.manager.switch_scene("C_ventas"))
-		self.u_venta_btn.place(relx = 0.5, y = self.h_grid2 -75, anchor = "center")        
+		self.u_venta_btn.place(relx = 0.5, y = 180, anchor = "center")        
 
 		self.u_venta_btn.bind("<Enter>", lambda event: self.cambiar_color(self.u_venta_btn, grey, "#454545", event))
 		self.u_venta_btn.bind("<Leave>", lambda event: self.cambiar_color(self.u_venta_btn, black, grey, event))
-		#--------------------------------------------------------------------------------------------------------------------------------------------
-	def grafico(self):
-		self.grafico = ctk.CTkLabel(self.main_fr, width= 765, height= self.h_grid2, fg_color= grey,
-									corner_radius= 40)
-		self.grafico.grid(row=2, column=0, columnspan=2, ipady= 6)
-
-		CTkChart(self.grafico, get_sales_per_categorie(), corner_radius=20, fg_color= color_s, stat_color= black, chart_fg_color= color_s,
+  
+		CTkChart(self.atajos_frame, get_sales_per_categorie(), corner_radius=20, fg_color= color_s, stat_color= black, chart_fg_color= color_s,
          show_indicators=(False, False), stat_info_show=(True, True), chart_arrow="none",
-		 indicator_line_color= blue, indicator_text_color= blue, stat_width=35,
-         stat_title_color= blue, stat_text_color= '#FFFFFF', chart_axis_width=3, width=700, height= self.h_grid2 - 50).place( relx = 0.5, rely = 0.5, anchor = "center")
+		 indicator_line_color= blue, indicator_text_color= blue, stat_width=25,
+         stat_title_color= blue, stat_text_color= '#FFFFFF', chart_axis_width=3, width=460, height= 415).place( relx = 0.32, rely = 0.46, anchor = "center")
 		
 class C_producto(BaseScene):
 	def __init__(self, parent, manager):
