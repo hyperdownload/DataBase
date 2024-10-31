@@ -321,7 +321,7 @@ class C_ventas(BaseScene):
 		if self.metodo in ["Credito", "Debito"]:
 			self._extracted_from_credito_4()
 		else:
-			self.d.animate_to(5,193,0.7,60)
+			self.d.animate_to(5,193,0.5,90)
 			self.input_c.destroy()
 
 	def _extracted_from_credito_4(self):
@@ -330,7 +330,7 @@ class C_ventas(BaseScene):
 		self.input_c.bind('<KeyRelease>', self.detect_card_type)
 		self.cardText = ctk.CTkLabel(app,width=30, text='', text_color=black, bg_color='#FFFFFF')
 		self.cardText.place(x=385,y=360)
-		self.d.animate_to(5,255,0.7,60)
+		self.d.animate_to(5,255,0.5,90)
 	def detect_card_type(self, event):
 		card_number = self.input_c.get().replace(" ", "")[:6]
 		if card_type := self.get_card_type(card_number):
@@ -512,7 +512,10 @@ class Men_p_admin(BaseScene):
 			card = ctk.CTkButton(self.fr, text = text, **style_card, command= command)
 			card.configure(fg_color = black, hover_color = "#232323", text_color = color_p)
 			card.grid(row = 0, column = x, padx = 10, pady = 15, sticky="e")
-
+		logs_button = ctk.CTkButton(self.fr, text = "Registros totales", command= lambda:app.switch_scene('Logs'), **style_card)	
+		logs_button.configure(fg_color = black, hover_color = "#232323", text_color = color_p)	
+		logs_button.grid(row=1,column=0)
+  
 	def sucursal_vw(self, sucursal_name):
 		app.clear_widget(self.sucursales_fr, self.fr)
 
@@ -563,13 +566,22 @@ class New_branch(BaseScene):
 
 		self.input_config = {'font': ('Plus jakarta Sans', 14, 'bold'),'fg_color': "transparent",'width': 350,'height': 50,'corner_radius': 35,'border_color': "#dcdcdc",'placeholder_text_color': "#BEBEBE"}
 
-		self.branch_name=ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese nombre de la sucursal', **self.input_config)
-		self.branch_name.place(relx=0.5, y=120, anchor="center")
-		self.direction_branch=ClearableEntry(self.inputs_fr, placeholder_text= 'Ingrese direccion de la sucursal', **self.input_config)
-		self.direction_branch.place(relx=0.5, y=180, anchor="center")
-
+		self.branch_name = self.extract(
+			'Ingrese nombre de la sucursal', 120, './img/branch.png', 105
+		)
+		self.direction_branch = self.extract(
+			'Ingrese direccion de la sucursal', 180, './img/place.png', 165
+		)
 		self.new_product = ctk.CTkButton(self.inputs_fr, text="Crear sucursal", font=('Plus jakarta Sans', 14, 'bold'),height=50, width=350, corner_radius=35, fg_color=black, hover_color="#454545", command=self.new_product_def)
 		self.new_product.place(relx=0.5, y=240, anchor="center")
+
+	def extract(self, placeholder_text, y, arg2, arg3):
+		result = ClearableEntry(
+			self.inputs_fr, placeholder_text=placeholder_text, **self.input_config
+		)
+		result.place(relx=0.5, y=y, anchor="center")
+		self.suc = ImageP(self.inputs_fr, arg2, height=25, width=25, x=335, y=arg3)
+		return result
 
 	def new_product_def(self, event = None):
 		nombre, direction = (self.branch_name.get_and_clear(),self.direction_branch.get_and_clear())
@@ -802,6 +814,42 @@ class R_Prod(BaseScene):
             show_notification(self.manager,f"Producto restockeado\nstock actual: {get_stock_product(id)}")
         except Exception:
             show_notification(self.manager, "Asegurese de colocar todos los datos.")
+            
+class logs(BaseScene):
+    def __init__(self, parent, manager):
+        super().__init__(parent, manager)
+        
+        self.manager=manager
+        self.header_fr = header(self.manager)
+        self.main()
+        self.manager.title("Menu admin")
+        
+    def main(self):
+        self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
+        self.main_fr.configure(scrollbar_button_color= color_p, scrollbar_button_hover_color= color_s)
+        self.a()
+        
+    def a(self):
+        self.logs_fr = ctk.CTkFrame(self.main_fr, width=800, height=600, fg_color=color_p)
+        self.logs_fr.place(relx=0.5, rely=3.0, anchor="center")
+        
+        columns = [
+			("#0", "ID", 30), 
+			("Producto", "Producto", 90), 
+			("Usuario", "Usuario", 60), 
+			("Sucursal", "Sucursal", 70), 
+			("Cantidad", "Cantidad", 70), 
+			("Fecha", "Fecha", 80), 
+			("Precio", "Precio", 50), 
+			("Categoria", "Categoria", 80), 
+			("M. Pago", "M. Pago", 50), 
+			("Descuento", "Descuento", 70)
+		]
+        self.data = Table(self.logs_fr, columns=columns, color_frame=black, color_tabla=black, height=400, width=760)
+        self.data.place(relx=0.5, rely=0.5, anchor="center")
+        
+        self.data.insert(get_all_sales())
+  
 if __name__ == "__main__":
 	notifications=[]
 	app = SceneManager()  # Crea una instancia del gestor de escenas
@@ -818,7 +866,7 @@ if __name__ == "__main__":
 
 	# Añade las escenas al gestor
 	scenes = [("Stock_nav", Stock_nav),("Ventas_nav", Ventas_nav),("C_ventas", C_ventas),("C_producto", C_producto),("Men_p", Men_p),("Login", Login),("Men_p_admin", Men_p_admin),
-    ("New_stock", New_stock),("New_user",New_user), ("Users_nav", Users), ("Notifications_nav", Notifications), ("New_branch", New_branch),("Restock", R_Prod)]
+    ("New_stock", New_stock),("New_user",New_user), ("Users_nav", Users), ("Notifications_nav", Notifications), ("New_branch", New_branch),("Restock", R_Prod),("Logs",logs),]
 
 	for scene_name, scene_class in scenes:
 		app.add_scene(scene_name, scene_class)
