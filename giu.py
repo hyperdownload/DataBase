@@ -65,8 +65,8 @@ class Login(BaseScene):
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
 		else:
-			user = 'carlos@example.com'
-			password = 'superadmin789'
+			user = 'john@example.com'
+			password = 'password123'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -248,8 +248,7 @@ class C_ventas(BaseScene):
 		self.visualizar_datos()
 
 	def conf(self):
-		self.tooltip1.configure(message=f"Producto: {get_product_name(self.inputid.get())}")
-
+		self.tooltip1.configure(message=f"Producto: {get_product_name_by_id_and_branch(self.inputid.get(), app.get_variable("branch_user"))}")
 	def inputs_col(self):
 		self.inputs_fr = ctk.CTkFrame(self.main_fr, width=400, height=300, fg_color=color_p)
 		self.inputs_fr.grid(row=1, column=0)
@@ -262,7 +261,7 @@ class C_ventas(BaseScene):
 				self.inputid = ClearableEntry(self.inputs_fr, placeholder_text=text, **self.input_config)
 				self.inputid.grid(row=y_cord, column=1, pady=5, padx=35)
 				self.inputid.bind("<Key>", lambda event: self.after(1, self.conf))
-				self.tooltip1 = CTkToolTip(self.inputid, message=f"Producto: {get_product_name(self.inputid.get())}")
+				self.tooltip1 = CTkToolTip(self.inputid, message=f"Producto: {get_product_name_by_id_and_branch(self.inputid.get(), app.get_variable("branch_user"))}")
 			elif y_cord == 1:
 				self.inputq = ClearableEntry(self.inputs_fr, placeholder_text=text, **self.input_config)
 				self.inputq.grid(row=y_cord, column=1, pady=5, padx=35)

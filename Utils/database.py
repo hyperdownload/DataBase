@@ -247,16 +247,16 @@ def get_user_id(email:str)->None:
 def add_product(product)->None:
     conn = sqlite3.connect(dataBasePath)
     cursor = conn.cursor()
+    if branch_exists(product.branch_name):
+        cursor.execute('''
+        INSERT INTO Products (name, price, brand, size, category, description, branch_name, stock)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (product.name, product.price, product.brand, product.size, product.category, product.description, product.branch_name, product.stock))
+        
+        conn.commit()
+        conn.close()
 
-    cursor.execute('''
-    INSERT INTO Products (name, price, brand, size, category, description, branch_name, stock)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (product.name, product.price, product.brand, product.size, product.category, product.description, product.branch_name, product.stock))
-    
-    conn.commit()
-    conn.close()
-
-    print(f"Product {product.name} added successfully.")
+        print(f"Product {product.name} added successfully.")
     
 def get_product_category(id_product:int)->str:
     '''
@@ -752,6 +752,23 @@ def add_random():
             add_product(Product(nombre, precio, marca, talla, categoria, descripcion, sucursal, stock))
             productos_generados.add(producto_id)  # Agregamos el producto al conjunto para futuras verificaciones
 
+import sqlite3
+
+def get_product_name_by_id_and_branch(id:int, branch_name:str) -> str:
+    '''
+    Obtiene el nombre de un producto
+    '''
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT name FROM Products WHERE id = ? AND branch_name = ?', (id, branch_name,))
+    try:
+        name = cursor.fetchone()[0]
+        conn.close()
+    except:
+        name = 'Producto no encontrado'
+        conn.close()
+    return name
 
 if __name__ == "__main__":
     
@@ -764,8 +781,8 @@ if __name__ == "__main__":
     register_user('Jane Smith', 'jane@example.com', 'admin456', 2, "Jose c paz")
     register_user('Carlos Torres', 'carlos@example.com', 'superadmin789', 3, "Retiro")
 
-    product1 = Product('White T-shirt', 19.99, 'Brand X', 'M', "T-Shirt", 'White cotton t-shirt', "San Miguel" , stock=10)
-    product2 = Product('Blue Jeans', 39.99, 'Brand Y', 'L', "Jeans", 'Blue denim jeans', "San Miguel", stock=10)
+    product1 = Product('White T-shirt', 19.99, 'Brand X', 'M', "T-Shirt", 'White cotton t-shirt', "San miguel" , stock=10)
+    product2 = Product('Blue Jeans', 39.99, 'Brand Y', 'L', "Jeans", 'Blue denim jeans', "San miguel", stock=10)
 
     add_product(product1)
     add_product(product2)
