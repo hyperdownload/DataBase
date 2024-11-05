@@ -7,6 +7,7 @@ import functools
 import sqlite3
 from Utils.placeholders import *
 from openpyxl import Workbook
+from tkinter import filedialog
 
 class Product:
     def __init__(self, name:str, price:int, brand:str, size:any, category:str, description:str, branch_name:str, stock:int, category_path=None, id:int=None):
@@ -643,9 +644,16 @@ def get_products_in_branch(name)->list:
     return products
 
 def export_to_file(manager, path_to_export: str = 'sales_export.xlsx') -> None:
+    path_to_export = filedialog.asksaveasfilename(
+        defaultextension=".xlsx",
+        filetypes=[("Excel Files", "*.xlsx"), ("All Files", "*.*")],
+        title="Guardar archivo como"
+    )
+    if not path_to_export:  
+        return
     conn = sqlite3.connect(dataBasePath); cursor = conn.cursor(); cursor.execute("SELECT * FROM Sales")
     wb = Workbook(); ws = wb.active; ws.title = "Sales Data"; ws.append([i[0] for i in cursor.description]); [ws.append(row) for row in get_all_sales()]; wb.save(path_to_export)
-    Slideout(manager, side="right", width=250, height=75, bg_color="#EDEBE9", text="Archivo exportado a la raíz del programa.", text_color='#000000').slide_in()
+    Slideout(manager, side="right", width=250, height=75, bg_color="#EDEBE9", text=f"Archivo exportado a {path_to_export}", text_color='#000000').slide_in()
 
 def get_branch_properties(branch_name:str)->list:
     conn = sqlite3.connect(dataBasePath)

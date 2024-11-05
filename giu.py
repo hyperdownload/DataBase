@@ -198,7 +198,7 @@ class C_producto(BaseScene):
 		self.cp_fr = ctk.CTkFrame(self.main_fr, fg_color = color_p, height = 85, width = 800)
 		self.cp_fr.grid(row=1, column=0)
 		self.buscar_producto = ClearableEntry(self.cp_fr, placeholder_text= "Buscar producto...", width= 250, height=50,
-										corner_radius=35, border_color= "#dcdcdc", text_color= black)
+										corner_radius=35, border_color= "#dcdcdc", text_color= '#FFFFFF')
 		self.buscar_producto.place(x = 185, rely = 0.5, anchor= "center")
 
 		self.buscar_producto.bind('<Key>', self.search)
