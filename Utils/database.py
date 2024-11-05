@@ -708,6 +708,51 @@ def get_all_sales_of_branch(branch_name) -> list:
 
     return sales_list
 
+def add_random():
+    import random
+    productos_generados = set()  # Usamos un conjunto para evitar duplicados
+    nombres = ["Camiseta", "Pantalón", "Chaqueta", "Sudadera", "Vestido", "Falda"]
+    colores = [
+        "Roja", "Azul", "Celeste", "Verde", "Negro", "Blanco", 
+        "Amarillo", "Naranja", "Rosa", "Violeta", "Gris", "Marrón"
+    ]
+    marcas = ["ModaX", "EstiloY", "TrendZ", "ChicWear"]
+    tallas = ["S", "M", "L", "XL"]
+    categorias = [
+        "T-Shirt",    
+        "Jeans",      
+        "Jacket",     
+        "Sweatshirt",
+        "Dress",     
+        "Skirt"     
+    ]
+    descripciones = [
+        "Prenda cómoda y de alta calidad.",
+        "Estilo moderno y elegante.",
+        "Ideal para cualquier ocasión.",
+        "Material duradero y resistente.",
+        "Última tendencia en moda."
+    ]
+    sucursales = ["San miguel", "Jose c paz", "Retiro"]
+
+    while len(productos_generados) < 100:  # Aseguramos que generamos 100 productos únicos
+        nombre = f"{random.choice(nombres)} {random.choice(colores)}" 
+        precio = round(random.uniform(200, 2000), 2)  # Precio entre 200 y 2000
+        marca = random.choice(marcas)
+        talla = random.choice(tallas)
+        categoria = random.choice(categorias)
+        descripcion = random.choice(descripciones)
+        sucursal = random.choice(sucursales)
+        stock = random.randint(1, 50)  # Stock entre 1 y 50
+
+        # Creamos un identificador único para cada producto
+        producto_id = (nombre, precio, marca, talla, categoria, sucursal)
+
+        if producto_id not in productos_generados:  # Verificamos que no sea un duplicado
+            add_product(Product(nombre, precio, marca, talla, categoria, descripcion, sucursal, stock))
+            productos_generados.add(producto_id)  # Agregamos el producto al conjunto para futuras verificaciones
+
+
 if __name__ == "__main__":
     
     ''' Literalmente aca solo copie y pegue del archivo example.py por cuestion de que se utilizaria

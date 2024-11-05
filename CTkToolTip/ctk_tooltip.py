@@ -10,10 +10,6 @@ from tkinter import Toplevel, Frame
 
 
 class CTkToolTip(Toplevel):
-    """
-    Creates a ToolTip (pop-up) widget for customtkinter.
-    """
-
     def __init__(
             self,
             widget: any = None,
@@ -33,15 +29,18 @@ class CTkToolTip(Toplevel):
         super().__init__()
 
         self.widget = widget
-
         self.withdraw()
 
         # Disable ToolTip's title bar
         self.overrideredirect(True)
 
+        # Set transparent color based on platform
         if sys.platform.startswith("win"):
-            self.transparent_color = self.widget._apply_appearance_mode(
-                customtkinter.ThemeManager.theme["CTkToplevel"]["fg_color"])
+            if hasattr(self.widget, "_apply_appearance_mode"):
+                self.transparent_color = self.widget._apply_appearance_mode(
+                    customtkinter.ThemeManager.theme["CTkToplevel"]["fg_color"])
+            else:
+                self.transparent_color = "#FFFFFF"  # Color predeterminado
             self.attributes("-transparentcolor", self.transparent_color)
             self.transient()
         elif sys.platform.startswith("darwin"):
@@ -54,11 +53,8 @@ class CTkToolTip(Toplevel):
             self.transient()
 
         self.resizable(width=True, height=True)
-
-        # Make the background transparent
         self.config(background=self.transparent_color)
 
-        # StringVar instance for msg string
         self.messageVar = customtkinter.StringVar()
         self.message = message
         self.messageVar.set(self.message)
@@ -74,14 +70,14 @@ class CTkToolTip(Toplevel):
         self.bg_color = customtkinter.ThemeManager.theme["CTkFrame"]["fg_color"] if bg_color is None else bg_color
         self.border_color = border_color
         self.disable = False
-
-        # visibility status of the ToolTip inside|outside|visible
         self.status = "outside"
         self.last_moved = 0
         self.attributes('-alpha', self.alpha)
 
+        # Configuración especial para widgets que no tienen _apply_appearance_mode
         if sys.platform.startswith("win"):
-            if self.widget._apply_appearance_mode(self.bg_color) == self.transparent_color:
+            if hasattr(self.widget, "_apply_appearance_mode") and \
+                    self.widget._apply_appearance_mode(self.bg_color) == self.transparent_color:
                 self.transparent_color = "#000001"
                 self.config(background=self.transparent_color)
                 self.attributes("-transparentcolor", self.transparent_color)
@@ -100,13 +96,17 @@ class CTkToolTip(Toplevel):
         self.message_label.pack(fill="both", padx=self.padding[0] + self.border_width,
                                 pady=self.padding[1] + self.border_width, expand=True)
 
-        if self.widget.winfo_name() != "tk":
-            if self.frame.cget("fg_color") == self.widget.cget("bg_color"):
-                if not bg_color:
-                    self._top_fg_color = self.frame._apply_appearance_mode(
-                        customtkinter.ThemeManager.theme["CTkFrame"]["top_fg_color"])
+        # Verificación para widgets tkinter
+        if hasattr(self.widget, "cget") and self.widget.winfo_name() != "tk":
+            try:
+                # Usar "background" en lugar de "bg_color" para widgets estándar de tkinter
+                if self.frame.cget("fg_color") == self.widget.cget("background") and not bg_color:
+                    self._top_fg_color = "#FFFFFF"  # Color predeterminado si es necesario
                     if self._top_fg_color != self.transparent_color:
                         self.frame.configure(fg_color=self._top_fg_color)
+            except:
+                # Si el widget no tiene "background", simplemente omite la configuración
+                pass
 
         # Add bindings to the widget without overriding the existing ones
         self.widget.bind("<Enter>", self.on_enter, add="+")
@@ -114,6 +114,7 @@ class CTkToolTip(Toplevel):
         self.widget.bind("<Motion>", self.on_enter, add="+")
         self.widget.bind("<B1-Motion>", self.on_enter, add="+")
         self.widget.bind("<Destroy>", lambda _: self.hide(), add="+")
+
 
     def show(self) -> None:
         """

@@ -2,6 +2,7 @@ import customtkinter as ctk
 from difflib import get_close_matches
 import threading
 import traceback
+from CTkToolTip import CTkToolTip
 
 class SceneManager(ctk.CTk):
     def __init__(self):

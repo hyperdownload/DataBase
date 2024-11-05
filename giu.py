@@ -35,14 +35,14 @@ class Login(BaseScene):
 			login_container, "Ingrese su nombre de usuario...", 260
 		)
 		self.password_entry = self._extracted_from_login_10(
-			login_container, "Ingrese su contraseña...", 310
+			login_container, "Ingrese su contraseña...", 310, True
 		)
 		self.password_entry.bind('<MouseWheel>', lambda event: self.login_logic(autologin=True))
 		self.user=ImageP(login_container,"./img/person.png", height=18, width=18,x=545,y=247)
 		self.key=ImageP(login_container,"./img/key.png", height=18, width=18,x=545,y=297)
 		ctk.CTkButton(login_container, text="Login", height=35, width=350, corner_radius=20, fg_color=black, text_color=color_p, hover_color="#454545", command=self.login_logic).place(relx=0.5, y=360, anchor="center")
 
-	def _extracted_from_login_10(self, login_container, placeholder_text, y):
+	def _extracted_from_login_10(self, login_container, placeholder_text, y, is_password=False):
 		result = ClearableEntry(
 			login_container,
 			height=35,
@@ -50,8 +50,11 @@ class Login(BaseScene):
 			corner_radius=20,
 			placeholder_text=placeholder_text,
 			fg_color="#FFFFFF",
-			text_color=black, 
+			text_color=black,
 		)
+		if is_password:
+			result.configure(show="*")  # Configura el entry para que muestre * en lugar de texto real
+
 		result.place(relx=0.5, y=y, anchor="center")
 		result.bind('<Return>', self.login_logic)
 
@@ -237,6 +240,7 @@ class C_ventas(BaseScene):
 		self.header_fr = header(self.manager)
 		self.main()
 		self.metodo = ''
+		self.before = 'Efectivo'
   
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
@@ -297,7 +301,7 @@ class C_ventas(BaseScene):
 			show_notification(app, "No hay nada que eliminar.")
 
 	def generate_ticket(self):  # sourcery skip: extract-method
-		if self.metodo in ["Credito", "Debito"] and self.input_c.get():
+		if self.metodo in ["Credito", "Debito"] and not self.input_c.get():
 			return show_notification(app, "Tarjeta no ingresada")
 		discount_value = (
 			(float(discount) / 100) if (discount := self.input_discount.get()) else 0
@@ -318,11 +322,15 @@ class C_ventas(BaseScene):
 
 	def credito(self, metodo):
 		self.metodo = metodo
-		if self.metodo in ["Credito", "Debito"]:
-			self._extracted_from_credito_4()
-		else:
-			self.d.animate_to(5,193,0.5,90)
-			self.input_c.destroy()
+		if self.metodo != self.before:
+			if self.metodo in ["Credito", "Debito"]:
+				self._extracted_from_credito_4()
+				self.before = metodo
+			else:
+				self.d.animate_to(5,193,0.5,90)
+				self.input_c.unbind('<KeyRelease>')
+				self.input_c.destroy()
+				self.input_c.grid_forget()
 
 	def _extracted_from_credito_4(self):
 		self.input_c = ClearableEntry(self.inputs_fr, placeholder_text="Ingrese tarjeta", **self.input_config)
@@ -378,19 +386,24 @@ class C_ventas(BaseScene):
 			product_id = int(self.inputid.get_and_clear())
 			branch_name = app.get_variable('branch_user')
 			
-			if self.input_c.get():
-				for parent in self.treeviewt.get_children():
-					for id in self.id_product:
-						values = self.treeviewt.item(parent)["values"]
-						product_id = id
-						precio = float(values[0])
-						quantity = int(values[1])
+			if hasattr(self, 'input_c') and self.input_c.winfo_exists():
+				if not self.input_c.get():
+					show_notification(app, "Ingrese un numero de tarjeta.")
+					return
+			
+			for parent in self.treeviewt.get_children():
+				for id in self.id_product:
+					values = self.treeviewt.item(parent)["values"]
+					product_id = id
+					precio = float(values[0])
+					quantity = int(values[1])
 
-						if record_sale(product_id, app.get_variable('user_id'), branch_name, quantity, get_price_product(product_id), self.metodo_pago.get(), self.input_discount.get()):
-							show_notification(app, "Venta registrada")
+					if record_sale(product_id, app.get_variable('user_id'), branch_name, quantity, get_price_product(product_id), self.metodo_pago.get(), self.input_discount.get()):
+						show_notification(app, "Venta registrada")
+						
+						if hasattr(self, 'input_c'):
 							self.input_c.delete(0, tk.END)
-			else:
-				show_notification(app, "Ingrese un numero de tarjeta.")
+					
 		except ValueError:
 			show_notification(app, "Por favor ingrese todos los campos y suba el ticket.")
 	

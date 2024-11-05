@@ -6,6 +6,7 @@ from tkinter import ttk
 import tkinter.font as tkFont
 from PIL import Image, ImageTk
 from datetime import datetime
+from CTkToolTip import CTkToolTip
 
 color_p = "#fafafa"
 color_s = "#efefef"
@@ -244,13 +245,12 @@ class Table:
         self.frame = ctk.CTkFrame(master, width=width, height=height, fg_color=color_tabla, corner_radius=40)
         self.frame.grid_propagate(False)
 
-        # Configuracion de las columnas del Treeview
         self.treeview = ttk.Treeview(self.frame, columns=[col[0] for col in columns[1:]])
         if filterBool:
             self.treeview.place(relx=0.5, rely=0.55, anchor="center", width=width - 50, height=height - 50)
         else:
             self.treeview.place(relx=0.5, rely=0.46, anchor="center", width=width - 50, height=height - 50)
-        # Definicion de columnas y encabezados
+
         for col_id, heading, col_width in columns:
             self.treeview.column(col_id, width=col_width, minwidth=col_width, anchor="w")
             self.treeview.heading(col_id, text=heading, anchor="w")
@@ -271,6 +271,73 @@ class Table:
 
             self.filter_image = ImageP(self.frame,"./img/filter.png", height=25, width=25,x=20,y=13)
         self.full_data = []
+        
+        self.default_font = tkFont.nametofont("TkDefaultFont")
+        self.tooltip = None
+        self.treeview.bind("<Motion>", self._show_tooltip)
+        
+        self.scrollbar = ctk.CTkScrollbar(self.frame, orientation="vertical", command=self.treeview.yview, fg_color=color_tabla, height=height-30)
+        self.treeview.configure(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.place(relx=0.98, rely=0.5, anchor="e")
+        
+        self.treeview.bind("<Up>", self._move_up)
+        self.treeview.bind("<Down>", self._move_down)
+        self.treeview.bind("<MouseWheel>", self._on_mouse_scroll)
+        self.treeview.bind("<Enter>", lambda _: self.treeview.focus_set())  # Da foco al entrar en el Treeview
+
+    def _move_up(self, event):
+        """Mueve la selección hacia arriba en el Treeview."""
+        selected_item = self.treeview.focus()
+        if prev_item := self.treeview.prev(selected_item):
+            self.treeview.selection_set(prev_item)
+            self.treeview.focus(prev_item)
+            self.treeview.see(prev_item)
+
+    def _move_down(self, event):
+        """Mueve la selección hacia abajo en el Treeview."""
+        selected_item = self.treeview.focus()
+        if next_item := self.treeview.next(selected_item):
+            self.treeview.selection_set(next_item)
+            self.treeview.focus(next_item)
+            self.treeview.see(next_item)
+
+    def _on_mouse_scroll(self, event):
+        """Desplaza el contenido del Treeview con la rueda del ratón."""
+        self.treeview.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    def _show_tooltip(self, event):
+        region = self.treeview.identify("region", event.x, event.y)
+        if region == "cell":
+            row_id = self.treeview.identify_row(event.y)
+            col_id = self.treeview.identify_column(event.x)
+            if row_id and col_id:
+                cell_value = self.treeview.item(row_id, "values")[int(col_id[1:]) - 1]
+                col_width = self.treeview.column(col_id, "width")
+                text_width = self.default_font.measure(cell_value)
+                
+                # Comprueba si el texto de la celda es más largo que el ancho de la columna
+                if text_width > col_width:
+                    # Crear un tooltip con CTkToolTip si no existe uno visible
+                    if self.tooltip is None:
+                        self.tooltip = CTkToolTip(
+                            widget=self.treeview,
+                            message=cell_value,
+                            delay=0.2,
+                            follow=True,
+                            x_offset=10,
+                            y_offset=10
+                        )
+                    else:
+                        # Actualiza el mensaje del tooltip si ya existe
+                        self.tooltip.configure(message=cell_value)
+                    self.tooltip.show()
+                    self.tooltip.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
+                elif self.tooltip:
+                    self.tooltip.hide()
+                    self.tooltip = None
+        elif self.tooltip:
+            self.tooltip.hide()
+            self.tooltip = None
 
     def insert(self, elements):
         """
@@ -279,6 +346,7 @@ class Table:
         Args:
             elements (list): Lista de elementos, cada uno como lista con valores en el mismo orden que las columnas.
         """
+        
         self.full_data = elements  
         self.treeview.delete(*self.treeview.get_children())
 
