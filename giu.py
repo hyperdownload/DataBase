@@ -368,7 +368,7 @@ class C_ventas(BaseScene):
 		ticket_fr = ctk.CTkFrame(self.ticket_col, width=300, height=400, fg_color=black, corner_radius=20, border_color=grey, border_width=3)
 		ticket_fr.place(relx=0.5, rely=0.5, anchor="center")
 
-		columns = [("#0", "Producto", 50),("Precio", "Precio", 50),("Cantidad", "Cantidad", 50)]
+		columns = [("#0", "Producto",35),("Precio", "Precio", 50),("Cantidad", "Cantidad", 50)]
 
 		self.treeviewt = Table(master=ticket_fr,columns=columns,color_tabla=black,color_frame=black,width=280,height=350, filterBool=False)
 		self.treeviewt.frame.place(relx=0.5, y=195, anchor="center")
