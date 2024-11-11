@@ -773,6 +773,46 @@ def get_product_name_by_id_and_branch(id:int, branch_name:str) -> str:
         conn.close()
     return name
 
+def get_logs(target_timezone='America/Argentina/Buenos_Aires'):
+    """
+    Obtiene los logs de la base de datos y los devuelve en formato de lista de tuplas para
+    su correcta inserción en la interfaz de usuario.
+    
+    :param target_timezone: Zona horaria a la que se desea convertir la fecha 
+                            (por defecto 'America/Argentina/Buenos_Aires').
+    :return: Lista de tuplas con los datos de los logs.
+    """
+    conn = sqlite3.connect(dataBasePath)
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT id, action, user_id, product_id, branch_name, quantity, price, date FROM Logs')
+    logs = cursor.fetchall()
+    conn.close()
+
+    logs_converted = []
+    for log in logs:
+        log_id, action, user_id, product_id, branch_name, quantity, price, log_date = log
+
+        user_name = get_user_name(user_id) if user_id else "Usuario desconocido"
+        product_name = get_product_name(product_id) if product_id else "Producto desconocido"
+
+        log_datetime_utc = datetime.strptime(log_date, '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
+        log_datetime_local = log_datetime_utc.astimezone(ZoneInfo(target_timezone))
+        log_date_converted = log_datetime_local.strftime('%Y-%m-%d %H:%M:%S')
+
+        logs_converted.append((
+            log_id,
+            action,
+            user_name,
+            product_name,
+            branch_name,
+            quantity,
+            price,
+            log_date_converted
+        ))
+
+    return logs_converted
+
 if __name__ == "__main__":
     
     ''' Literalmente aca solo copie y pegue del archivo example.py por cuestion de que se utilizaria

@@ -65,8 +65,8 @@ class Login(BaseScene):
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
 		else:
-			user = 'john@example.com'
-			password = 'password123'
+			user = 'carlos@example.com'
+			password = 'superadmin789'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -385,10 +385,9 @@ class C_ventas(BaseScene):
 			product_id = int(self.inputid.get_and_clear())
 			branch_name = app.get_variable('branch_user')
 			
-			if hasattr(self, 'input_c') and self.input_c.winfo_exists():
-				if not self.input_c.get():
-					show_notification(app, "Ingrese un numero de tarjeta.")
-					return
+			if hasattr(self, 'input_c') and self.input_c.winfo_exists() and not self.input_c.get():
+				show_notification(app, "Ingrese un numero de tarjeta.")
+				return
 			
 			for parent in self.treeviewt.get_children():
 				for id in self.id_product:
@@ -823,7 +822,29 @@ class R_Prod(BaseScene):
             show_notification(self.manager,f"Producto restockeado\nstock actual: {get_stock_product(id)}")
         except Exception:
             show_notification(self.manager, "Asegurese de colocar todos los datos.")
-  
+
+class Logs(BaseScene):
+    def __init__(self, parent, manager):
+        super().__init__(parent, manager)
+        self.manager=manager
+        self.header = header(self.manager)
+        self.render_gui()
+    
+    def render_gui(self):
+        columns = [
+			("#0", "ID", 30),
+			("action", "Accion", 80),
+			("userid", "User", 60),
+			("productid", "Producto", 90),
+			("branch", "Sucursal", 70),
+			("quantity", "Cantidad", 70),
+			("price", "Precio", 50),
+			("date", "Fecha", 80)
+		]
+        self.table = Table(self.manager, columns,color_frame=black, color_tabla=black, height=500, width=800)
+        self.table.place(x=0,y=60)
+        self.table.insert(get_logs())
+
 if __name__ == "__main__":
 	notifications=[]
 	app = SceneManager()  # Crea una instancia del gestor de escenas
@@ -840,7 +861,8 @@ if __name__ == "__main__":
 
 	# Añade las escenas al gestor
 	scenes = [("Stock_nav", Stock_nav),("Ventas_nav", Ventas_nav),("C_ventas", C_ventas),("C_producto", C_producto),("Men_p", Men_p),("Login", Login),("Men_p_admin", Men_p_admin),
-    ("New_stock", New_stock),("New_user",New_user), ("Users_nav", Users), ("Notifications_nav", Notifications), ("New_branch", New_branch),("Restock", R_Prod),]
+    ("New_stock", New_stock),("New_user",New_user), ("Users_nav", Users), ("Notifications_nav", Notifications), ("New_branch", New_branch),("Restock", R_Prod),
+    ("Logs", Logs)]
 
 	for scene_name, scene_class in scenes:
 		app.add_scene(scene_name, scene_class)
