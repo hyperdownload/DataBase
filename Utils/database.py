@@ -577,7 +577,7 @@ def get_restock_date(restock_id: int, target_timezone: str = 'America/Argentina/
     cursor.execute('''
     SELECT MAX(date)
     FROM Restocks
-    WHERE id = ?
+    WHERE product_id = ?
     ''', (restock_id,))
 
     restock_date = cursor.fetchone()
@@ -644,13 +644,8 @@ def get_products_in_branch(name)->list:
     return products
 
 def export_to_file(manager, path_to_export: str = 'sales_export.xlsx') -> None:
-    path_to_export = filedialog.asksaveasfilename(
-        defaultextension=".xlsx",
-        filetypes=[("Excel Files", "*.xlsx"), ("All Files", "*.*")],
-        title="Guardar archivo como"
-    )
-    if not path_to_export:  
-        return
+    path_to_export = filedialog.asksaveasfilename(defaultextension=".xlsx",filetypes=[("Excel Files", "*.xlsx"), ("All Files", "*.*")],title="Guardar archivo como")
+    if not path_to_export:  return
     conn = sqlite3.connect(dataBasePath); cursor = conn.cursor(); cursor.execute("SELECT * FROM Sales")
     wb = Workbook(); ws = wb.active; ws.title = "Sales Data"; ws.append([i[0] for i in cursor.description]); [ws.append(row) for row in get_all_sales()]; wb.save(path_to_export)
     Slideout(manager, side="right", width=250, height=75, bg_color="#EDEBE9", text=f"Archivo exportado a {path_to_export}", text_color='#000000').slide_in()

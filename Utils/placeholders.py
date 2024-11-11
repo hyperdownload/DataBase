@@ -6,7 +6,14 @@ from tkinter import ttk
 import tkinter.font as tkFont
 from PIL import Image, ImageTk
 from datetime import datetime
-from CTkToolTip import CTkToolTip
+try:
+    from CTkToolTip import CTkToolTip
+except:
+    import os
+    module_path = os.path.join(os.path.dirname(__file__), '..', 'CTkToolTip', 'ctk_tooltip.py')
+
+    with open(module_path) as file:
+        exec(file.read())
 
 color_p = "#fafafa"
 color_s = "#efefef"
@@ -289,17 +296,18 @@ class Table:
         """Mueve la selección hacia arriba en el Treeview."""
         selected_item = self.treeview.focus()
         if prev_item := self.treeview.prev(selected_item):
-            self.treeview.selection_set(prev_item)
-            self.treeview.focus(prev_item)
-            self.treeview.see(prev_item)
+            self._extracted_from__move_down_5(prev_item)
 
     def _move_down(self, event):
         """Mueve la selección hacia abajo en el Treeview."""
         selected_item = self.treeview.focus()
         if next_item := self.treeview.next(selected_item):
-            self.treeview.selection_set(next_item)
-            self.treeview.focus(next_item)
-            self.treeview.see(next_item)
+            self._extracted_from__move_down_5(next_item)
+
+    def _extracted_from__move_down_5(self, arg0):
+        self.treeview.selection_set(arg0)
+        self.treeview.focus(arg0)
+        self.treeview.see(arg0)
 
     def _on_mouse_scroll(self, event):
         """Desplaza el contenido del Treeview con la rueda del ratón."""
@@ -307,47 +315,50 @@ class Table:
 
     def _show_tooltip(self, event):
         region = self.treeview.identify("region", event.x, event.y)
-        if region == "cell" or region == "heading":  # Añadir encabezado
-            if region == "cell":
-                row_id = self.treeview.identify_row(event.y)
-                col_id = self.treeview.identify_column(event.x)
-                if row_id and col_id:
-                    cell_value = self.treeview.item(row_id, "values")[int(col_id[1:]) - 1]
-                    text = cell_value
-            elif region == "heading":
-                col_id = self.treeview.identify_column(event.x)
-                heading = self.treeview.heading(col_id)["text"]
-                text = heading
+        if region == "cell":  # Añadir encabezado
+            row_id = self.treeview.identify_row(event.y)
+            col_id = self.treeview.identify_column(event.x)
+            if row_id and col_id:
+                cell_value = self.treeview.item(row_id, "values")[int(col_id[1:]) - 1]
+                text = cell_value
+            self._extracted_from__show_tooltip_16(col_id, text, event)
+        elif region == "heading":  # Añadir encabezado
+            col_id = self.treeview.identify_column(event.x)
+            heading = self.treeview.heading(col_id)["text"]
+            text = heading
 
-            # Obtén el ancho del texto y de la columna
-            col_width = self.treeview.column(col_id, "width")
-            text_width = self.default_font.measure(text)
-
-            # Mostrar tooltip si el texto es más largo que el ancho de la columna
-            if text_width+10 > col_width:
-                if self.tooltip is None or not self.tooltip.winfo_exists():
-                    # Crear tooltip si no existe o fue destruido
-                    self.tooltip = CTkToolTip(
-                        widget=self.treeview,
-                        message=text,
-                        delay=0.2,
-                        follow=True,
-                        x_offset=10,
-                        y_offset=10
-                    )
-                else:
-                    # Actualizar el mensaje del tooltip si ya existe
-                    self.tooltip.configure(message=text)
-                self.tooltip.show()
-                self.tooltip.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
-            elif self.tooltip and self.tooltip.winfo_exists():
-                self.tooltip.hide()
-                self.tooltip.destroy()  # Destruye el tooltip si no es necesario
-                self.tooltip = None
+            self._extracted_from__show_tooltip_16(col_id, text, event)
         elif self.tooltip and self.tooltip.winfo_exists():
-            self.tooltip.hide()
-            self.tooltip.destroy()
-            self.tooltip = None
+            self._extracted_from__show_tooltip_37()
+
+    def _extracted_from__show_tooltip_16(self, col_id, text, event):
+        col_width = self.treeview.column(col_id, "width")
+        text_width = self.default_font.measure(text)
+
+        if text_width+10 > col_width:
+            self._extracted_from__show_tooltip_21(text, event)
+        elif self.tooltip and self.tooltip.winfo_exists():
+            self._extracted_from__show_tooltip_37()
+
+    def _extracted_from__show_tooltip_21(self, text, event):
+        if self.tooltip is None or not self.tooltip.winfo_exists():
+            self.tooltip = CTkToolTip(
+                widget=self.treeview,
+                message=text,
+                delay=0.2,
+                follow=True,
+                x_offset=10,
+                y_offset=10
+            )
+        else:
+            self.tooltip.configure(message=text)
+        self.tooltip.show()
+        self.tooltip.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
+
+    def _extracted_from__show_tooltip_37(self):
+        self.tooltip.hide()
+        self.tooltip.destroy()  
+        self.tooltip = None
 
     def insert(self, elements):
         """
