@@ -21,39 +21,38 @@ grey = "#EDEBE9"
 blue = "#0080ff"
 black = "#131313"
 
+import threading
+import time
+import customtkinter as ctk
+import Opacity as configstyle
+
 class Slideout(ctk.CTkFrame):
     active_slideout = None  # Variable de clase para mantener referencia al slideout activo
 
-    def __init__(self, parent, side="right", width=100, height=100, bg_color='#fafafa', text_color='#000000', text="", y_axis: float = 1.2, **kwargs):
-        super().__init__(parent, width=width, height=height, bg_color='#fafafa', border_width=2, corner_radius=20, **kwargs)
+    def __init__(self, parent, side="right", width=100, height=100, bg_color='transparent', text_color='#000000', text="", y_axis: float = 1.2, **kwargs):
+        super().__init__(parent, width=width, height=height, fg_color='transparent', bg_color='#343434', border_width=2, corner_radius=20, **kwargs)
         self.parent = parent
         self.side = side
         self.width = width
         self.text = text
         self.y_axis = y_axis
         self.text_color = text_color
-
-        # Ajusta la altura según el contenido del texto
+        configstyle.set_opacity(self, color='#343434')
         self.adjust_height_to_text()
 
-        # Configura la geometría y la posición inicial fuera de la pantalla
         self.place_initial_position()
 
-        # Cambia el color de fondo
         self.configure(fg_color=bg_color)
 
-        # Agrega texto
-        self.text_label = ctk.CTkLabel(self, text=self.text, anchor="center", text_color=self.text_color, wraplength=self.width-20)  # wraplength evita overflow horizontal
+        self.text_label = ctk.CTkLabel(self, text=self.text, anchor="center", text_color=self.text_color, wraplength=self.width-20, corner_radius=20)  # wraplength evita overflow horizontal
         self.text_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Botón para cerrar el slideout
         self.close_button = ctk.CTkButton(self, text="×", width=25, height=25, bg_color="transparent", fg_color="transparent", text_color="Black", hover_color="#EDEBE9", font=('Arial', 16), command=self.slide_out)
         self.close_button.place(relx=0.95, rely=0.025, anchor="ne")
 
-        # Verifica si ya hay un slideout activo
         if Slideout.active_slideout is not None and Slideout.active_slideout != self:
             Slideout.active_slideout.slide_out()
-        Slideout.active_slideout = self  # Establece el nuevo slideout como el activo
+        Slideout.active_slideout = self  
 
     def adjust_height_to_text(self):
         """Ajusta la altura del slideout en función del contenido del texto."""
@@ -68,7 +67,7 @@ class Slideout(ctk.CTkFrame):
             self.place(x=-self.width, y=(self.parent.winfo_height() - self.height) // self.y_axis)
 
     def slide_in(self):
-        # Ejecuta el movimiento en un hilo separado para no bloquear la elementna
+        # Ejecuta el movimiento en un hilo separado para no bloquear la interfaz
         threading.Thread(target=self._animate_in).start()
 
     def slide_out(self):
@@ -79,31 +78,53 @@ class Slideout(ctk.CTkFrame):
         if self.side == "right":
             # Desliza desde la derecha hacia la izquierda
             for x in range(self.parent.winfo_width(), self.parent.winfo_width() - self.width, -10):
-                self._update_position(x)
+                if self.winfo_exists():  # Verificar que el widget sigue existiendo
+                    self._update_position(x)
+                else:
+                    return
+                time.sleep(0.01)  # Tiempo entre frames
+
         elif self.side == "left":
             # Desliza desde la izquierda hacia la derecha
             for x in range(-self.width, 0, 10):
-                self._update_position(x)
+                if self.winfo_exists():  # Verificar que el widget sigue existiendo
+                    self._update_position(x)
+                else:
+                    return
+                time.sleep(0.01)
+
+        # Espera antes de iniciar el deslizamiento hacia afuera automáticamente
         time.sleep(5)
-        if Slideout.active_slideout != None:
+        if Slideout.active_slideout is not None:
             self.slide_out()
 
     def _update_position(self, x):
-        """Actualiza la posición del slideout."""
-        self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)
-        self.update_idletasks()
-        time.sleep(0.01)
+        """Actualiza la posición del slideout si aún existe."""
+        if self.winfo_exists():  # Verificar que el widget sigue existiendo antes de actualizar
+            self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)
+            self.update_idletasks()
 
     def _animate_out(self):
         if self.side == "right":
             # Desliza de regreso hacia la derecha (fuera de la pantalla)
             for x in range(self.parent.winfo_width() - self.width, self.parent.winfo_width(), 10):
-                self._update_position(x)
+                if self.winfo_exists():  # Verificar que el widget sigue existiendo
+                    self._update_position(x)
+                else:
+                    return
+                time.sleep(0.01)
+
         elif self.side == "left":
             # Desliza de regreso hacia la izquierda (fuera de la pantalla)
             for x in range(0, -self.width, -10):
-                self._update_position(x)
-        self.after(10, self.destroy)
+                if self.winfo_exists():  # Verificar que el widget sigue existiendo
+                    self._update_position(x)
+                else:
+                    return
+                time.sleep(0.01)
+
+        if self.winfo_exists():  # Asegurarse de que el widget existe antes de destruirlo
+            self.after(10, self.destroy)
         Slideout.active_slideout = None  # Libera la referencia del slideout activo
 
 class Menu_user(ctk.CTkFrame):

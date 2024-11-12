@@ -502,14 +502,27 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
     for sale in sales:
         sale_id, product_id, user_id, branch_name, quantity, sale_date, price, category, payment_method, discount = sale
 
-        # Convierte el string a objeto datetime asumiendo que la fecha está en UTC
         sale_datetime_utc = datetime.strptime(sale_date, '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
 
-        # Convierte a la zona horaria objetivo
         sale_datetime_local = sale_datetime_utc.astimezone(ZoneInfo(target_timezone))
 
-        # Guarda los datos con la fecha convertida en la lista final
-        sale_with_converted_date = [sale_id, get_product_name(product_id), get_user_name(user_id), branch_name, quantity, sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'), price, category, payment_method, discount]
+        sale_with_converted_date = [
+            sale_id,
+            get_product_name(product_id),
+            get_user_name(user_id),
+            branch_name,
+            quantity,
+            sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'),
+            (
+                round(price * (1 - float(int(discount)) / 100), 2)
+                if discount
+                else price
+            ),
+            category,
+            payment_method,
+            discount,
+            f"${str(round(price * quantity, 2))}",
+        ]
         sales_converted.append(sale_with_converted_date)
 
     return sales_converted
@@ -629,11 +642,16 @@ def get_all_branches()->list:
     return branches
 
 @log_database_action("New_Branch")
-def create_new_branch(name, address)->None:
-    conn = sqlite3.connect(dataBasePath)
-    cursor = conn.cursor()
-    cursor.execute('INSERT OR IGNORE INTO Branches (name, address) VALUES (?, ?)', (name, address))
-    conn.close()
+def create_new_branch(branch_name, address, user_id)->None:
+    if not branch_exists(branch_name):
+        conn = sqlite3.connect(dataBasePath)
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO Branches (name, address) VALUES (?, ?)', (branch_name, address))
+        conn.commit()
+        conn.close()
+        return "Nueva sucursal cargada con éxito."
+    else:
+        return 'La sucursal ya existe.'
 
 def get_products_in_branch(name)->list:
     conn = sqlite3.connect(dataBasePath)
@@ -643,10 +661,10 @@ def get_products_in_branch(name)->list:
     conn.close()
     return products
 
-def export_to_file(manager, path_to_export: str = 'sales_export.xlsx') -> None:
+def export_to_file(manager, branch, path_to_export: str = 'sales_export.xlsx') -> None:
     path_to_export = filedialog.asksaveasfilename(defaultextension=".xlsx",filetypes=[("Excel Files", "*.xlsx"), ("All Files", "*.*")],title="Guardar archivo como")
     if not path_to_export:  return
-    conn = sqlite3.connect(dataBasePath); cursor = conn.cursor(); cursor.execute("SELECT * FROM Sales")
+    conn = sqlite3.connect(dataBasePath); cursor = conn.cursor(); cursor.execute("SELECT * FROM Sales WHERE branch_name=?", (branch,))
     wb = Workbook(); ws = wb.active; ws.title = "Sales Data"; ws.append([i[0] for i in cursor.description]); [ws.append(row) for row in get_all_sales()]; wb.save(path_to_export)
     Slideout(manager, side="right", width=250, height=75, bg_color="#EDEBE9", text=f"Archivo exportado a {path_to_export}", text_color='#000000').slide_in()
 

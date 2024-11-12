@@ -7,6 +7,7 @@ from PIL import Image
 import customtkinter as ctk
 from tkinter import ttk
 from CTkToolTip import CTkToolTip
+import Opacity as configstyle
 
 color_p = "#fafafa"
 color_s = "#efefef"
@@ -32,7 +33,7 @@ class Login(BaseScene):
 			ctk.CTkLabel(login_container, text=text, font=('Plus Jakarta Sans', font_size, 'bold'), text_color=black if font_size == 28 else "#BEBEBE").place(relx=0.5, y=y_pos, anchor="center")
 		
 		self.user_entry = self._extracted_from_login_10(
-			login_container, "Ingrese su nombre de usuario...", 260
+			login_container, "Ingrese su Gmail...", 260
 		)
 		self.password_entry = self._extracted_from_login_10(
 			login_container, "Ingrese su contraseña...", 310, True
@@ -65,8 +66,8 @@ class Login(BaseScene):
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
 		else:
-			user = 'carlos@example.com'
-			password = 'superadmin789'
+			user = 'john@example.com'
+			password = 'password123'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -96,7 +97,6 @@ class Login(BaseScene):
 class Men_p(BaseScene):
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
-
 		self.manager=manager
 		self.header_fr = header(self.manager)
 		self.main()
@@ -183,10 +183,13 @@ class C_producto(BaseScene):
 		focus = self.tabla_stock.focus()
 		name_product = self.tabla_stock.item(focus, 'text')
 		try:
-			record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get_and_clear())
-			show_notification(app, f"Reestock exitoso\n stock actual: {get_stock_product(get_name_per_id(str(name_product)))}")
-			
-			notifications = [n for n in notifications if n.tag != 'stock']
+			if self.c_stock.get():
+				record_restock(get_name_per_id(str(name_product)), app.get_variable("user_id"), app.get_variable("branch_user"), self.c_stock.get_and_clear())
+				show_notification(app, f"Reestock exitoso\n stock actual: {get_stock_product(get_name_per_id(str(name_product)))}")
+				
+				notifications = [n for n in notifications if n.tag != 'stock']
+			else:
+				show_notification(app, "Debe ingresar una cantidad para reestockear")
 		except TypeError:
 			show_notification(app, "Error al reestockear,\n procure seleccionar un\n producto de la tabla")
 
@@ -241,6 +244,7 @@ class C_ventas(BaseScene):
 		self.main()
 		self.metodo = ''
 		self.before = 'Efectivo'
+		self.active = False
   
 	def main(self):
 		self.main_fr, self.sucursal_fr, self.sucursal_lb = create_scrollable_frame(self.manager, color_p, app.get_variable("branch_user"))
@@ -322,14 +326,16 @@ class C_ventas(BaseScene):
 	def credito(self, metodo):
 		self.metodo = metodo
 		if self.metodo != self.before:
-			if self.metodo in ["Credito", "Debito"]:
+			if self.metodo in ["Credito", "Debito"] and not self.active:
 				self._extracted_from_credito_4()
 				self.before = metodo
+				self.active=True
 			else:
-				self.d.animate_to(5,193,0.5,90)
+				self.active=False
+				self.d.animate_to(5, 193, 0.5, 90)
 				self.input_c.unbind('<KeyRelease>')
-				self.input_c.destroy()
 				self.input_c.grid_forget()
+				self.input_c.destroy()
 
 	def _extracted_from_credito_4(self):
 		self.input_c = ClearableEntry(self.inputs_fr, placeholder_text="Ingrese tarjeta", **self.input_config)
@@ -401,6 +407,8 @@ class C_ventas(BaseScene):
 						
 						if hasattr(self, 'input_c'):
 							self.input_c.delete(0, tk.END)
+					else:
+						show_notification(app, f"Falta {quantity-get_stock_product(product_id)} de stock para realizar la venta.")
 					
 		except ValueError:
 			show_notification(app, "Por favor ingrese todos los campos y suba el ticket.")
@@ -468,7 +476,7 @@ class Ventas_nav(BaseScene):
 		self.u_venta_btn.place(x = 135, y= 25, anchor = "center")     
 
 		self.u_export_btn = ctk.CTkButton(atajos, text= "Exportar ventas", fg_color= "#222325", text_color= color_p, corner_radius=25,
-											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command= lambda:export_to_file(self.manager))
+											width= 100, height= 50, font=('Plus Jakarta Sans', 16, 'bold'), hover_color= "#454545", command= lambda:export_to_file(self.manager, branch=app.get_variable('branch_user')))
 		self.u_export_btn.place(x = 635, y= 25, anchor = "center")   
 
 		tabla = ctk.CTkFrame(self.main_fr, fg_color=color_p, height=425, width=800)
@@ -484,7 +492,8 @@ class Ventas_nav(BaseScene):
 			("Precio", "Precio", 50),
 			("Categoria", "Categoria", 50),
     		("PayMethod", "Metodo de Pago", 50),
-      		("Descuento", "Descuento", 50)
+      		("Descuento", "Descuento", 50),
+			("Total", "Total", 50)
 		]
 		self.sales_view = Table(tabla, columns=columns, width=725, height=750,color_frame=black, color_tabla=black)
 		self.sales_view.place(x=25,y=0)
@@ -513,8 +522,10 @@ class Men_p_admin(BaseScene):
 		style_card = {'width': 235, 'height': 100, 'corner_radius': 20, 'fg_color': grey, 'font': ('Plus Jakarta Sans', 16, 'bold'), 'hover_color': color_s, 'text_color': black}
 		cord = [(i, branch[0]) for i, branch in enumerate(get_all_branches())]
 		for x, texts in cord:
-			card = ctk.CTkButton(self.sucursales_fr, text = texts, command=lambda texts=texts: self.sucursal_vw(texts), **style_card)
-			card.grid(row = 0, column = x,pady = 10, padx = 10, sticky="e")
+			row = x // 3  # Dividir el índice entre 3 para obtener la fila
+			column = x % 3  # Obtener el índice de columna dentro de la fila (0, 1, 2)
+			card = ctk.CTkButton(self.sucursales_fr, text=texts, command=lambda texts=texts: self.sucursal_vw(texts), **style_card)
+			card.grid(row=row, column=column, pady=10, padx=10, sticky="e")
 
 		self.fr = ctk.CTkFrame(self.main_fr, height=100, width= 750, fg_color= color_p)
 		self.fr.grid(row = 2, column = 0, columnspan=4, padx = 6, sticky = "ew")
@@ -595,11 +606,7 @@ class New_branch(BaseScene):
 		nombre, direction = (self.branch_name.get_and_clear(),self.direction_branch.get_and_clear())
 		if campos_vacios := [campo for campo, valor in {"nombre":nombre,"direction": direction,}.items()if not valor]:	show_notification(self.manager,f"Los siguientes campos están vacíos: {', '.join(campos_vacios)}")
 		else:
-			try:
-				create_new_branch(nombre, direction)
-				show_notification(app, "Nueva sucursal cargada con éxito")
-			except Exception as e:
-				show_notification(app, "Algo fallo.")
+			show_notification(app, create_new_branch(nombre, direction, user_id=app.get_variable("user_id")))
 		
 class New_stock(BaseScene):
 	def __init__(self, parent, manager):
@@ -852,7 +859,7 @@ if __name__ == "__main__":
 	y = (app.winfo_screenheight() // 2)-(600 // 2)
 	app.geometry(f"800x600+{x}+{y}")  # Establece el tamaño de la ventana
 	app.resizable(False,False)
- 
+	configstyle.change_header_color(app, color="transparent")
 	style = ttk.Style()
 	style.theme_use("default")
 	style.configure("Treeview.Heading", background= black, foreground= color_p, font=("Arial", 12, "bold"), relief = "flat")
@@ -866,8 +873,6 @@ if __name__ == "__main__":
 
 	for scene_name, scene_class in scenes:
 		app.add_scene(scene_name, scene_class)
-  
-	# Inicia la aplicacion con la primera escena visible
+	
 	app.switch_scene("Login")
-
 	app.mainloop()  # Ejecuta el bucle principal de la aplicacion
