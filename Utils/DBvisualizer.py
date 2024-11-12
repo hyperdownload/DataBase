@@ -3,6 +3,13 @@ from tkinter import filedialog, messagebox, ttk
 import sqlite3
 import re
 from placeholders import Table
+import importlib.util
+import os
+
+module_path = os.path.join(os.path.dirname(__file__), '..', 'Opacity', 'py_win_style.py')
+spec = importlib.util.spec_from_file_location("configstyle", module_path)
+configstyle = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(configstyle)
 
 class BDViewerApp:
     MAX_ROWS_DISPLAY = 500 
@@ -14,12 +21,14 @@ class BDViewerApp:
         self.root.geometry("1000x600")
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("dark-blue")
+        
         self.conn = None
         self.sql_keywords = ["SELECT", "FROM", "WHERE", "INSERT INTO", "DELETE", "UPDATE", "JOIN", "ON", "ORDER BY", "GROUP BY"]
         self._create_interface()
         self.root.resizable(False, False)  
         self.current_suggestion = ""
         self.tables_and_columns = {}  # Cache para almacenar tablas y sus columnas
+        #configstyle.apply_style(self.root, 'acrylic')
 
     def _create_interface(self):
         frame_top = ctk.CTkFrame(self.root)

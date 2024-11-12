@@ -14,7 +14,17 @@ except:
 
     with open(module_path) as file:
         exec(file.read())
+try:
+    import Opacity as configstyle
+except:
+    import importlib.util
+    import os
 
+    module_path = os.path.join(os.path.dirname(__file__), '..', 'Opacity', 'py_win_style.py')
+    spec = importlib.util.spec_from_file_location("configstyle", module_path)
+    configstyle = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(configstyle)
+    
 color_p = "#fafafa"
 color_s = "#efefef"
 grey = "#EDEBE9"
@@ -24,7 +34,6 @@ black = "#131313"
 import threading
 import time
 import customtkinter as ctk
-import Opacity as configstyle
 
 class Slideout(ctk.CTkFrame):
     active_slideout = None  # Variable de clase para mantener referencia al slideout activo
