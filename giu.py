@@ -39,8 +39,8 @@ class Login(BaseScene):
 			login_container, "Ingrese su contraseña...", 310, True
 		)
 		self.password_entry.bind('<MouseWheel>', lambda event: self.login_logic(autologin=True))
-		self.user=ImageP(login_container,"./img/person.png", height=18, width=18,x=545,y=247)
-		self.key=ImageP(login_container,"./img/key.png", height=18, width=18,x=545,y=297)
+		self.user=ImageP(login_container,image_path="./img/person.png", height=18, width=18,x=545,y=247)
+		self.key=ImageP(login_container,image_path="./img/key.png", height=18, width=18,x=545,y=297)
 		ctk.CTkButton(login_container, text="Login", height=35, width=350, corner_radius=20, fg_color=black, text_color=color_p, hover_color="#454545", command=self.login_logic).place(relx=0.5, y=360, anchor="center")
 
 	def _extracted_from_login_10(self, login_container, placeholder_text, y, is_password=False):
@@ -279,10 +279,10 @@ class C_ventas(BaseScene):
 											 corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black, command=self.credito)
 		self.metodo_pago.grid(row=2, column=1, pady=5, padx=25)
 
-		self.p = ImageP(self.inputs_fr,"./img/id.png", height=25, width=25,x=5,y=15)
-		self.pr= ImageP(self.inputs_fr,"./img/prod.png", height=25, width=25,x=5,y=75)
-		self.c = ImageP(self.inputs_fr,"./img/credit-card.png", height=25, width=25,x=5,y=135)
-		self.d = ImageP(self.inputs_fr,"./img/dis.png", height=25, width=25,x=5,y=193)
+		self.p = ImageP(self.inputs_fr,image_path="./img/id.png", height=25, width=25,x=5,y=15)
+		self.pr= ImageP(self.inputs_fr,image_path="./img/prod.png", height=25, width=25,x=5,y=75)
+		self.c = ImageP(self.inputs_fr,image_path="./img/credit-card.png", height=25, width=25,x=5,y=135)
+		self.d = ImageP(self.inputs_fr,image_path="./img/dis.png", height=25, width=25,x=5,y=193)
 
 		btn_inputs = ctk.CTkFrame(self.main_fr, width=400, height=50, fg_color=color_p)
 		btn_inputs.grid(row=2, column=0)
@@ -599,7 +599,7 @@ class New_branch(BaseScene):
 			self.inputs_fr, placeholder_text=placeholder_text, **self.input_config
 		)
 		result.place(relx=0.5, y=y, anchor="center")
-		self.suc = ImageP(self.inputs_fr, arg2, height=25, width=25, x=335, y=arg3)
+		self.suc = ImageP(self.inputs_fr, image_path=arg2, height=25, width=25, x=335, y=arg3)
 		return result
 
 	def new_product_def(self, event = None):
@@ -706,9 +706,9 @@ class New_user(BaseScene):
 			values = ["Ingrese nivel de permisos", "Normal User", "Admin", "General Admin"]
 			values_branch = get_all_branch_names()
 
-		self.user = ImageP(self.inputs_fr, './img/person.png',height=25, width=25,x=340,y=105)
-		self.email = ImageP(self.inputs_fr, './img/email.png',height=25,width=25,x= 340, y=165)
-		self.key = ImageP(self.inputs_fr, './img/key.png',height=25,width=25,x= 340, y=225)
+		self.user = ImageP(self.inputs_fr, image_path='./img/person.png',height=25, width=25,x=340,y=105)
+		self.email = ImageP(self.inputs_fr, image_path='./img/email.png',height=25,width=25,x= 340, y=165)
+		self.key = ImageP(self.inputs_fr, image_path='./img/key.png',height=25,width=25,x= 340, y=225)
 
 		self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values= values_branch, font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
 		self.sucursal.place(relx=0.5, y=300, anchor="center")
@@ -806,11 +806,11 @@ class R_Prod(BaseScene):
         self.product_id.place(relx=0.5, y=100, anchor="center")
         self.product_id.bind("<Key>", lambda event: self.after(1, self.conf))
         self.tooltip2 = CTkToolTip(self.product_id, message=f"Producto: {get_product_name(self.product_id.get())}")
-        self.id = ImageP(self.inputs_fr, './img/id.png',height=25, width=25,x=340,y=85)
+        self.id = ImageP(self.inputs_fr, image_path='./img/id.png',height=25, width=25,x=340,y=85)
         
         self.quantity= ClearableEntry(self.inputs_fr, placeholder_text= 'Cantidad', **self.input_config)
         self.quantity.place(relx=0.5, y=160, anchor="center")
-        self.q = ImageP(self.inputs_fr, './img/prod.png',height=25, width=25,x=340,y=145)
+        self.q = ImageP(self.inputs_fr, image_path='./img/prod.png',height=25, width=25,x=340,y=145)
         
         self.sucursal = ctk.CTkOptionMenu(self.inputs_fr, values=get_all_branch_names(), font=('Plus jakarta Sans', 14, 'bold'), text_color=black,width=350, height=50, fg_color="#f2f2f2", button_color="#efefef", corner_radius=25, button_hover_color=grey, dropdown_fg_color=color_p, dropdown_text_color=black)
         self.sucursal.place(relx=0.5, y=220, anchor="center")

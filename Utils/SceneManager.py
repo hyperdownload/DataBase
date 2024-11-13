@@ -2,7 +2,8 @@ import customtkinter as ctk
 from difflib import get_close_matches
 import threading
 import traceback
-from CTkToolTip import CTkToolTip
+import random
+from Utils.functions import *
 
 class SceneManager(ctk.CTk):
     def __init__(self):
@@ -18,6 +19,7 @@ class SceneManager(ctk.CTk):
         self.scene_history = [] # Se supone, un historial
         self.current_scene = None  # Referencia a la escena actualmente visible
         self.current_scene_name = None
+        self.add_scene("Error", Error)
 
     def save_variable(self, variable_name:str, variable_value:any)->None:
         """Almacena una variable en el gestor de escenas."""
@@ -38,7 +40,7 @@ class SceneManager(ctk.CTk):
         except NameError as e:
             # Captura la traza del error y la imprime
             traceback.print_exc()
-            # Relanza la excepción para no perder la traza original
+            # Relanza la excepcion para no perder la traza original
             raise
        
     def add_scene(self, name:str, scene_class:object)->None:
@@ -50,8 +52,7 @@ class SceneManager(ctk.CTk):
 
     def switch_scene(self, name:str) -> None:
         """Cambia a otra escena asegurando que la anterior sea eliminada completamente."""
-        
-        self.scene_history.append(name.__class__.__name__)
+        self.scene_history.append(name)
         self.current_scene_name = name
         if self.current_scene:
             self.current_scene.pack_forget()
@@ -59,11 +60,21 @@ class SceneManager(ctk.CTk):
             self.current_scene.grid_forget()
 
         if scene_class := self.scenes.get(name):
-            self.current_scene = scene_class(self, self)
-            self.current_scene.pack(fill='both', expand=True)
+            if name=='Error':
+                self.current_scene = scene_class(self, self,{"error":f'La scena no existe.',"scene":'Login'})
+                self.current_scene.pack(fill='both', expand=True)
+            else:
+                self.current_scene = scene_class(self, self)
+                self.current_scene.pack(fill='both', expand=True)
+
         else:
             print(f"Escena '{name}' no encontrada.")
+            self.show_error()
     
+    def show_error(self):
+        self.switch_scene("Error")
+        print(self.current_scene)
+
     def clear_widget(self, *widgets):
         """Elimina todos los widgets o los hijos de los widgets dados."""
         try:
@@ -129,6 +140,40 @@ class Scene1(BaseScene):
                               command=lambda: manager.switch_scene("Scene2"))
         button.pack(pady=20)  # Empaqueta el botón con un relleno vertical
 
+class Error(BaseScene):
+    def __init__(self, parent, manager, dict):
+        """Inicializa la primera escena.
+
+        Configura la interfaz para Scene1, incluyendo una etiqueta y un botón.
+
+        Args:
+            parent (ctk.CTk): Ventana principal o gestor de escenas.
+            manager (SceneManager): Gestor de escenas que maneja esta escena.
+        """
+        super().__init__(parent, manager)
+
+        self.manager = manager
+        self.elements = []
+        label = ctk.CTkLabel(self, text=f"Hubo un error: {dict["error"]}")
+        label.pack(pady=20)  
+        button = ctk.CTkButton(self, text="Volver", 
+                              command=lambda: manager.switch_scene(dict["scene"]))
+        button.pack(pady=20) 
+        animation_thread = threading.Thread(target=self.something)
+        animation_thread.daemon = True
+        animation_thread.start()
+
+    def something(self, quantity=15):
+        for _ in range(quantity):
+            self.elements.append(ImageP(self.manager,height=25,width=25, x=400, y=300, color='red'))
+        while True:
+            timea = random.randint(1,15)
+            for element in self.elements:
+                x = random.randint(1,800)
+                y = random.randint(1,600)
+                element.animate_to(x, y, timea, 100)
+            time.sleep(timea+1)
+            
 if __name__ == "__main__":
     app = SceneManager()  # Crea una instancia del gestor de escenas
     app.geometry("400x300")  # Establece el tamaño de la ventana

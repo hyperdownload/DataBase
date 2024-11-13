@@ -306,7 +306,7 @@ class Table:
             self.sort_button = ctk.CTkButton(self.frame, width=60, text="Filtrar", corner_radius=20, fg_color='#FFFFFF', text_color=black, hover_color='#ADACAA', command=self.apply_sort)
             self.sort_button.place(relx=0.8, rely=0.02)
 
-            self.filter_image = ImageP(self.frame,"./img/filter.png", height=25, width=25,x=20,y=13)
+            self.filter_image = ImageP(self.frame,image_path="./img/filter.png", height=25, width=25,x=20,y=13)
         self.full_data = []
         
         self.default_font = tkFont.nametofont("TkDefaultFont")
@@ -494,13 +494,18 @@ class Table:
         self.treeview.delete(item_id)
     
 class ImageP:
-    def __init__(self, manager: tk.Widget, image_path: str, height: int, width: int, x: int, y: int) -> None:
+    def __init__(self, manager: tk.Widget, height: int, width: int, x: int, y: int, image_path: str = None, color:str = None) -> None:
         self.x = x
         self.y = y
-        img = Image.open(image_path)
-        img = img.resize((width, height), Image.LANCZOS)
-        self.render = ImageTk.PhotoImage(img)
-        self.img = ctk.CTkLabel(manager, text='', image=self.render, bg_color='transparent')
+        if image_path and not color:
+            img = Image.open(image_path)
+            img = img.resize((width, height), Image.LANCZOS)
+            self.render = ImageTk.PhotoImage(img)
+            self.img = ctk.CTkLabel(manager, text='', image=self.render, bg_color='transparent')
+        else:
+            self.img = ctk.CTkFrame(manager, width=width, height=height, fg_color=color, bg_color='#353535')
+            configstyle.set_opacity(self.img, color='#353535')
+
         self.img.place(x=x, y=y)
 
     def configure_y(self, y):
