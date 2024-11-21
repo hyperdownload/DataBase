@@ -136,7 +136,23 @@ class BaseScene(ctk.CTkFrame):
             manager (SceneManager): Gestor de escenas que maneja esta escena.
         """
         super().__init__(parent)
-        self.manager = manager  # Referencia al gestor de escenas (ventana principal)
+        self.manager = manager 
+        self.scene_name = self.__class__.__name__ 
+        logging.info(f"Inicializando escena base '{self.scene_name}'.")
+        
+        try:
+            self.initialize_components()
+            logging.debug(f"Componentes inicializados para '{self.scene_name}'.")
+        except Exception as e:
+            logging.error(f"Error al inicializar componentes en '{self.scene_name}': {e}")
+            raise
+
+    def initialize_components(self):
+        """Método para inicializar los componentes de la escena.
+
+        Este método puede ser sobrescrito por clases que hereden de `BaseScene`.
+        """
+        logging.debug(f"No se sobrescribió 'initialize_components' en '{self.scene_name}'.")
 
 # Ejemplo de una escena
 class Scene1(BaseScene):
