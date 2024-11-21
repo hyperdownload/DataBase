@@ -1,110 +1,130 @@
 import customtkinter as ctk
+import logging
 from difflib import get_close_matches
 import threading
 import traceback
 import random
 from Utils.functions import *
 
+# Configuración del logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler()]
+)
+
 class SceneManager(ctk.CTk):
     def __init__(self):
-        """Inicializa el gestor de escenas.
-
-        Establece el gestor de escenas como una ventana de `customtkinter` y 
-        prepara un diccionario para almacenar las escenas y una referencia 
-        a la escena actual.
-        """
+        """Inicializa el gestor de escenas."""
         super().__init__()
         self.scenes = {}  # Diccionario para almacenar las escenas añadidas
-        self.variables = {} # Variables almacenadas para interactuar con otras escenas
-        self.scene_history = [] # Se supone, un historial
-        self.current_scene = None  # Referencia a la escena actualmente visible
-        self.current_scene_name = None
-        self.add_scene("Error", Error)
+        self.variables = {}  # Variables almacenadas para interactuar con otras escenas
+        self.scene_history = []  # Historial de escenas visitadas
+        self.current_scene = None  # Referencia a la escena actual
+        self.current_scene_name = None  # Nombre de la escena actual
 
-    def save_variable(self, variable_name:str, variable_value:any)->None:
+        # Agrega una escena de error por defecto
+        self.add_scene("Error", Error)
+        logging.info("SceneManager inicializado correctamente.")
+
+    def save_variable(self, variable_name: str, variable_value: any) -> None:
         """Almacena una variable en el gestor de escenas."""
         self.variables[variable_name] = variable_value
-        
+        logging.debug(f"Variable '{variable_name}' almacenada con valor: {variable_value}")
+
     def get_variable(self, variable_name: str) -> any:
         """Obtiene una variable almacenada en el gestor de escenas."""
         try:
             if var := self.variables.get(variable_name):
+                logging.debug(f"Variable '{variable_name}' obtenida con valor: {var}")
                 return var
             if close_matches := get_close_matches(
                 variable_name, self.variables.keys(), n=1, cutoff=0.5
             ):
                 suggestion = close_matches[0]
-                raise NameError(f"Esta variable no está definida. ¿Quisiste decir '{suggestion}'?")
+                raise NameError(f"Variable no definida. ¿Quizás quisiste decir '{suggestion}'?")
             else:
-                raise NameError("Esta variable no está definida.")
+                raise NameError(f"Variable '{variable_name}' no está definida.")
         except NameError as e:
-            # Captura la traza del error y la imprime
+            logging.error(str(e))
             traceback.print_exc()
-            # Relanza la excepcion para no perder la traza original
             raise
-       
-    def add_scene(self, name:str, scene_class:object)->None:
+
+    def add_scene(self, name: str, scene_class: object) -> None:
         """Agrega una nueva escena al gestor."""
         if name in self.scenes:
-            print(f"Escena '{name}' ya existe.")
+            logging.warning(f"Escena '{name}' ya existe y no será añadida nuevamente.")
         else:
             self.scenes[name] = scene_class
+            logging.info(f"Escena '{name}' añadida correctamente.")
 
-    def switch_scene(self, name:str) -> None:
+    def switch_scene(self, name: str) -> None:
         """Cambia a otra escena asegurando que la anterior sea eliminada completamente."""
-        self.scene_history.append(name)
-        self.current_scene_name = name
-        if self.current_scene:
-            self.current_scene.pack_forget()
-            self.current_scene.place_forget()
-            self.current_scene.grid_forget()
+        try:
+            if name == self.current_scene_name:
+                logging.info(f"La escena actual ya es '{name}'. No se necesita cambiar.")
+                return
 
-        if scene_class := self.scenes.get(name):
-            if name=='Error':
-                self.current_scene = scene_class(self, self,{"error":f'La scena no existe.',"scene":'Login'})
-                self.current_scene.pack(fill='both', expand=True)
-            else:
-                self.current_scene = scene_class(self, self)
-                self.current_scene.pack(fill='both', expand=True)
+            if not (scene_class := self.scenes.get(name)):
+                logging.warning(f"Escena '{name}' no encontrada.")
+                self.show_error()
+                return
 
-        else:
-            print(f"Escena '{name}' no encontrada.")
-            self.show_error()
-    
+            self.scene_history.append(name)
+            self.current_scene_name = name
+
+            # Eliminar widgets de la escena actual
+            if self.current_scene:
+                self.current_scene.pack_forget()
+                self.current_scene.place_forget()
+                self.current_scene.grid_forget()
+
+            # Instanciar y mostrar la nueva escena
+            self.current_scene = scene_class(self, self)
+            self.current_scene.pack(fill="both", expand=True)
+            logging.info(f"Cambiado a la escena '{name}'.")
+        except Exception as e:
+            logging.error(f"Error al cambiar a la escena '{name}': {e}")
+            traceback.print_exc()
+
     def show_error(self):
-        self.switch_scene("Error")
-        print(self.current_scene)
+        """Muestra la escena de error predeterminada."""
+        try:
+            self.switch_scene("Error")
+            logging.error("Mostrando escena de error.")
+        except Exception as e:
+            logging.critical(f"Error al mostrar la escena de error: {e}")
+            traceback.print_exc()
 
     def clear_widget(self, *widgets):
         """Elimina todos los widgets o los hijos de los widgets dados."""
         try:
             for widget in widgets:
-                # Si el widget tiene hijos, itera sobre ellos y los destruye
                 for child in widget.winfo_children():
-                    self._extracted_from_clear_widget_7(child)
-                self._extracted_from_clear_widget_7(widget)
-            print("Todos los elementos han sido eliminados.")
+                    self._destroy_widget(child)
+                self._destroy_widget(widget)
+            logging.debug("Todos los widgets han sido eliminados correctamente.")
         except Exception as e:
+            logging.error(f"Error al intentar eliminar widgets: {e}")
             traceback.print_exc()
-            print(f"Error al intentar eliminar el/los elemento(s): {e}")
 
-    def _extracted_from_clear_widget_7(self, arg0):
-        arg0.pack_forget()
-        arg0.grid_forget()
-        arg0.place_forget()
-        arg0.destroy()
+    def _destroy_widget(self, widget):
+        """Destruye un widget de forma segura."""
+        widget.pack_forget()
+        widget.grid_forget()
+        widget.place_forget()
+        widget.destroy()
 
     def refresh_current_scene(self):
         """Actualiza la escena actual recargándola."""
         try:
             if not self.current_scene_name:
                 raise ValueError("No hay una escena actual para refrescar.")
-            self.clear_current_scene()
             self.switch_scene(self.current_scene_name)
-            print(f"Escena '{self.current_scene_name}' refrescada con éxito.")
+            logging.info(f"Escena '{self.current_scene_name}' refrescada correctamente.")
         except Exception as e:
+            logging.error(f"Error al refrescar la escena: {e}")
             traceback.print_exc()
-            print(f"Error al intentar refrescar la escena: {e}")
 
 # Clase base para las escenas
 class BaseScene(ctk.CTkFrame):
