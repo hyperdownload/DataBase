@@ -58,10 +58,10 @@ class SceneManager(ctk.CTk):
             self.scenes[name] = scene_class
             logging.info(f"Escena '{name}' añadida correctamente.")
 
-    def switch_scene(self, name: str) -> None:
+    def switch_scene(self, name: str, bypass:bool=False) -> None:
         """Cambia a otra escena asegurando que la anterior sea eliminada completamente."""
         try:
-            if name == self.current_scene_name:
+            if name == self.current_scene_name and not bypass:
                 logging.info(f"La escena actual ya es '{name}'. No se necesita cambiar.")
                 return
 
@@ -120,7 +120,7 @@ class SceneManager(ctk.CTk):
         try:
             if not self.current_scene_name:
                 raise ValueError("No hay una escena actual para refrescar.")
-            self.switch_scene(self.current_scene_name)
+            self.switch_scene(self.current_scene_name, True)
             logging.info(f"Escena '{self.current_scene_name}' refrescada correctamente.")
         except Exception as e:
             logging.error(f"Error al refrescar la escena: {e}")

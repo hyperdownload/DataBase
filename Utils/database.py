@@ -504,8 +504,15 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
 
         sale_datetime_utc = datetime.strptime(sale_date, '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('UTC'))
 
+        if discount == '': discount="N/C"
+        else: discount = f"{discount}%"
+        
+        try:
+            final_price = round(price * (1 - float(int(discount)) / 100), 2) if discount else price
+        except (ValueError, TypeError, ZeroDivisionError) as e:
+            final_price = price
+        
         sale_datetime_local = sale_datetime_utc.astimezone(ZoneInfo(target_timezone))
-
         sale_with_converted_date = [
             sale_id,
             get_product_name(product_id),
@@ -513,14 +520,10 @@ def get_all_sales(target_timezone: str = 'America/Argentina/Buenos_Aires') -> li
             branch_name,
             quantity,
             sale_datetime_local.strftime('%Y-%m-%d %H:%M:%S'),
-            (
-                round(price * (1 - float(int(discount)) / 100), 2)
-                if discount
-                else price
-            ),
+            final_price,
             category,
             payment_method,
-            discount,
+            discount, 
             f"${str(round(price * quantity, 2))}",
         ]
         sales_converted.append(sale_with_converted_date)
@@ -710,10 +713,13 @@ def get_all_sales_of_branch(branch_name) -> list:
     conn.close()
 
     sales_list = []
-
+    
     for sale in sales:
-        sale_id, product_id, user_id, branch_name, quantity, sale_date, price, category, mpago, desc = sale
+        sale_id, product_id, user_id, branch_name, quantity, sale_date, price, category, mpago, discount = sale
 
+        if discount == '': discount="N/C"
+        else: discount = f"{discount}%"
+        
         sales_list.append([
             sale_id, 
             get_name_product(product_id), 
@@ -724,7 +730,7 @@ def get_all_sales_of_branch(branch_name) -> list:
             price, 
             category,
             mpago,
-            desc
+            discount
         ])
 
     return sales_list

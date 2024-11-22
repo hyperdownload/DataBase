@@ -8,6 +8,7 @@ import customtkinter as ctk
 from tkinter import ttk
 from CTkToolTip import CTkToolTip
 import Opacity as configstyle
+import keyboard
 
 color_p = "#fafafa"
 color_s = "#efefef"
@@ -66,8 +67,8 @@ class Login(BaseScene):
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
 		else:
-			user = 'john@example.com'
-			password = 'password123'
+			user = 'carlos@example.com'
+			password = 'superadmin789'
 		try:
 			if hashlib.sha256(password.encode()).hexdigest() == get_user_details(get_user_id(user))[2]:
 				self._extracted_from_login_logic_10(user, "Men_p")
@@ -147,8 +148,8 @@ class Men_p(BaseScene):
   
 		CTkChart(self.atajos_frame, get_sales_per_categorie(), corner_radius=20, fg_color= color_s, stat_color= black, chart_fg_color= color_s,
          show_indicators=(False, False), stat_info_show=(True, True), chart_arrow="none",
-		 indicator_line_color= blue, indicator_text_color= blue, stat_width=25,
-         stat_title_color= blue, stat_text_color= '#FFFFFF', chart_axis_width=3, width=460, height= 415).place( relx = 0.32, rely = 0.46, anchor = "center")
+		 indicator_line_color= black, indicator_text_color= black, stat_width=25,
+         stat_title_color= black, stat_text_color= '#FFFFFF', chart_axis_width=3, width=460, height= 415).place( relx = 0.32, rely = 0.46, anchor = "center")
 		
 class C_producto(BaseScene):
 	def __init__(self, parent, manager):
@@ -537,7 +538,7 @@ class Men_p_admin(BaseScene):
   
 	def sucursal_vw(self, sucursal_name):
 		app.clear_widget(self.sucursales_fr, self.fr)
-
+  
 		sucursal_name = get_branch_properties(sucursal_name)
 
 		columns = [("#0", "ID", 30), 
@@ -565,6 +566,10 @@ class Men_p_admin(BaseScene):
 		
 		label_info = ctk.CTkLabel(self.main_fr, text=text_info, fg_color='#FFFFFF', text_color='black')
 		label_info.grid(row=0, column=0, columnspan=4, sticky="ew", padx=10)
+  
+		show_notification(app, "Precione F5 para volver al home.")
+
+		keyboard.add_hotkey('f5', app.refresh_current_scene)
 
 class New_branch(BaseScene):
 	def __init__(self, parent, manager):

@@ -36,6 +36,7 @@ def header(manager) -> any:
 
     def toggle_menu():
         nonlocal menu_user
+        
         if menu_user is None or not menu_user.is_active:
             menu_user = Menu_user(manager, side="right", width=300, height=530)
             menu_user.slide_in()

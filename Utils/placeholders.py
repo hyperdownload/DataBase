@@ -1,6 +1,7 @@
 import threading
 import time
 import customtkinter as ctk
+import logging
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
@@ -138,8 +139,9 @@ class Slideout(ctk.CTkFrame):
 
 class Menu_user(ctk.CTkFrame):
     is_in_animation = False
-    def __init__(self, parent, side="right", width=300, height=530, bg_color='#fafafa', text="", y_axis:float=1, **kwargs):
-        super().__init__(parent, width=width, height=height, bg_color='#fafafa',border_width=1, border_color= "#EDEBE9",**kwargs)
+
+    def __init__(self, parent, side="right", width=300, height=530, bg_color='#fafafa', text="", y_axis: float = 1, **kwargs):
+        super().__init__(parent, width=width, height=height, bg_color='#fafafa', border_width=1, border_color="#EDEBE9", **kwargs)
         self.parent = parent
         self.side = side
         self.width = width
@@ -147,8 +149,8 @@ class Menu_user(ctk.CTkFrame):
         self.bg_color = bg_color
         self.text = text
         self.y_axis = y_axis
-        self.is_active=False
-		
+        self.is_active = False
+
         # Configura la geometría y la posición inicial fuera de la pantalla
         if self.side == "right":
             self.place(x=parent.winfo_width(), y=(parent.winfo_height() - self.height) // y_axis)  # Centra verticalmente
@@ -162,53 +164,38 @@ class Menu_user(ctk.CTkFrame):
         self.text_label = ctk.CTkLabel(self, text=self.text, anchor="center")
         self.text_label.place(relx=0.5, rely=0.5, anchor="center")
 
-       
     def slide_in(self):
-        # Ejecuta el movimiento en un hilo separado para no bloquear la elementna
         if not Menu_user.is_in_animation:
-            Menu_user.is_in_animation = not Menu_user.is_in_animation
-            threading.Thread(target=self._animate_in).start()
-        
+            Menu_user.is_in_animation = True
+            if self.side == "right":
+                self._animate_in_step(self.parent.winfo_width(), self.parent.winfo_width() - self.width, -10)
+            elif self.side == "left":
+                self._animate_in_step(-self.width, 0, 10)
+
+    def _animate_in_step(self, current_x, target_x, step):
+        if (step < 0 and current_x > target_x) or (step > 0 and current_x < target_x):
+            self.place(x=current_x, y=(self.parent.winfo_height() - self.height) // self.y_axis)
+            self.update_idletasks()
+            self.after(10, self._animate_in_step, current_x + step, target_x, step)
+        else:
+            Menu_user.is_in_animation = False
+
     def slide_out(self):
-        # Ejecuta el movimiento de salida en un hilo separado
         if not Menu_user.is_in_animation:
-            Menu_user.is_in_animation = not Menu_user.is_in_animation
-            threading.Thread(target=self._animate_out).start()
+            Menu_user.is_in_animation = True
+            if self.side == "right":
+                self._animate_out_step(self.parent.winfo_width() - self.width, self.parent.winfo_width(), 10)
+            elif self.side == "left":
+                self._animate_out_step(0, -self.width, -10)
 
-    def _animate_in(self):
-        if self.side == "right":
-            # Desliza desde la derecha hacia la izquierda
-            for x in range(self.parent.winfo_width(), self.parent.winfo_width() - self.width, -10):
-                self._extracted_from__animate_in_5(x)
-        elif self.side == "left":
-            # Desliza desde la izquierda hacia la derecha
-            for x in range(-self.width, 0, 10):
-                self._extracted_from__animate_in_5(x)
-        Menu_user.is_in_animation = not Menu_user.is_in_animation
-
-    def _extracted_from__animate_in_5(self, x):
-        self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-        self.update_idletasks()  # Asegurar que se actualice la interfaz
-        time.sleep(0.01)
-        
-    def _animate_out(self):
-        if self.side == "right":
-            # Desliza de regreso hacia la derecha (fuera de la pantalla)
-            for x in range(self.parent.winfo_width() - self.width, self.parent.winfo_width(), 10):
-                self._extracted_from__animate_out_5(x)
-        elif self.side == "left":
-            # Desliza de regreso hacia la izquierda (fuera de la pantalla)
-            for x in range(0, -self.width, -10):
-                self._extracted_from__animate_out_5(x)
-        Menu_user.is_in_animation = not Menu_user.is_in_animation
-
-        # Elimina el frame una vez que esté fuera de la pantalla
-        self.destroy()
-
-    def _extracted_from__animate_out_5(self, x):
-        self.place(x=x, y=(self.parent.winfo_height() - self.height) // self.y_axis)  # Fuerza el valor de `y`
-        self.update_idletasks()
-        time.sleep(0.01)
+    def _animate_out_step(self, current_x, target_x, step):
+        if (step > 0 and current_x < target_x) or (step < 0 and current_x > target_x):
+            self.place(x=current_x, y=(self.parent.winfo_height() - self.height) // self.y_axis)
+            self.update_idletasks()
+            self.after(10, self._animate_out_step, current_x + step, target_x, step)
+        else:
+            Menu_user.is_in_animation = False
+            self.destroy()
 
 class NotificationPlaceHolder():
     def __init__(self, title:str, text:str, tag:str=None):
