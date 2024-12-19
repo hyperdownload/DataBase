@@ -17,6 +17,17 @@ blue = "#0080ff"
 black = "#131313"
 
 class Login(BaseScene):
+	"""
+	Represents the login scene of the application.
+
+	This class handles the user authentication process, including the GUI for the login form
+	and the logic for verifying user credentials.
+
+	Attributes:
+		manager (SceneManager): The scene manager object.
+		user_entry (ClearableEntry): Entry widget for the user's email.
+		password_entry (ClearableEntry): Entry widget for the user's password.
+	"""
 	def __init__(self, parent, manager):
 		super().__init__(parent, manager)
 		
@@ -25,6 +36,12 @@ class Login(BaseScene):
 		self.login()
 
 	def login(self):
+		"""
+        Sets up the login GUI.
+
+        This method creates and places all the widgets for the login form, including
+        labels, entry fields, and the login button.
+        """
 		self.manager.title("Login")
 		login_container = ctk.CTkFrame(self.manager, width=800, height=600, fg_color=color_p)
 		login_container.place(x=0, y=0)
@@ -45,6 +62,22 @@ class Login(BaseScene):
 		ctk.CTkButton(login_container, text="Login", height=35, width=350, corner_radius=20, fg_color=black, text_color=color_p, hover_color="#454545", command=self.login_logic).place(relx=0.5, y=360, anchor="center")
 
 	def _extracted_from_login_10(self, login_container, placeholder_text, y, is_password=False):
+		"""
+		Creates and configures a ClearableEntry widget for the login form.
+
+		This function sets up a ClearableEntry widget with specified properties,
+		configures it for password input if required, positions it in the login container,
+		and binds the Return key to trigger the login logic.
+
+		Args:
+			login_container (tkinter.Widget): The parent widget to contain the entry field.
+			placeholder_text (str): The placeholder text to display in the entry field.
+			y (int): The y-coordinate for placing the entry field.
+			is_password (bool, optional): If True, configures the entry for password input. Defaults to False.
+
+		Returns:
+			ClearableEntry: The configured entry widget.
+		"""
 		result = ClearableEntry(
 			login_container,
 			height=35,
@@ -55,7 +88,7 @@ class Login(BaseScene):
 			text_color=black,
 		)
 		if is_password:
-			result.configure(show="*")  # Configura el entry para que muestre * en lugar de texto real
+			result.configure(show="*")  
 
 		result.place(relx=0.5, y=y, anchor="center")
 		result.bind('<Return>', self.login_logic)
@@ -63,6 +96,16 @@ class Login(BaseScene):
 		return result
   
 	def login_logic(self, event=None, autologin=False):
+		"""
+        Handles the login process.
+
+        This method verifies the user's credentials and switches to the appropriate
+        scene based on the user's role.
+
+        Args:
+            event (Event, optional): The event that triggered the login. Defaults to None.
+            autologin (bool, optional): Whether to use predefined credentials for autologin. Defaults to False.
+        """
 		if not autologin:
 			user = self.user_entry.get_and_clear()
 			password = self.password_entry.get_and_clear()
